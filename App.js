@@ -28,12 +28,14 @@ export default class App extends React.Component {
 			})
         .then((responseJson) => {
 			console.log(responseJson);
-          this.setState({
-            isLoading: false,
-            dataSource: responseJson.movies,
-          }, function(){
+			if(responseJson["Status"]=="Completed"){
+	          this.setState({
+	            isLoading: false,
+	            dataSource: responseJson,
+	          }, function(){
 
-          });
+	          });
+			}
 
         })
         .catch((error) =>{
@@ -48,7 +50,49 @@ export default class App extends React.Component {
 	            <ActivityIndicator/>
 	          </View>
 	        )
-    }
+    	}
+	
+	var obj = this.state.dataSource
+	var assignments = [];
+
+	for(className in obj){
+		if(className!="Status"){
+		for(markingPeriod in obj[className]){
+			if(markingPeriod!=null && markingPeriod != "teacher" && markingPeriod != "title"){
+				console.log(markingPeriod);
+				console.log(className)
+				console.log(obj[className][markingPeriod]["Assignments"]);
+				for(var assignment of obj[className][markingPeriod]["Assignments"]){
+					assignments.push(assignment);
+					console.log(assignment["Date"]);
+				}
+			}	
+		}
+		}
+	}
+
+	arr = assignments;
+
+var i, len = arr.length, el, j;
+
+  for(i = 1; i<len; i++){
+    el = arr[i];
+    j = i;
+
+    while(j>0 && Date.parse(arr[j-1]["Date"].split("\n")[1])>Date.parse(arr[i]["Date"].split("\n")[1])){
+      arr[j] = arr[j-1];
+      j--;
+   }
+
+   arr[j] = el;
+  }
+
+  console.log(arr);
+
+var listOfAssignments =[];
+  for(var assignment of arr){
+	listOfAssignments.push(assignment["Name"]);
+  }
 
     return (
 
@@ -56,7 +100,7 @@ export default class App extends React.Component {
         <SectionList
           sections={[
             {title: 'Class', data: ['Assignment1']},
-            {title: 'cLASS', data: ['Assignment1', 'Assignment1', 'Assignment1', 'Assignment1', 'Assignment1', 'Assignment1', 'Assignment1']},
+            {title: 'cLASS', data: listOfAssignments},
           ]}
           renderItem={({item}) => <Text style={styles.item}>{item}</Text>}
           renderSectionHeader={({section}) => <Text style={styles.sectionHeader}>{section.title}</Text>}
