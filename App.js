@@ -1,47 +1,60 @@
 import React from 'react';
-import { AppRegistry, SectionList, StyleSheet, Text, View ,ActivityIndicator} from 'react-native';
+import { AppRegistry, SectionList, StyleSheet, Text, View ,ActivityIndicator, Alert} from 'react-native';
+import { Ionicons } from '@expo/vector-icons'; // 6.2.2
+import { createBottomTabNavigator, createAppContainer, TabBarBottom } from 'react-navigation';
 
-export default class App extends React.Component {
+
+
+ class gradeList extends React.Component {
 	  constructor(props){
 	    super(props);
 	    this.state ={ isLoading: true}
   }
 
     componentDidMount(){
-		console.log("TEST")
-      return fetch('https://gradeview.herokuapp.com/', {
-		  method: 'POST',
-		  headers: {
-			Accept: 'application/json',
-			'Content-Type': 'application/json',
-		  },
-		  body: JSON.stringify({
-			username: '10012734',
-			password: 'Sled%2#9',
-		  }),
-		})
-        .then((response) => {
-			console.log(response);
-			//response.json()
-			console.log(typeof response)
-				return response.json();
-			})
-        .then((responseJson) => {
-			console.log(responseJson);
-			if(responseJson["Status"]=="Completed"){
-	          this.setState({
-	            isLoading: false,
-	            dataSource: responseJson,
-	          }, function(){
-
-	          });
-			}
-
-        })
-        .catch((error) =>{
-          console.error(error);
-        });
+				this._getGrade()
   }
+
+_getGrade(){
+	console.log("TEST")
+		return fetch('https://gradeview.herokuapp.com/', {
+		method: 'POST',
+		headers: {
+		Accept: 'application/json',
+		'Content-Type': 'application/json',
+		},
+		body: JSON.stringify({
+		username: '10012734',
+		password: 'Sled%2#9',
+		}),
+	})
+			.then((response) => {
+		console.log(response);
+		//response.json()
+		console.log(typeof response)
+			return response.json();
+		})
+			.then((responseJson) => {
+		console.log(responseJson);
+		if(responseJson["Status"]=="Completed"){
+					this.setState({
+						isLoading: false,
+						dataSource: responseJson,
+					}, function(){
+
+					});
+		}else{
+      setTimeout(function(){
+        Alert.alert("not cached")
+      },3000);
+
+    }
+
+			})
+			.catch((error) =>{
+				console.error(error);
+			});
+}
 
   render() {
 	      if(this.state.isLoading){
@@ -51,7 +64,7 @@ export default class App extends React.Component {
 	          </View>
 	        )
     	}
-	
+
 	var obj = this.state.dataSource
 	var assignments = [];
 
@@ -66,7 +79,7 @@ export default class App extends React.Component {
 					assignments.push(assignment);
 					console.log(assignment["Date"]);
 				}
-			}	
+			}
 		}
 		}
 	}
@@ -131,3 +144,36 @@ const styles = StyleSheet.create({
     height: 44,
   },
 })
+
+
+
+export default createAppContainer(createBottomTabNavigator(
+  {
+    Home: { screen:  gradeList},
+  },
+  {
+    navigationOptions: ({ navigation }) => ({
+      tabBarIcon: ({ focused, tintColor }) => {
+        const { routeName } = navigation.state;
+        let iconName;
+        if (routeName === 'Home') {
+          iconName = `ios-information-circle${focused ? '' : '-outline'}`;
+        } else if (routeName === 'Settings') {
+          iconName = `ios-options${focused ? '' : '-outline'}`;
+        }
+
+        // You can return any component that you like here! We usually use an
+        // icon component from react-native-vector-icons
+        return <Ionicons name={iconName} size={25} color={tintColor} />;
+      },
+    }),
+    tabBarComponent: TabBarBottom,
+    tabBarPosition: 'bottom',
+    tabBarOptions: {
+      activeTintColor: 'tomato',
+      inactiveTintColor: 'gray',
+    },
+    animationEnabled: false,
+    swipeEnabled: false,
+  }
+));
