@@ -45,7 +45,8 @@ _getGrade(){
 					});
 		}else{
       setTimeout(function(){
-        Alert.alert("not cached")
+        Alert.alert("NOT cached")
+        _getGrade()
       },3000);
 
     }
@@ -84,9 +85,9 @@ _getGrade(){
 		}
 	}
 
-	arr = assignments;
+	var arr = assignments;
 
-var i, len = arr.length, el, j;
+/*var i, len = arr.length, el, j;
 
   for(i = 1; i<len; i++){
     el = arr[i];
@@ -101,7 +102,11 @@ var i, len = arr.length, el, j;
   }
 
   console.log(arr);
-
+  */
+  console.log(arr);
+  arr = arr.sort((a, b) => Date.parse(b["Date"].split("\n")[1]) - Date.parse(a["Date"].split("\n")[1]));
+  console.log("SORTED\n\n\n\n\n\n");
+  console.log(arr);
 var listOfAssignments =[];
   for(var assignment of arr){
 	listOfAssignments.push(assignment["Name"]);
