@@ -44,8 +44,9 @@ _getGrade(){
 
 					});
 		}else{
+      Alert.alert("NOT cached")
       setTimeout(function(){
-        Alert.alert("NOT cached")
+
         _getGrade()
       },3000);
 
@@ -77,8 +78,13 @@ _getGrade(){
 				console.log(className)
 				console.log(obj[className][markingPeriod]["Assignments"]);
 				for(var assignment of obj[className][markingPeriod]["Assignments"]){
-					assignments.push(assignment);
-					console.log(assignment["Date"]);
+          var year = "19";
+          if(parseInt(assignment["Date"].split("/")[0])>5)
+            year = "18";
+          assignment["Name"] = (assignment["Date"].split("/")[1]).split("\n")[0];
+					assignment["Timestamp"] = Date.parse(assignment["Date"]+"/"+year);
+          assignments.push(assignment);
+					console.log(assignment["Date"]+"/"+year);
 				}
 			}
 		}
@@ -104,12 +110,13 @@ _getGrade(){
   console.log(arr);
   */
   console.log(arr);
-  arr = arr.sort((a, b) => Date.parse(b["Date"].split("\n")[1]) - Date.parse(a["Date"].split("\n")[1]));
+  arr = arr.sort((a, b) => b["Timestamp"] - a["Timestamp"]);
   console.log("SORTED\n\n\n\n\n\n");
   console.log(arr);
 var listOfAssignments =[];
   for(var assignment of arr){
-	listOfAssignments.push(assignment["Name"]);
+    console.log(assignment["Date"]);
+	listOfAssignments.push(assignment["Name"]+assignment["Date"].split("\n")[1]+" "+assignment["Timestamp"]);
   }
 
     return (
