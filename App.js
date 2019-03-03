@@ -1,57 +1,62 @@
 import React from 'react';
-import { AppRegistry, SectionList, StyleSheet, Text, View ,ActivityIndicator} from 'react-native';
+import { AppRegistry, SectionList, StyleSheet, Text, View ,ActivityIndicator, Alert} from 'react-native';
+import { Ionicons } from '@expo/vector-icons'; // 6.2.2
+import { createBottomTabNavigator, createAppContainer, TabBarBottom } from 'react-navigation';
 
-export default class App extends React.Component {
+
+
+ class gradeList extends React.Component {
 	  constructor(props){
 	    super(props);
 	    this.state ={ isLoading: true}
   }
 
     componentDidMount(){
-		this.fetchData()
+				this._getGrade()
   }
 
-	fetchData(){
-		console.log("TEST")
-      return fetch('https://gradeview.herokuapp.com/', {
-		  method: 'POST',
-		  headers: {
-			Accept: 'application/json',
-			'Content-Type': 'application/json',
-		  },
-		  body: JSON.stringify({
-			username: '10012734',
-			password: 'Sled%2#9',
-		  }),
+_getGrade(){
+	console.log("TEST")
+		return fetch('https://gradeview.herokuapp.com/', {
+		method: 'POST',
+		headers: {
+		Accept: 'application/json',
+		'Content-Type': 'application/json',
+		},
+		body: JSON.stringify({
+		username: '10012734',
+		password: 'Sled%2#9',
+		}),
+	})
+			.then((response) => {
+		console.log(response);
+		//response.json()
+		console.log(typeof response)
+			return response.json();
 		})
-        .then((response) => {
-					var responseJSON = response.json();
-					console.log(responseJSON);
-					console.log(typeof response)
-					if(!responseJSON)
-						console.log("NOT JSON");
-					else
-						return responseJSON;
+			.then((responseJson) => {
+		console.log(responseJson);
+		if(responseJson["Status"]=="Completed"){
+					this.setState({
+						isLoading: false,
+						dataSource: responseJson,
+					}, function(){
+
+					});
+		}else{
+      Alert.alert("NOT cached")
+      setTimeout(function(){
+
+        _getGrade()
+      },3000);
+
+    }
+
 			})
-        .then((responseJson) => {
-					if(!responseJson){
-						console.log(responseJson);
-	          this.setState({
-	            isLoading: false,
-	            dataSource: responseJson,
-	          }, function(){
-
-	          });
-					}else{
-						console.log("No JSON, request again!");
-						setTimeout(() => {this.fetchData()}, 5000)
-					}
-
-        })
-        .catch((error) =>{
-          console.error(error);
-        });
-	}
+			.catch((error) =>{
+				console.error(error);
+			});
+}
 
   render() {
 	      if(this.state.isLoading){
@@ -60,7 +65,59 @@ export default class App extends React.Component {
 	            <ActivityIndicator/>
 	          </View>
 	        )
-    }
+    	}
+
+	var obj = this.state.dataSource
+	var assignments = [];
+
+	for(className in obj){
+		if(className!="Status"){
+		for(markingPeriod in obj[className]){
+			if(markingPeriod!=null && markingPeriod != "teacher" && markingPeriod != "title"){
+				console.log(markingPeriod);
+				console.log(className)
+				console.log(obj[className][markingPeriod]["Assignments"]);
+				for(var assignment of obj[className][markingPeriod]["Assignments"]){
+          var year = "19";
+          if(parseInt(assignment["Date"].split("/")[0])>5)
+            year = "18";
+          assignment["Name"] = (assignment["Date"].split("/")[1]).split("\n")[0];
+					assignment["Timestamp"] = Date.parse(assignment["Date"]+"/"+year);
+          assignments.push(assignment);
+					console.log(assignment["Date"]+"/"+year);
+				}
+			}
+		}
+		}
+	}
+
+	var arr = assignments;
+
+/*var i, len = arr.length, el, j;
+
+  for(i = 1; i<len; i++){
+    el = arr[i];
+    j = i;
+
+    while(j>0 && Date.parse(arr[j-1]["Date"].split("\n")[1])>Date.parse(arr[i]["Date"].split("\n")[1])){
+      arr[j] = arr[j-1];
+      j--;
+   }
+
+   arr[j] = el;
+  }
+
+  console.log(arr);
+  */
+  console.log(arr);
+  arr = arr.sort((a, b) => b["Timestamp"] - a["Timestamp"]);
+  console.log("SORTED\n\n\n\n\n\n");
+  console.log(arr);
+var listOfAssignments =[];
+  for(var assignment of arr){
+    console.log(assignment["Date"]);
+	listOfAssignments.push(assignment["Name"]+assignment["Date"].split("\n")[1]+" "+assignment["Timestamp"]);
+  }
 
     return (
 
@@ -68,7 +125,7 @@ export default class App extends React.Component {
         <SectionList
           sections={[
             {title: 'Class', data: ['Assignment1']},
-            {title: 'cLASS', data: ['Assignment1', 'Assignment1', 'Assignment1', 'Assignment1', 'Assignment1', 'Assignment1', 'Assignment1']},
+            {title: 'cLASS', data: listOfAssignments},
           ]}
           renderItem={({item}) => <Text style={styles.item}>{item}</Text>}
           renderSectionHeader={({section}) => <Text style={styles.sectionHeader}>{section.title}</Text>}
@@ -99,3 +156,36 @@ const styles = StyleSheet.create({
     height: 44,
   },
 })
+
+
+
+export default createAppContainer(createBottomTabNavigator(
+  {
+    Home: { screen:  gradeList},
+  },
+  {
+    navigationOptions: ({ navigation }) => ({
+      tabBarIcon: ({ focused, tintColor }) => {
+        const { routeName } = navigation.state;
+        let iconName;
+        if (routeName === 'Home') {
+          iconName = `ios-information-circle${focused ? '' : '-outline'}`;
+        } else if (routeName === 'Settings') {
+          iconName = `ios-options${focused ? '' : '-outline'}`;
+        }
+
+        // You can return any component that you like here! We usually use an
+        // icon component from react-native-vector-icons
+        return <Ionicons name={iconName} size={25} color={tintColor} />;
+      },
+    }),
+    tabBarComponent: TabBarBottom,
+    tabBarPosition: 'bottom',
+    tabBarOptions: {
+      activeTintColor: 'tomato',
+      inactiveTintColor: 'gray',
+    },
+    animationEnabled: false,
+    swipeEnabled: false,
+  }
+));
