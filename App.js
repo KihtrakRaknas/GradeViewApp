@@ -8,6 +8,10 @@ export default class App extends React.Component {
   }
 
     componentDidMount(){
+		this.fetchData()
+  }
+
+	fetchData(){
 		console.log("TEST")
       return fetch('https://gradeview.herokuapp.com/', {
 		  method: 'POST',
@@ -21,25 +25,33 @@ export default class App extends React.Component {
 		  }),
 		})
         .then((response) => {
-			console.log(response);
-			//response.json()
-			console.log(typeof response)
-				return response.json();
+					var responseJSON = response.json();
+					console.log(responseJSON);
+					console.log(typeof response)
+					if(!responseJSON)
+						console.log("NOT JSON");
+					else
+						return responseJSON;
 			})
         .then((responseJson) => {
-			console.log(responseJson);
-          this.setState({
-            isLoading: false,
-            dataSource: responseJson.movies,
-          }, function(){
+					if(!responseJson){
+						console.log(responseJson);
+	          this.setState({
+	            isLoading: false,
+	            dataSource: responseJson,
+	          }, function(){
 
-          });
+	          });
+					}else{
+						console.log("No JSON, request again!");
+						setTimeout(() => {this.fetchData()}, 5000)
+					}
 
         })
         .catch((error) =>{
           console.error(error);
         });
-  }
+	}
 
   render() {
 	      if(this.state.isLoading){
