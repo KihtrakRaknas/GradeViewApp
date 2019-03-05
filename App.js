@@ -1,5 +1,5 @@
 import React from 'react';
-import { AppRegistry, SectionList, StyleSheet, Text, View ,ActivityIndicator, Alert, Button, TouchableOpacity,TextInput ,KeyboardAvoidingView } from 'react-native';
+import { AppRegistry, SectionList, StyleSheet, Text, View ,ActivityIndicator, Alert, Button, TouchableOpacity,TextInput ,KeyboardAvoidingView , ScrollView} from 'react-native';
 import { Ionicons } from '@expo/vector-icons'; // 6.2.2
 import { createBottomTabNavigator, createAppContainer, TabBarBottom, createStackNavigator} from 'react-navigation';
 import { Icon, Input  } from 'react-native-elements'
@@ -27,12 +27,12 @@ import {AsyncStorage} from 'react-native';
         name="refresh"
         type = "MaterialIcons"
         onPress={navigation.getParam('refresh')}
-        
+
       />
       </View>
     ),
     }
-  }; 
+  };
 
 
   componentWillMount(){
@@ -120,8 +120,15 @@ _retrieveData = async () => {
           isLoading: false,
           dataSource: parsedJSON,
         }, function(){
-          
+
         });
+    }else{
+      this.setState({
+        isLoading: true,
+        dataSource: {},
+      }, function(){
+
+      });
     }
   } catch (error) {
     // Error retrieving data
@@ -140,12 +147,13 @@ runGetGrades(){
 	        return(
 	          <View style={{flex: 1, justifyContent: 'center', alignItems: 'center' }}>
 	            <ActivityIndicator/>
+              <Text style={{padding:20}}>This is the first time we are retrieving your grades so this may take a bit longer. Future requests will be much faster!</Text>
 	          </View>
 	        )
     	}
 
 	var listOfAssignments = this.state.dataSource
-	
+
 
     return (
 
@@ -159,14 +167,14 @@ runGetGrades(){
             <Text style={styles.rightContainer} flex right>{item["Grade"]}</Text>
             </View>}
           renderSectionHeader={({section}) => <Text style={styles.sectionHeader}>{section.title}</Text>}
-          keyExtractor={(item, index) => index} 
+          keyExtractor={(item, index) => index}
         />
       </View>
     );
   }
 
   parseJSON(obj){
-    var assignments = []; 
+    var assignments = [];
 
               for(className in obj){
                 if(className!="Status"){
@@ -222,7 +230,7 @@ runGetGrades(){
                   });
                   tempList= [];
                 }
-                  
+
                 console.log("a"+assignment["Grade"]+"b");
                 tempList.push(assignment);//+assignment["Date"].split("\n")[1]+" "+assignment["Timestamp"]
 
@@ -280,7 +288,7 @@ const styles = StyleSheet.create({
 
 
 class settings extends React.Component {
-  
+
   constructor(props){
     super(props);
     this.state ={ isLoading: false, email:"", password:"",}
@@ -294,10 +302,45 @@ class settings extends React.Component {
 
   render() {
       return(
-        <Button
-        onPress = {this.signOut}
-        title = "Sign Out"
-        />
+        <ScrollView style={{flex: 1, flexDirection: 'column'}}>
+          <Button
+          onPress = {this.signOut}
+          title = "Sign Out"
+          />
+        </ScrollView>
+      )
+  }
+
+}
+
+class home extends React.Component {
+
+  constructor(props){
+    super(props);
+    this.state ={ isLoading: false, email:"", password:"",}
+
+  }
+
+  signOut = ()=>{
+    AsyncStorage.clear()
+    this.props.navigation.navigate('SignIn')
+  }
+
+  genTable = ()=>{
+    var table = []
+    for(var i =0;i!=5;i++){
+      if(i>0)
+        table.push(<View style={{flex: 1, justifyContent: 'center', alignItems: 'center' }}><View style={{height: 0.5, width: '96%', backgroundColor: '#C8C8C8', }}/></View>);
+      table.push(<View style={{flex: 1, flexDirection: 'row',justifyContent: 'space-between', padding:10,paddingVertical:20}}><View style={{backgroundColor: 'skyblue'}}><Text style={{fontSize:30}}>Class Name</Text><Text style={{fontSize:20}}>Teacher</Text></View><View right style={{backgroundColor: 'skyblue'}}><Text style={{fontSize:30}}>Average</Text></View></View>)
+    }
+    return table
+  }
+
+  render() {
+      return(
+        <ScrollView style={{flex: 1, flexDirection: 'column'}}>
+        {this.genTable()}
+        </ScrollView>
       )
   }
 
@@ -306,7 +349,7 @@ class settings extends React.Component {
 
 
 const HomeStack = createStackNavigator({
-  Home: { screen: gradeList },
+  Home: { screen: home },
 });
 
 const AssignmentsStack = createStackNavigator({
@@ -339,7 +382,7 @@ const TabNav = createBottomTabNavigator(
           }else{
             iconName = 'view-headline'
           }
-          
+
           //iconName = `${focused ? 'ios-list-box' : 'view-headline'}`; // assignment
         } else if (routeName === 'Settings') {
           iconName = `settings`;
@@ -364,7 +407,7 @@ const TabNav = createBottomTabNavigator(
 
 
 class signIn extends React.Component {
-  
+
 	  constructor(props){
       super(props);
       this.state ={ isLoading: false, email:"", password:"",}
@@ -403,7 +446,7 @@ class signIn extends React.Component {
               refreshFunc();
             });
           });
-          
+
         }else{
           Alert.alert("Invalid username or password!");
         }
@@ -421,7 +464,7 @@ class signIn extends React.Component {
       if(this.state.isLoading){//padding: 20
         return(
           <KeyboardAvoidingView behavior="padding" style={{flex: 1, justifyContent: 'center', alignItems: 'center',backgroundColor: "#ededed" }}>
-          
+
               <View style={{flexDirection: 'row',backgroundColor: "#FFFFFF",margin:10,borderRadius: 30,paddingHorizontal: 20,paddingVertical: 10,marginVertical: 15,}}>
               <Icon
                 name='email'
@@ -459,7 +502,7 @@ class signIn extends React.Component {
                 borderRadius: 30,
                 width:"80%",alignItems: 'center',
                 marginVertical: 30,}}
-              
+
             >
               <ActivityIndicator size="large" color="#ffffff"/>
             </TouchableOpacity>
@@ -470,7 +513,7 @@ class signIn extends React.Component {
 
         return(
           <KeyboardAvoidingView behavior="padding" style={{flex: 1, justifyContent: 'center', alignItems: 'center',backgroundColor: "#ededed" }}>
-          
+
               <View style={{flexDirection: 'row',backgroundColor: "#FFFFFF",margin:10,borderRadius: 30,paddingHorizontal: 20,paddingVertical: 10,marginVertical: 15,}}>
               <Icon
                 name='email'
@@ -512,8 +555,8 @@ class signIn extends React.Component {
                 width:"80%",alignItems: 'center',
                 marginVertical: 30,
               }}
-              onPress={this.verify} 
-              
+              onPress={this.verify}
+
             >
               <Text style={{fontSize: 30,fontWeight: '400',color: "#fff",}}>Sign In</Text>
             </TouchableOpacity>
