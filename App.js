@@ -34,18 +34,27 @@ import {AsyncStorage} from 'react-native';
     }
   }; 
 
+
   componentWillMount(){
     AsyncStorage.getItem('username').then((user)=>{
       console.log(user);
       if(user==null){
-        this.props.navigation.navigate('SignIn')
+        this.props.navigation.navigate('SignIn',{refresh: () =>{
+            this.componentWillMount();
+        }})
       }else{
-        this.props.navigation.setParams({ refresh: this.getGrade.bind(this)});
+        this.props.navigation.setParams({ refresh: this.getGrade.bind(this),});
         this._retrieveData()
         this.getGrade()
       }
     })
   }
+
+  /*componentDidMount(){
+    this.props.navigation.setParams({ refresh: this.getGrade.bind(this)});
+    this._retrieveData()
+    this.getGrade()
+  }*/
 
 	  constructor(props){
 	    super(props);
@@ -62,8 +71,8 @@ getGrade = async () => {
 		'Content-Type': 'application/json',
 		},
 		body: JSON.stringify({
-		  username: "10012734@sbstudents.org",//10012734 //await AsyncStorage.getItem('username')
-		  password: "Sled%2#9",//Sled%2#9 //await AsyncStorage.getItem('password')
+		  username: await AsyncStorage.getItem('username'),//"10012734@sbstudents.org",//10012734 //
+		  password: await AsyncStorage.getItem('password'),//"Sled%2#9",//Sled%2#9 //
 		}),
 	})
 			.then((response) => {
@@ -85,7 +94,7 @@ getGrade = async () => {
 
           });
 		}else{
-      Alert.alert("NOT cached")
+      //Alert.alert("NOT cached")
       this.runGetGrades()
 
     }
@@ -94,12 +103,6 @@ getGrade = async () => {
 			.catch((error) =>{
 				console.error(error);
 			});
-}
-
-componentDidMount(){
-  /*this.props.navigation.setParams({ refresh: this.getGrade.bind(this)});
-  this._retrieveData()
-  this.getGrade()*/
 }
 
 _retrieveData = async () => {
@@ -274,16 +277,44 @@ const styles = StyleSheet.create({
   },
 })
 
+
+
+class settings extends React.Component {
+  
+  constructor(props){
+    super(props);
+    this.state ={ isLoading: false, email:"", password:"",}
+
+  }
+
+  signOut = ()=>{
+    AsyncStorage.clear()
+    this.props.navigation.navigate('SignIn')
+  }
+
+  render() {
+      return(
+        <Button
+        onPress = {this.signOut}
+        title = "Sign Out"
+        />
+      )
+  }
+
+}
+
+
+
 const HomeStack = createStackNavigator({
   Home: { screen: gradeList },
 });
 
 const AssignmentsStack = createStackNavigator({
-  Settings: { screen: gradeList },
+  Assignments: { screen: gradeList },
 });
 
 const SettingsStack = createStackNavigator({
-  Settings: { screen: gradeList },
+  Settings: { screen: settings },
 });
 
 const TabNav = createBottomTabNavigator(
@@ -336,12 +367,50 @@ class signIn extends React.Component {
   
 	  constructor(props){
       super(props);
-      this.state ={ isLoading: false, email:"en", password:"en",}
+      this.state ={ isLoading: false, email:"", password:"",}
 
     }
 
     verify = () =>{
-      Alert.alert(this.state.email+":"+this.state.password);
+      this.setState({
+        isLoading: true,
+      });
+      var email = this.state.email;
+      var pass = this.state.password;
+      //Alert.alert(this.state.email+":"+this.state.password);
+      return fetch('https://gradeview.herokuapp.com/check', {
+        method: 'POST',
+        headers: {
+        Accept: 'application/json',
+        'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          username: email,//10012734 //await AsyncStorage.getItem('username')
+          password: pass,//Sled%2#9 //await AsyncStorage.getItem('password')
+        }),
+      })
+			.then((response) => {
+		    console.log(typeof response)
+			  return response.json();
+	  	})
+			.then((responseJson) => {
+        console.log(responseJson);
+        if(responseJson['valid']==true){
+          AsyncStorage.setItem('username', email).then(()=>{
+            AsyncStorage.setItem('password', pass).then(()=>{
+              this.props.navigation.navigate('Normal')
+              let refreshFunc = this.props.navigation.getParam('refresh');
+              refreshFunc();
+            });
+          });
+          
+        }else{
+          Alert.alert("Invalid username or password!");
+        }
+        this.setState({
+          isLoading: false,
+        });
+      });
     }
 
     onChangeText = (key, val) => {
@@ -351,9 +420,51 @@ class signIn extends React.Component {
     render() {
       if(this.state.isLoading){//padding: 20
         return(
-          <View style={{flex: 1, justifyContent: 'center', alignItems: 'center',backgroundColor: "#ededed" }}>
-            <ActivityIndicator/>
-          </View>
+          <KeyboardAvoidingView behavior="padding" style={{flex: 1, justifyContent: 'center', alignItems: 'center',backgroundColor: "#ededed" }}>
+          
+              <View style={{flexDirection: 'row',backgroundColor: "#FFFFFF",margin:10,borderRadius: 30,paddingHorizontal: 20,paddingVertical: 10,marginVertical: 15,}}>
+              <Icon
+                name='email'
+                type='MaterialCommunityIcons'
+                size={30}
+              />
+              <TextInput
+                style={{flex: 1,fontSize: 30,paddingHorizontal: 8}}
+                keyboardType={'email-address'}
+                  autoCorrect={false}
+                  placeholder={this.state.email}
+                />
+
+            </View>
+          <View style={{flexDirection: 'row',backgroundColor: "#FFFFFF",margin:10,borderRadius: 30,paddingHorizontal: 20,paddingVertical: 10,marginVertical: 15,}}>
+              <Icon
+                name='lock'
+                type='FontAwesome5'
+                size={30}
+              />
+              <TextInput
+                style={{flex: 1,fontSize: 30,paddingHorizontal: 8}}
+                  autoCorrect={false}
+                  secureTextEntry
+                  placeholder={this.state.password}
+                />
+
+            </View>
+
+            <TouchableOpacity
+              style={{
+                backgroundColor: "#7a9145",
+                paddingHorizontal: 15,
+                paddingVertical: 30,
+                borderRadius: 30,
+                width:"80%",alignItems: 'center',
+                marginVertical: 30,}}
+              
+            >
+              <ActivityIndicator size="large" color="#ffffff"/>
+            </TouchableOpacity>
+
+        </KeyboardAvoidingView>
         )
         }
 
@@ -396,14 +507,15 @@ class signIn extends React.Component {
               style={{
                 backgroundColor: "#7a9145",
                 paddingHorizontal: 15,
-                paddingVertical: 5,
+                paddingVertical: 30,
                 borderRadius: 30,
                 width:"80%",alignItems: 'center',
-                marginVertical: 30,}}
+                marginVertical: 30,
+              }}
               onPress={this.verify} 
               
             >
-              <Text style={{fontSize: 60,fontWeight: '400',color: "#fff",}}>Sign In</Text>
+              <Text style={{fontSize: 30,fontWeight: '400',color: "#fff",}}>Sign In</Text>
             </TouchableOpacity>
 
         </KeyboardAvoidingView>
@@ -411,6 +523,11 @@ class signIn extends React.Component {
     }
 
   }
+
+
+
+
+
 
 
 export default createAppContainer(createStackNavigator(
@@ -423,7 +540,7 @@ export default createAppContainer(createStackNavigator(
     },
   },
   {
-    mode: 'modal',
+    //mode: 'modal',
     headerMode: 'none',
   }
 ));
