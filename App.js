@@ -1,4 +1,4 @@
-import React from 'react';
+  import React from 'react';
 import { AppRegistry, SectionList, StyleSheet, Text, View ,ActivityIndicator, Alert, Button, TouchableOpacity,TextInput ,KeyboardAvoidingView , ScrollView} from 'react-native';
 import { Ionicons } from '@expo/vector-icons'; // 6.2.2
 import { createBottomTabNavigator, createAppContainer, TabBarBottom, createStackNavigator} from 'react-navigation';
@@ -6,6 +6,7 @@ import { Icon, Input  } from 'react-native-elements'
 import {AsyncStorage} from 'react-native';
 
 
+var grades;
  class gradeList extends React.Component {
   static navigationOptions = ({ navigation }) => {
     if(navigation.getParam('loading')){
@@ -82,8 +83,10 @@ getGrade = async () => {
 			return response.json();
 		})
 			.then((responseJson) => {
+
 		//console.log(responseJson);
 		if(responseJson["Status"]=="Completed"){
+      grades = responseJson;
           AsyncStorage.setItem('grades', JSON.stringify(responseJson));
           this.props.navigation.setParams({ loading: false })
           parsedJSON = this.parseJSON(responseJson)
@@ -317,30 +320,56 @@ class home extends React.Component {
 
   constructor(props){
     super(props);
-    this.state ={ isLoading: false, email:"", password:"",}
-
+    this.state ={ isLoading: false, email:"", password:"",num: 0}
+    console.log(grades);
   }
-
   signOut = ()=>{
     AsyncStorage.clear()
     this.props.navigation.navigate('SignIn')
+
   }
 
   genTable = ()=>{
     var table = []
-    for(var i =0;i!=5;i++){
-      if(i>0)
+    var first = true;
+    console.log(grades);
+    var maxMarking
+    for(classN in grades){
+      for(marking in grades[classN]){
+        if(Number(marking.substring(1))){
+          if(Number(marking.substring(1))>)
+            maxMarking
+        }
+      }
+      console.log(classN);
+      if(!first){
         table.push(<View style={{flex: 1, justifyContent: 'center', alignItems: 'center' }}><View style={{height: 0.5, width: '96%', backgroundColor: '#C8C8C8', }}/></View>);
-      table.push(<View style={{flex: 1, flexDirection: 'row',justifyContent: 'space-between', padding:10,paddingVertical:20}}><View style={{backgroundColor: 'skyblue'}}><Text style={{fontSize:30}}>Class Name</Text><Text style={{fontSize:20}}>Teacher</Text></View><View right style={{backgroundColor: 'skyblue'}}><Text style={{fontSize:30}}>Average</Text></View></View>)
+      }else{
+        first = false;
+      }
+      table.push(<View style={{flex: 1, flexDirection: 'row',justifyContent: 'space-between', padding:10,paddingVertical:20}}><View style={{backgroundColor: 'skyblue'}}><Text style={{fontSize:30, width:"80%"}}>{classN}</Text><Text style={{fontSize:20}}>Teacher</Text></View><View right style={{backgroundColor: 'skyblue'}}><Text style={{fontSize:30}}>Average</Text></View></View>)
     }
     return table
   }
 
+  click = () =>{
+    //console.log(grades);
+    this.setState({
+      num: 9,
+    });
+  }
+
   render() {
+
       return(
-        <ScrollView style={{flex: 1, flexDirection: 'column'}}>
+        <ScrollView style={{flex: 1, flexDirection: 'column'}} onPress={this.click}>
         {this.genTable()}
+        <Button
+        onPress = {this.click}
+        title = "Sign Out"
+        />
         </ScrollView>
+
       )
   }
 
