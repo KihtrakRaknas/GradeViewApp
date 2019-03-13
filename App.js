@@ -1,9 +1,10 @@
   import React from 'react';
-import { AppRegistry, SectionList, StyleSheet, Text, View ,ActivityIndicator, Alert, Button, TouchableOpacity,TextInput ,KeyboardAvoidingView , ScrollView} from 'react-native';
+import { AppRegistry, SectionList, StyleSheet, Text, View ,ActivityIndicator, Alert, Button, TouchableOpacity,TextInput ,KeyboardAvoidingView , ScrollView, Picker} from 'react-native';
 import { Ionicons } from '@expo/vector-icons'; // 6.2.2
 import { createBottomTabNavigator, createAppContainer, TabBarBottom, createStackNavigator} from 'react-navigation';
 import { Icon, Input  } from 'react-native-elements'
 import {AsyncStorage} from 'react-native';
+import DropdownMenu from 'react-native-dropdown-menu';
 
 
 var grades;
@@ -323,22 +324,53 @@ class home extends React.Component {
     this.state ={ isLoading: false, email:"", password:"",num: 0}
     console.log(grades);
   }
-  signOut = ()=>{
-    AsyncStorage.clear()
-    this.props.navigation.navigate('SignIn')
 
-  }
+  static navigationOptions = ({ navigation }) => {
+   
+      return {
+        title: 'Home',
+      headerRight: (
+        <View style={{height:20,}} paddingRight={10}>
+
+        </View>
+      ),
+      }
+  };
 
   genTable = ()=>{
     var table = []
     var first = true;
     console.log(grades);
-    var maxMarking
+    var mps = []
     for(classN in grades){
+      if(classN!="Status"){
       for(marking in grades[classN]){
-        if(Number(marking.substring(1))){
-          if(Number(marking.substring(1))>)
-            maxMarking
+        console.log("MARK1: "+marking+"MARK2: "+classN);
+        //console.log(grades[classN]);
+        if(Number(marking.substring(2))){
+          if(!mps.includes(marking))
+            mps.push(marking);
+        }
+      }
+      }
+    }
+    console.log(mps)
+    for(classN in grades){
+      var maxMarking="MP0";
+      var avg = "";
+      for(marking in grades[classN]){
+        console.log(marking.substring(2));
+        if(Number(marking.substring(2))){
+          if(Number(marking.substring(2))>Number(maxMarking.substring(2)))
+            maxMarking = marking
+        }
+      }
+      console.log(maxMarking);
+      if(grades[classN][maxMarking]){
+        
+        if(grades[classN][maxMarking]["avg"]){
+          console.log("YEET")
+          avg = grades[classN][maxMarking]["avg"]
         }
       }
       console.log(classN);
@@ -347,7 +379,7 @@ class home extends React.Component {
       }else{
         first = false;
       }
-      table.push(<View style={{flex: 1, flexDirection: 'row',justifyContent: 'space-between', padding:10,paddingVertical:20}}><View style={{backgroundColor: 'skyblue'}}><Text style={{fontSize:30, width:"80%"}}>{classN}</Text><Text style={{fontSize:20}}>Teacher</Text></View><View right style={{backgroundColor: 'skyblue'}}><Text style={{fontSize:30}}>Average</Text></View></View>)
+      table.push(<View style={{flex: 1, flexDirection: 'row',justifyContent: 'space-between', padding:10,paddingVertical:20}}><View style={{backgroundColor: 'skyblue'}}><Text style={{fontSize:30, width:"80%"}}>{classN}</Text><Text style={{fontSize:20}}>Teacher</Text></View><View right style={{backgroundColor: 'skyblue'}}><Text style={{fontSize:30}}>{avg}</Text></View></View>)
     }
     return table
   }
@@ -360,14 +392,51 @@ class home extends React.Component {
   }
 
   render() {
-
+    var mps = []
+    for(classN in grades){
+      if(classN!="Status"){
+      for(marking in grades[classN]){
+        console.log("MARK1: "+marking+"MARK2: "+classN);
+        //console.log(grades[classN]);
+        if(Number(marking.substring(2))){
+          if(!mps.includes(marking))
+            mps.push(marking);
+        }
+      }
+      }
+    }
+    var data = [mps];
       return(
         <ScrollView style={{flex: 1, flexDirection: 'column'}} onPress={this.click}>
+                <DropdownMenu
+            style={{flex: 1}}
+            bgColor={'white'}
+            tintColor={'#666666'}
+            activityTintColor={'green'}
+            // arrowImg={}      
+            // checkImage={}   
+            // optionTextStyle={{color: '#333333'}}
+            // titleStyle={{color: '#333333'}} 
+            // maxHeight={300} 
+            handler={(selection, row) => this.setState({})}
+            data={data}
+          ></DropdownMenu>
         {this.genTable()}
         <Button
         onPress = {this.click}
         title = "Sign Out"
-        />
+        />  
+        <Picker
+          selectedValue={this.state.language}
+          style={{height: 50, width: 100}}
+          onValueChange={(itemValue, itemIndex) =>
+            this.setState({language: itemValue})
+          }>
+          <Picker.Item label="Java" value="java" />
+          <Picker.Item label="JavaScript" value="js" />
+        </Picker>
+
+
         </ScrollView>
 
       )
