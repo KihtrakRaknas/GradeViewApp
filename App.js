@@ -5,6 +5,7 @@ import { createBottomTabNavigator, createAppContainer, TabBarBottom, createStack
 import { Icon, Input  } from 'react-native-elements'
 import {AsyncStorage} from 'react-native';
 import DropdownMenu from 'react-native-dropdown-menu';
+import Modal from 'react-native-modal';
 
 
 var grades;
@@ -408,20 +409,31 @@ class home extends React.Component {
     var data = [mps];
       return(
         <ScrollView style={{flex: 1, flexDirection: 'column'}} onPress={this.click}>
-                <DropdownMenu
-            style={{flex: 1}}
-            bgColor={'white'}
-            tintColor={'#666666'}
-            activityTintColor={'green'}
-            // arrowImg={}      
-            // checkImage={}   
-            // optionTextStyle={{color: '#333333'}}
-            // titleStyle={{color: '#333333'}} 
-            // maxHeight={300} 
-            handler={(selection, row) => this.setState({})}
-            data={data}
-          ></DropdownMenu>
+        <Modal isVisible={this.state.visibleModal} 
+        style={{
+          justifyContent: 'flex-end',
+          margin: 0,
+        }}
+        onRequestClose={() => this.setState({ visibleModal: false })}
+        >
+              <View style={{backgroundColor: 'white',padding: 22,justifyContent: 'center',alignItems: 'center',borderRadius: 4,borderColor: 'rgba(0, 0, 0, 0.1)',}}>
+                <Picker
+                  selectedValue={this.state.language}
+                  style={{height: 200, width: 100}}
+                  onValueChange={(itemValue, itemIndex) =>
+                    this.setState({language: itemValue})
+                  }>
+                  <Picker.Item label="Java" value="java" />
+                  <Picker.Item label="JavaScript" value="js" />
+                  <Picker.Item label="JavaScript" value="js" />
+                  <Picker.Item label="JavaScript" value="js" />
+                </Picker>
+                <Button title="Set Marking Period" onPress={() => this.setState({ visibleModal: false })}/>
+              </View>
+        </Modal>
+              
         {this.genTable()}
+
         <Button
         onPress = {this.click}
         title = "Sign Out"
