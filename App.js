@@ -1,4 +1,4 @@
-  import React from 'react';
+import React from 'react';
 import { AppRegistry, SectionList, StyleSheet, Text, View ,ActivityIndicator, Alert, Button, TouchableOpacity,TextInput ,KeyboardAvoidingView , ScrollView, Picker} from 'react-native';
 import { Ionicons } from '@expo/vector-icons'; // 6.2.2
 import { createBottomTabNavigator, createAppContainer, TabBarBottom, createStackNavigator} from 'react-navigation';
@@ -338,10 +338,19 @@ class home extends React.Component {
       }
   };
 
-  genTable = ()=>{
-    var table = []
-    var first = true;
-    console.log(grades);
+  genMpSelector = () =>{
+    var pickerArry = [];
+    var mps = this.genMpsArray();
+
+    for(mp of mps){
+      pickerArry.push(<Picker.Item label={{mp}} value={{mp}} />);
+    }
+    
+    return pickerArry;
+
+  }
+
+  genMpsArray = () =>{
     var mps = []
     for(classN in grades){
       if(classN!="Status"){
@@ -355,6 +364,14 @@ class home extends React.Component {
       }
       }
     }
+    return mps;
+  }
+
+  genTable = ()=>{
+    var table = []
+    var first = true;
+    console.log(grades);
+    var mps = this.genMpsArray();
     console.log(mps)
     for(classN in grades){
       var maxMarking="MP0";
@@ -388,7 +405,7 @@ class home extends React.Component {
   click = () =>{
     //console.log(grades);
     this.setState({
-      num: 9,
+      visibleModal: !this.state.visibleModal,
     });
   }
 
@@ -423,10 +440,7 @@ class home extends React.Component {
                   onValueChange={(itemValue, itemIndex) =>
                     this.setState({language: itemValue})
                   }>
-                  <Picker.Item label="Java" value="java" />
-                  <Picker.Item label="JavaScript" value="js" />
-                  <Picker.Item label="JavaScript" value="js" />
-                  <Picker.Item label="JavaScript" value="js" />
+                  {this.genMpSelector()}
                 </Picker>
                 <Button title="Set Marking Period" onPress={() => this.setState({ visibleModal: false })}/>
               </View>
