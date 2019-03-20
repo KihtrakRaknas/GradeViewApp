@@ -341,9 +341,11 @@ class home extends React.Component {
   genMpSelector = () =>{
     var pickerArry = [];
     var mps = this.genMpsArray();
-
+    console.log("MPS");
+    console.log(mps);
     for(mp of mps){
       pickerArry.push(<Picker.Item label={{mp}} value={{mp}} />);
+      console.log(mp);
     }
     
     return pickerArry;
@@ -437,10 +439,10 @@ class home extends React.Component {
                 <Picker
                   selectedValue={this.state.language}
                   style={{height: 200, width: 100}}
-                  onValueChange={(itemValue, itemIndex) =>
+                  /*onValueChange={(itemValue, itemIndex) =>
                     this.setState({language: itemValue})
-                  }>
-                  {this.genMpSelector()}
+                  }*/>
+                  //{this.genMpSelector()}
                 </Picker>
                 <Button title="Set Marking Period" onPress={() => this.setState({ visibleModal: false })}/>
               </View>
