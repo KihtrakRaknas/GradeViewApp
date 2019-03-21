@@ -331,8 +331,11 @@ class home extends React.Component {
       return {
         title: 'Home',
       headerRight: (
-        <View style={{height:20,}} paddingRight={10}>
-
+        <View>
+        <Button
+          onPress = {this.click}
+          title = "Sign Out"
+        />  
         </View>
       ),
       }
@@ -344,16 +347,16 @@ class home extends React.Component {
     console.log("MPS");
     console.log(mps);
     for(mp of mps){
-      pickerArry.push(<Picker.Item label={{mp}} value={{mp}} />);
+      pickerArry.push(<Picker.Item label={mp} value={mp} />);
       console.log(mp);
     }
-    
-    return pickerArry;
+    console.log(pickerArry)
+    return pickerArry
 
   }
 
-  genMpsArray = () =>{
-    var mps = []
+  genMpsArray = () => {
+    var mps = [];
     for(classN in grades){
       if(classN!="Status"){
       for(marking in grades[classN]){
@@ -389,7 +392,7 @@ class home extends React.Component {
       if(grades[classN][maxMarking]){
         
         if(grades[classN][maxMarking]["avg"]){
-          console.log("YEET")
+          console.log("YEE2T")
           avg = grades[classN][maxMarking]["avg"]
         }
       }
@@ -401,6 +404,7 @@ class home extends React.Component {
       }
       table.push(<View style={{flex: 1, flexDirection: 'row',justifyContent: 'space-between', padding:10,paddingVertical:20}}><View style={{backgroundColor: 'skyblue'}}><Text style={{fontSize:30, width:"80%"}}>{classN}</Text><Text style={{fontSize:20}}>Teacher</Text></View><View right style={{backgroundColor: 'skyblue'}}><Text style={{fontSize:30}}>{avg}</Text></View></View>)
     }
+    console.log("DONE");
     return table
   }
 
@@ -412,20 +416,6 @@ class home extends React.Component {
   }
 
   render() {
-    var mps = []
-    for(classN in grades){
-      if(classN!="Status"){
-      for(marking in grades[classN]){
-        console.log("MARK1: "+marking+"MARK2: "+classN);
-        //console.log(grades[classN]);
-        if(Number(marking.substring(2))){
-          if(!mps.includes(marking))
-            mps.push(marking);
-        }
-      }
-      }
-    }
-    var data = [mps];
       return(
         <ScrollView style={{flex: 1, flexDirection: 'column'}} onPress={this.click}>
         <Modal isVisible={this.state.visibleModal} 
@@ -439,21 +429,19 @@ class home extends React.Component {
                 <Picker
                   selectedValue={this.state.language}
                   style={{height: 200, width: 100}}
-                  /*onValueChange={(itemValue, itemIndex) =>
+                  onValueChange={(itemValue, itemIndex) =>
                     this.setState({language: itemValue})
-                  }*/>
-                  //{this.genMpSelector()}
+                  }>
+                  {this.genMpSelector()}
                 </Picker>
                 <Button title="Set Marking Period" onPress={() => this.setState({ visibleModal: false })}/>
               </View>
         </Modal>
               
-        {this.genTable()}
+        {//this.genTable()
+          }
 
-        <Button
-        onPress = {this.click}
-        title = "Sign Out"
-        />  
+
         <Picker
           selectedValue={this.state.language}
           style={{height: 50, width: 100}}
