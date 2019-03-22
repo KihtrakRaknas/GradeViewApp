@@ -1,11 +1,14 @@
 import React from 'react';
-import { AppRegistry, SectionList, StyleSheet, Text, View ,ActivityIndicator, Alert, Button, TouchableOpacity,TextInput ,KeyboardAvoidingView , ScrollView} from 'react-native';
+import { AppRegistry, SectionList, StyleSheet, Text, View ,ActivityIndicator, Alert, Button, TouchableOpacity,TextInput ,KeyboardAvoidingView , ScrollView, Picker} from 'react-native';
 import { Ionicons } from '@expo/vector-icons'; // 6.2.2
 import { createBottomTabNavigator, createAppContainer, TabBarBottom, createStackNavigator} from 'react-navigation';
 import { Icon, Input  } from 'react-native-elements'
 import {AsyncStorage} from 'react-native';
+import DropdownMenu from 'react-native-dropdown-menu';
+import Modal from 'react-native-modal';
 
 
+var grades;
  class gradeList extends React.Component {
   static navigationOptions = ({ navigation }) => {
     if(navigation.getParam('loading')){
@@ -82,8 +85,10 @@ getGrade = async () => {
 			return response.json();
 		})
 			.then((responseJson) => {
+
 		//console.log(responseJson);
 		if(responseJson["Status"]=="Completed"){
+      grades = responseJson;
           AsyncStorage.setItem('grades', JSON.stringify(responseJson));
           this.props.navigation.setParams({ loading: false })
           parsedJSON = this.parseJSON(responseJson)
@@ -317,30 +322,152 @@ class home extends React.Component {
 
   constructor(props){
     super(props);
-    this.state ={ isLoading: false, email:"", password:"",}
+    this.state ={ isLoading: false, email:"", password:"", num: 0, currentMarking: "Select MP"}
+    console.log(grades);
+  }
+
+  static navigationOptions = ({ navigation }) => {
+    var text = "test"
+    console.log("CURR:");
+    //console.log(navigation.getParam('currentMarking'));
+    console.log(this.state.currentMarking);
+    console.log("CURN");
+      return {
+        title: 'Home',
+      headerRight: (
+        <View>
+        <Button
+          onPress = {navigation.getParam('click')}
+          title = {text}//{this.state.currentMarking}//
+        />  
+        </View>
+      ),
+      }
+  };
+
+  genMpSelector = () =>{
+    var pickerArry = [];
+    var mps = this.genMpsArray();
+    console.log("MPS");
+    console.log(mps);
+    for(mp of mps){
+      pickerArry.push(<Picker.Item label={mp} value={mp} />);
+      console.log(mp);
+    }
+    console.log(pickerArry)
+    return pickerArry
 
   }
 
-  signOut = ()=>{
-    AsyncStorage.clear()
-    this.props.navigation.navigate('SignIn')
+  genMpsArray = () => {
+    var mps = [];
+    for(classN in grades){
+      if(classN!="Status"){
+      for(marking in grades[classN]){
+        console.log("MARK1: "+marking+"MARK2: "+classN);
+        //console.log(grades[classN]);
+        if(Number(marking.substring(2))){
+          if(!mps.includes(marking))
+            mps.push(marking);
+        }
+      }
+      }
+    }
+    return mps;
   }
 
   genTable = ()=>{
     var table = []
-    for(var i =0;i!=5;i++){
-      if(i>0)
+    var first = true;
+    console.log(grades);
+    var mps = this.genMpsArray();
+    console.log(mps)
+    for(classN in grades){
+      var maxMarking="MP0";
+      var avg = "";
+      for(marking in grades[classN]){
+        console.log(marking.substring(2));
+        if(Number(marking.substring(2))){
+          if(Number(marking.substring(2))>Number(maxMarking.substring(2)))
+            maxMarking = marking
+        }
+      }
+      console.log(maxMarking);
+      if(grades[classN][maxMarking]){
+        
+        if(grades[classN][maxMarking]["avg"]){
+          console.log("YEE2T")
+          avg = grades[classN][maxMarking]["avg"]
+        }
+      }
+      console.log(classN);
+      if(!first){
         table.push(<View style={{flex: 1, justifyContent: 'center', alignItems: 'center' }}><View style={{height: 0.5, width: '96%', backgroundColor: '#C8C8C8', }}/></View>);
-      table.push(<View style={{flex: 1, flexDirection: 'row',justifyContent: 'space-between', padding:10,paddingVertical:20}}><View style={{backgroundColor: 'skyblue'}}><Text style={{fontSize:30}}>Class Name</Text><Text style={{fontSize:20}}>Teacher</Text></View><View right style={{backgroundColor: 'skyblue'}}><Text style={{fontSize:30}}>Average</Text></View></View>)
+      }else{
+        first = false;
+      }
+      table.push(<View style={{flex: 1, flexDirection: 'row',justifyContent: 'space-between', padding:10,paddingVertical:20}}><View style={{backgroundColor: 'skyblue'}}><Text style={{fontSize:30, width:"80%"}}>{classN}</Text><Text style={{fontSize:20}}>Teacher</Text></View><View right style={{backgroundColor: 'skyblue'}}><Text style={{fontSize:30}}>{avg}</Text></View></View>)
     }
+    console.log("DONE");
     return table
+  }
+
+  click = () =>{
+    //console.log(grades);
+    this.setState({
+      visibleModal: !this.state.visibleModal,
+    });
+  }
+
+  componentWillMount(){
+    this.props.navigation.setParams({ click: this.click,});
+    var curr = this.state.currentMarking;
+    //if(!curr)
+      curr = "Select Marking"
+    this.props.navigation.setParams({ currentMarking: curr});
+    
   }
 
   render() {
       return(
-        <ScrollView style={{flex: 1, flexDirection: 'column'}}>
-        {this.genTable()}
+        <ScrollView style={{flex: 1, flexDirection: 'column'}} onPress={this.click}>
+        <Modal isVisible={this.state.visibleModal} 
+        style={{
+          justifyContent: 'flex-end',
+          margin: 0,
+        }}
+        onRequestClose={() => this.setState({ visibleModal: false })}
+        >
+              <View style={{backgroundColor: 'white',padding: 22,justifyContent: 'center',alignItems: 'center',borderRadius: 4,borderColor: 'rgba(0, 0, 0, 0.1)',}}>
+                <Picker
+                  selectedValue={this.state.language}
+                  style={{height: 200, width: 100}}
+                  onValueChange={(itemValue, itemIndex) =>
+                    this.setState({currentMarking: itemValue})
+                  }>
+                  {this.genMpSelector()}
+                </Picker>
+                <Button title="Set Marking Period" onPress={() => this.setState({ visibleModal: false })}/>
+              </View>
+        </Modal>
+              
+        {//this.genTable()
+          }
+
+
+        <Picker
+          selectedValue={this.state.language}
+          style={{height: 50, width: 100}}
+          onValueChange={(itemValue, itemIndex) =>
+            this.setState({language: itemValue})
+          }>
+          <Picker.Item label="Java" value="java" />
+          <Picker.Item label="JavaScript" value="js" />
+        </Picker>
+
+
         </ScrollView>
+
       )
   }
 
