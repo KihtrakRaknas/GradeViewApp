@@ -443,6 +443,7 @@ class signIn extends React.Component {
             AsyncStorage.setItem('password', pass).then(()=>{
               this.props.navigation.navigate('Normal')
               let refreshFunc = this.props.navigation.getParam('refresh');
+              if(refreshFunc)
               refreshFunc();
             });
           });
@@ -471,12 +472,9 @@ class signIn extends React.Component {
                 type='MaterialCommunityIcons'
                 size={30}
               />
-              <TextInput
-                style={{flex: 1,fontSize: 30,paddingHorizontal: 8}}
-                keyboardType={'email-address'}
-                  autoCorrect={false}
-                  placeholder={this.state.email}
-                />
+              <Text
+                style={{flex: 1,fontSize: 30,paddingHorizontal: 8,color:"#ededed"}}>{this.state.email}</Text>
+                
 
             </View>
           <View style={{flexDirection: 'row',backgroundColor: "#FFFFFF",margin:10,borderRadius: 30,paddingHorizontal: 20,paddingVertical: 10,marginVertical: 15,}}>
@@ -485,12 +483,9 @@ class signIn extends React.Component {
                 type='FontAwesome5'
                 size={30}
               />
-              <TextInput
-                style={{flex: 1,fontSize: 30,paddingHorizontal: 8}}
-                  autoCorrect={false}
-                  secureTextEntry
-                  placeholder={this.state.password}
-                />
+              <Text
+                style={{flex: 1,fontSize: 30,paddingHorizontal: 8,color:"#ededed"}}
+                >verifying credentials</Text>
 
             </View>
 
