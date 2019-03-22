@@ -322,19 +322,23 @@ class home extends React.Component {
 
   constructor(props){
     super(props);
-    this.state ={ isLoading: false, email:"", password:"",num: 0}
+    this.state ={ isLoading: false, email:"", password:"", num: 0, currentMarking: "Select MP"}
     console.log(grades);
   }
 
   static navigationOptions = ({ navigation }) => {
-   
+    var text = "test"
+    console.log("CURR:");
+    //console.log(navigation.getParam('currentMarking'));
+    console.log(this.state.currentMarking);
+    console.log("CURN");
       return {
         title: 'Home',
       headerRight: (
         <View>
         <Button
-          onPress = {this.click}
-          title = "Sign Out"
+          onPress = {navigation.getParam('click')}
+          title = {text}//{this.state.currentMarking}//
         />  
         </View>
       ),
@@ -415,6 +419,15 @@ class home extends React.Component {
     });
   }
 
+  componentWillMount(){
+    this.props.navigation.setParams({ click: this.click,});
+    var curr = this.state.currentMarking;
+    //if(!curr)
+      curr = "Select Marking"
+    this.props.navigation.setParams({ currentMarking: curr});
+    
+  }
+
   render() {
       return(
         <ScrollView style={{flex: 1, flexDirection: 'column'}} onPress={this.click}>
@@ -430,7 +443,7 @@ class home extends React.Component {
                   selectedValue={this.state.language}
                   style={{height: 200, width: 100}}
                   onValueChange={(itemValue, itemIndex) =>
-                    this.setState({language: itemValue})
+                    this.setState({currentMarking: itemValue})
                   }>
                   {this.genMpSelector()}
                 </Picker>
