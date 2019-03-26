@@ -324,22 +324,33 @@ class home extends React.Component {
     super(props);
     this.state ={ isLoading: false, email:"", password:"", num: 0, currentMarking: "Select MP"}
     console.log(grades);
+
+    this.props.navigation.setParams({ click: this.click,});
+    var mp = AsyncStorage.getItem('MP');
+    if(!mp){
+      var mps = this.genMpsArray();
+      if(mps.length>0){
+        AsyncStorage.setItem('MP', mps[mps.length-1]).then(()=>{
+          this.props.navigation.setParams({ currentMarking: mps[mps.length-1]});
+          this.setState({currentMarking: mps[mps.length-1]});
+        })
+      }
+    }else{
+      this.props.navigation.setParams({ currentMarking: mp});
+      this.setState({currentMarking: mp});
+    }
   }
 
   static navigationOptions = ({ navigation }) => {
-    var text = "test"
-    console.log("CURR:");
-    //console.log(navigation.getParam('currentMarking'));
-    console.log(this.state.currentMarking);
-    console.log("CURN");
+    console.log(navigation.getParam('currentMarking','Select a MP'))
       return {
         title: 'Home',
       headerRight: (
         <View>
         <Button
           onPress = {navigation.getParam('click')}
-          title = {text}//{this.state.currentMarking}//
-        />  
+          title = {navigation.getParam('currentMarking','Select a MP')}//{this.state.currentMarking}//
+        />
         </View>
       ),
       }
@@ -394,7 +405,7 @@ class home extends React.Component {
       }
       console.log(maxMarking);
       if(grades[classN][maxMarking]){
-        
+
         if(grades[classN][maxMarking]["avg"]){
           console.log("YEE2T")
           avg = grades[classN][maxMarking]["avg"]
@@ -420,18 +431,15 @@ class home extends React.Component {
   }
 
   componentWillMount(){
-    this.props.navigation.setParams({ click: this.click,});
-    var curr = this.state.currentMarking;
-    //if(!curr)
-      curr = "Select Marking"
-    this.props.navigation.setParams({ currentMarking: curr});
-    
+
+
+
   }
 
   render() {
       return(
         <ScrollView style={{flex: 1, flexDirection: 'column'}} onPress={this.click}>
-        <Modal isVisible={this.state.visibleModal} 
+        <Modal isVisible={this.state.visibleModal}
         style={{
           justifyContent: 'flex-end',
           margin: 0,
@@ -440,17 +448,21 @@ class home extends React.Component {
         >
               <View style={{backgroundColor: 'white',padding: 22,justifyContent: 'center',alignItems: 'center',borderRadius: 4,borderColor: 'rgba(0, 0, 0, 0.1)',}}>
                 <Picker
-                  selectedValue={this.state.language}
+                  selectedValue={this.state.currentMarking}
                   style={{height: 200, width: 100}}
                   onValueChange={(itemValue, itemIndex) =>
                     this.setState({currentMarking: itemValue})
                   }>
                   {this.genMpSelector()}
                 </Picker>
-                <Button title="Set Marking Period" onPress={() => this.setState({ visibleModal: false })}/>
+                <Button title="Set Marking Period" onPress={() => {
+                  this.setState({ visibleModal: false });
+                  this.props.navigation.setParams({ currentMarking: this.state.currentMarking});
+              }
+            }/>
               </View>
         </Modal>
-              
+
         {//this.genTable()
           }
 
@@ -601,7 +613,7 @@ class signIn extends React.Component {
               />
               <Text
                 style={{flex: 1,fontSize: 30,paddingHorizontal: 8,color:"#ededed"}}>{this.state.email}</Text>
-                
+
 
             </View>
           <View style={{flexDirection: 'row',backgroundColor: "#FFFFFF",margin:10,borderRadius: 30,paddingHorizontal: 20,paddingVertical: 10,marginVertical: 15,}}>
