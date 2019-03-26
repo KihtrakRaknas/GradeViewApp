@@ -322,10 +322,7 @@ class home extends React.Component {
 
   constructor(props){
     super(props);
-    this.state ={ isLoading: false, email:"", password:"", num: 0, currentMarking: "Select MP"}
-    console.log(grades);
 
-    this.props.navigation.setParams({ click: this.click,});
     var mp = AsyncStorage.getItem('MP');
     if(!mp){
       var mps = this.genMpsArray();
@@ -339,10 +336,20 @@ class home extends React.Component {
       this.props.navigation.setParams({ currentMarking: mp});
       this.setState({currentMarking: mp});
     }
+
+    this.state ={ isLoading: false, email:"", password:"", num: 0, currentMarking: "Select MP"}
+    console.log(grades);
+
+    this.props.navigation.setParams({ click: this.click,});
   }
 
   static navigationOptions = ({ navigation }) => {
+    console.log("TEXT: "+navigation.getParam('currentMarking','Select a MP'))
     console.log(navigation.getParam('currentMarking','Select a MP'))
+    var text = navigation.getParam('currentMarking','Select a MP');
+    if(!text){
+      text = "temp"
+    }
       return {
         title: 'Home',
       headerRight: (
