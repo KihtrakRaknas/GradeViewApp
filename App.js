@@ -322,23 +322,26 @@ class home extends React.Component {
 
   constructor(props){
     super(props);
-
-    var mp = AsyncStorage.getItem('MP');
-    if(!mp){
-      var mps = this.genMpsArray();
-      if(mps.length>0){
-        AsyncStorage.setItem('MP', mps[mps.length-1]).then(()=>{
-          this.props.navigation.setParams({ currentMarking: mps[mps.length-1]});
-          this.setState({currentMarking: mps[mps.length-1]});
-        })
-      }
-    }else{
-      this.props.navigation.setParams({ currentMarking: mp});
-      this.setState({currentMarking: mp});
-    }
-
+    console.log("GERNERATING")  
     this.state ={ isLoading: false, email:"", password:"", num: 0, currentMarking: "Select MP"}
-    console.log(grades);
+    AsyncStorage.getItem('MP').then((mp)=>{
+      console.log(mp)
+      if(!mp){
+        var mps = this.genMpsArray();
+        if(mps.length>0){
+          AsyncStorage.setItem('MP', mps[mps.length-1]).then(()=>{
+            this.props.navigation.setParams({ currentMarking: mps[mps.length-1]});
+            this.setState({currentMarking: mps[mps.length-1]});
+          })
+        }
+      }else{
+        this.props.navigation.setParams({ currentMarking: mp});
+        this.setState({currentMarking: mp});
+      }
+    });
+    
+
+    
 
     this.props.navigation.setParams({ click: this.click,});
   }
@@ -347,16 +350,18 @@ class home extends React.Component {
     console.log("TEXT: "+navigation.getParam('currentMarking','Select a MP'))
     console.log(navigation.getParam('currentMarking','Select a MP'))
     var text = navigation.getParam('currentMarking','Select a MP');
-    if(!text){
-      text = "temp"
+    console.log(typeof text)
+    if(typeof text != "string"){
+      text = "Select a MP"
     }
+    console.log("TEXTt: "+text)
       return {
         title: 'Home',
       headerRight: (
         <View>
         <Button
           onPress = {navigation.getParam('click')}
-          title = {navigation.getParam('currentMarking','Select a MP')}//{this.state.currentMarking}//
+          title = {text}//{navigation.getParam('currentMarking','Select a MP')}//{this.state.currentMarking}//
         />
         </View>
       ),
@@ -367,12 +372,9 @@ class home extends React.Component {
     var pickerArry = [];
     var mps = this.genMpsArray();
     console.log("MPS");
-    console.log(mps);
     for(mp of mps){
       pickerArry.push(<Picker.Item label={mp} value={mp} />);
-      console.log(mp);
     }
-    console.log(pickerArry)
     return pickerArry
 
   }
@@ -397,14 +399,11 @@ class home extends React.Component {
   genTable = ()=>{
     var table = []
     var first = true;
-    console.log(grades);
     var mps = this.genMpsArray();
-    console.log(mps)
     for(classN in grades){
       var maxMarking="MP0";
       var avg = "";
       for(marking in grades[classN]){
-        console.log(marking.substring(2));
         if(Number(marking.substring(2))){
           if(Number(marking.substring(2))>Number(maxMarking.substring(2)))
             maxMarking = marking
@@ -463,8 +462,12 @@ class home extends React.Component {
                   {this.genMpSelector()}
                 </Picker>
                 <Button title="Set Marking Period" onPress={() => {
-                  this.setState({ visibleModal: false });
-                  this.props.navigation.setParams({ currentMarking: this.state.currentMarking});
+                  AsyncStorage.setItem('MP', this.state.currentMarking)//.then(()=>{
+                    this.props.navigation.setParams({ currentMarking: this.state.currentMarking});
+                    this.setState({ visibleModal: false , currentMarking: this.state.currentMarking});
+                 //})
+                  
+                  
               }
             }/>
               </View>
@@ -495,11 +498,11 @@ class home extends React.Component {
 
 
 const HomeStack = createStackNavigator({
-  Home: { screen: home },
+  Home: { screen: gradeList },
 });
 
 const AssignmentsStack = createStackNavigator({
-  Assignments: { screen: gradeList },
+  Assignments: { screen: home},
 });
 
 const SettingsStack = createStackNavigator({
