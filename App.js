@@ -401,20 +401,15 @@ class home extends React.Component {
     var first = true;
     var mps = this.genMpsArray();
     for(classN in grades){
-      var maxMarking="MP0";
-      var avg = "";
-      for(marking in grades[classN]){
-        if(Number(marking.substring(2))){
-          if(Number(marking.substring(2))>Number(maxMarking.substring(2)))
-            maxMarking = marking
-        }
-      }
+      var maxMarking=this.state.currentMarking;
       console.log(maxMarking);
+      var avg = "";
       if(grades[classN][maxMarking]){
 
         if(grades[classN][maxMarking]["avg"]){
           console.log("YEE2T")
           avg = grades[classN][maxMarking]["avg"]
+          console.log(avg);
         }
       }
       console.log(classN);
@@ -473,7 +468,7 @@ class home extends React.Component {
               </View>
         </Modal>
 
-        {//this.genTable()
+        {this.genTable()
           }
 
 
