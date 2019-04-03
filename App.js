@@ -6,177 +6,11 @@ import { Icon, Input  } from 'react-native-elements'
 import {AsyncStorage} from 'react-native';
 import DropdownMenu from 'react-native-dropdown-menu';
 import Modal from 'react-native-modal';
-
+//import gradeList from './gradeList.js'
 
 var grades;
- class gradeList extends React.Component {
-  static navigationOptions = ({ navigation }) => {
-    if(navigation.getParam('loading')){
-      return {
-        title: 'Your Assignments',
-      headerRight: (
-        <View paddingRight={10}>
-          <ActivityIndicator/>
-        </View>
-      ),
-      }
-    }
 
-    return {
-      title: 'Your Assignments',
-    headerRight: (
-      <View paddingRight={10}>
-      <Icon
-        name="refresh"
-        type = "MaterialIcons"
-        onPress={navigation.getParam('refresh')}
-
-      />
-      </View>
-    ),
-    }
-  };
-
-
-  componentWillMount(){
-    AsyncStorage.getItem('username').then((user)=>{
-      console.log(user);
-      if(user==null){
-        this.props.navigation.navigate('SignIn',{refresh: () =>{
-            this.componentWillMount();
-        }})
-      }else{
-        this.props.navigation.setParams({ refresh: this.getGrade.bind(this),});
-        this._retrieveData()
-        this.getGrade()
-      }
-    })
-  }
-
-  /*componentDidMount(){
-    this.props.navigation.setParams({ refresh: this.getGrade.bind(this)});
-    this._retrieveData()
-    this.getGrade()
-  }*/
-
-	  constructor(props){
-	    super(props);
-	    this.state ={ isLoading: true}
-  }
-
-getGrade = async () => {
-  this.props.navigation.setParams({loading: true});
-	console.log("TEST")
-		return fetch('https://gradeview.herokuapp.com/', {
-		method: 'POST',
-		headers: {
-		Accept: 'application/json',
-		'Content-Type': 'application/json',
-		},
-		body: JSON.stringify({
-		  username: await AsyncStorage.getItem('username'),//"10012734@sbstudents.org",//10012734 //
-		  password: await AsyncStorage.getItem('password'),//"Sled%2#9",//Sled%2#9 //
-		}),
-	})
-			.then((response) => {
-		//console.log(response);
-		//response.json()
-		console.log(typeof response)
-			return response.json();
-		})
-			.then((responseJson) => {
-
-		//console.log(responseJson);
-		if(responseJson["Status"]=="Completed"){
-      grades = responseJson;
-          AsyncStorage.setItem('grades', JSON.stringify(responseJson));
-          this.props.navigation.setParams({ loading: false })
-          parsedJSON = this.parseJSON(responseJson)
-					this.setState({
-						isLoading: false,
-						dataSource: parsedJSON,
-					}, function(){
-
-          });
-		}else{
-      //Alert.alert("NOT cached")
-      this.runGetGrades()
-
-    }
-
-			})
-			.catch((error) =>{
-				console.error(error);
-			});
-}
-
-_retrieveData = async () => {
-  try {
-    const value = await AsyncStorage.getItem('grades');
-    if (value != null) {
-      var jsonVal = JSON.parse(value)
-      console.log("LOCALLY STORED");
-        console.log(jsonVal)
-        console.log("LOCALLY STORED");
-
-        parsedJSON = this.parseJSON(jsonVal)
-
-        this.setState({
-          isLoading: false,
-          dataSource: parsedJSON,
-        }, function(){
-
-        });
-    }else{
-      this.setState({
-        isLoading: true,
-        dataSource: {},
-      }, function(){
-
-      });
-    }
-  } catch (error) {
-    // Error retrieving data
-  }
-};
-
-runGetGrades(){
-  setTimeout(() => {
-
-    this.getGrade()
-  },10000);
-}
-
-  render() {
-	      if(this.state.isLoading){//padding: 20
-	        return(
-	          <View style={{flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-	            <ActivityIndicator/>
-              <Text style={{padding:20}}>This is the first time we are retrieving your grades so this may take a bit longer. Future requests will be much faster!</Text>
-	          </View>
-	        )
-    	}
-
-	var listOfAssignments = this.state.dataSource
-
-
-    return (
-
-      <View style={styles.container}>
-        <SectionList
-          ItemSeparatorComponent={({item}) => <View style={{flex: 1, justifyContent: 'center', alignItems: 'center' }}><View style={{height: 0.5, width: '96%', backgroundColor: '#C8C8C8', }}/></View>}
-          sections={listOfAssignments}
-          renderItem={({item}) => <View style={{flexDirection: 'row',
-          justifyContent: 'space-between'}}>
-            <Text style={styles.leftContainer} flex left>{item["Name"]}</Text>
-            <Text style={styles.rightContainer} flex right>{item["Grade"]}</Text>
-            </View>}
-          renderSectionHeader={({section}) => <Text style={styles.sectionHeader}>{section.title}</Text>}
-          keyExtractor={(item, index) => index}
-        />
-      </View>
-    );
-  }
+class LoadInComponent extends React.Component {
 
   parseJSON(obj){
     var assignments = [];
@@ -248,6 +82,265 @@ runGetGrades(){
 
               return listOfAssignments;
   }
+
+  componentWillMount(){
+    console.log("LOADIN COMPONENT RUNNIN")
+    AsyncStorage.getItem('username').then((user)=>{
+      console.log(user);
+      if(user==null){
+        this.props.navigation.navigate('SignIn',{refresh: () =>{
+            this.componentWillMount();
+        }})
+      }else{
+        this._retrieveData()
+        this.getGrade()
+      }
+    })
+  }
+
+  getGrade = async () => {
+  this.props.navigation.setParams({loading: true});
+	console.log("TEST")
+		return fetch('https://gradeview.herokuapp.com/', {
+		method: 'POST',
+		headers: {
+		Accept: 'application/json',
+		'Content-Type': 'application/json',
+		},
+		body: JSON.stringify({
+		  username: await AsyncStorage.getItem('username'),//"10012734@sbstudents.org",//10012734 //
+		  password: await AsyncStorage.getItem('password'),//"Sled%2#9",//Sled%2#9 //
+		}),
+	})
+			.then((response) => {
+		//console.log(response);
+		//response.json()
+		console.log(typeof response)
+			return response.json();
+		})
+			.then((responseJson) => {
+
+		//console.log(responseJson);
+		if(responseJson["Status"]=="Completed"){
+      grades = responseJson;
+      console.log("GRADES UPDATED")
+          AsyncStorage.setItem('grades', JSON.stringify(responseJson));
+          this.props.navigation.setParams({ loading: false })
+          parsedJSON = this.parseJSON(responseJson)
+					this.setState({
+						isLoading: false,
+						dataSource: parsedJSON,
+					}, function(){
+
+          });
+		}else{
+      //Alert.alert("NOT cached")
+      this.runGetGrades()
+
+    }
+
+			})
+			.catch((error) =>{
+				console.error(error);
+			});
+}
+
+_retrieveData = async () => {
+  try {
+    const value = await AsyncStorage.getItem('grades');
+    if (value != null) {
+      var jsonVal = JSON.parse(value)
+      console.log("LOCALLY STORED");
+        console.log(jsonVal)
+        console.log("LOCALLY STORED");
+
+        parsedJSON = this.parseJSON(jsonVal)
+
+        this.setState({
+          isLoading: false,
+          dataSource: parsedJSON,
+        }, function(){
+
+        });
+    }else{
+      this.setState({
+        isLoading: true,
+        dataSource: {},
+      }, function(){
+
+      });
+    }
+  } catch (error) {
+    // Error retrieving data
+  }
+};
+
+runGetGrades(){
+  setTimeout(() => {
+
+    this.getGrade()
+  },10000);
+}
+}
+
+ class gradeList extends LoadInComponent {
+  static navigationOptions = ({ navigation }) => {
+    if(navigation.getParam('loading')){
+      return {
+        title: 'Your Assignments',
+      headerRight: (
+        <View paddingRight={10}>
+          <ActivityIndicator/>
+        </View>
+      ),
+      }
+    }
+
+    return {
+      title: 'Your Assignments',
+    headerRight: (
+      <View paddingRight={10}>
+      <Icon
+        name="refresh"
+        type = "MaterialIcons"
+        onPress={navigation.getParam('refresh')}
+
+      />
+      </View>
+    ),
+    }
+  };
+
+/*
+  componentWillMount(){
+    AsyncStorage.getItem('username').then((user)=>{
+      console.log(user);
+      if(user==null){
+        this.props.navigation.navigate('SignIn',{refresh: () =>{
+            this.componentWillMount();
+        }})
+      }else{
+        this.props.navigation.setParams({ refresh: this.getGrade.bind(this),});
+        this._retrieveData()
+        this.getGrade()
+      }
+    })
+  }*/
+
+  /*componentDidMount(){
+    this.props.navigation.setParams({ refresh: this.getGrade.bind(this)});
+    this._retrieveData()
+    this.getGrade()
+  }*/
+
+	  constructor(props){
+	    super(props);
+	    this.state ={ isLoading: true}
+  }
+
+
+
+  render() {
+	      if(this.state.isLoading){//padding: 20
+	        return(
+	          <View style={{flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+	            <ActivityIndicator/>
+              <Text style={{padding:20}}>This is the first time we are retrieving your grades so this may take a bit longer. Future requests will be much faster!</Text>
+	          </View>
+	        )
+    	}
+
+	var listOfAssignments = this.state.dataSource
+
+
+    return (
+
+      <View style={styles.container}>
+        <SectionList
+          ItemSeparatorComponent={({item}) => <View style={{flex: 1, justifyContent: 'center', alignItems: 'center' }}><View style={{height: 0.5, width: '96%', backgroundColor: '#C8C8C8', }}/></View>}
+          sections={listOfAssignments}
+          renderItem={({item}) => <View style={{flexDirection: 'row',
+          justifyContent: 'space-between'}}>
+            <Text style={styles.leftContainer} flex left>{item["Name"]}</Text>
+            <Text style={styles.rightContainer} flex right>{item["Grade"]}</Text>
+            </View>}
+          renderSectionHeader={({section}) => <Text style={styles.sectionHeader}>{section.title}</Text>}
+          keyExtractor={(item, index) => index}
+        />
+      </View>
+    );
+  }
+/*
+  parseJSON(obj){
+    var assignments = [];
+
+              for(className in obj){
+                if(className!="Status"){
+                for(markingPeriod in obj[className]){
+                  if(markingPeriod!=null && markingPeriod != "teacher" && markingPeriod != "title"){
+                    //console.log(markingPeriod);
+                    //console.log(className)
+                    //console.log(obj[className][markingPeriod]["Assignments"]);
+                    for(var assignment of obj[className][markingPeriod]["Assignments"]){
+                      var year = "19";
+                      if(parseInt((assignment["Date"].split("\n")[1]).split("/")[0])>5)
+                        year = "18";
+                      //assignment["Name"] = (assignment["Date"].split("/")[1]).split("\n")[0];
+                      assignment["Timestamp"] = Date.parse(assignment["Date"]+"/"+year);
+                      assignments.push(assignment);
+                      //console.log(assignment["Date"]+"/"+year);
+                    }
+                  }
+                }
+                }
+              }
+
+              var arr = assignments;
+
+            /*var i, len = arr.length, el, j;
+
+              for(i = 1; i<len; i++){
+                el = arr[i];
+                j = i;
+
+                while(j>0 && Date.parse(arr[j-1]["Date"].split("\n")[1])>Date.parse(arr[i]["Date"].split("\n")[1])){
+                  arr[j] = arr[j-1];
+                  j--;
+              }
+
+              arr[j] = el;
+              }
+
+              console.log(arr);
+              * /
+              //console.log(arr);
+              arr = arr.sort((a, b) => b["Timestamp"] - a["Timestamp"]);
+              //console.log("SORTED\n\n\n\n\n\n");
+              //console.log(arr);
+            var listOfAssignments =[];
+            var lastAssignment;
+            var tempList = []
+              for(var assignment of arr){
+                if(lastAssignment!=null&&lastAssignment["Date"]!=assignment["Date"]){
+                  listOfAssignments.push({
+                    title: assignment["Date"].replace("\n"," "),
+                    data: tempList,
+                  });
+                  tempList= [];
+                }
+
+                console.log("a"+assignment["Grade"]+"b");
+                tempList.push(assignment);//+assignment["Date"].split("\n")[1]+" "+assignment["Timestamp"]
+
+                lastAssignment = assignment;
+              }
+              listOfAssignments.push({
+                title: assignment["Date"],
+                data: tempList,
+              });
+
+              return listOfAssignments;
+  }*/
 }
 //container had paddingTop: 22
 const styles = StyleSheet.create({
@@ -318,7 +411,7 @@ class settings extends React.Component {
 
 }
 
-class home extends React.Component {
+class home extends LoadInComponent {
 
   constructor(props){
     super(props);
@@ -418,6 +511,7 @@ class home extends React.Component {
       }else{
         first = false;
       }
+      if(classN!="Status")
       table.push(<View style={{flex: 1, flexDirection: 'row',justifyContent: 'space-between', padding:10,paddingVertical:20}}><View style={{backgroundColor: 'skyblue'}}><Text style={{fontSize:30, width:"80%"}}>{classN}</Text><Text style={{fontSize:20}}>Teacher</Text></View><View right style={{backgroundColor: 'skyblue'}}><Text style={{fontSize:30}}>{avg}</Text></View></View>)
     }
     console.log("DONE");
@@ -431,11 +525,6 @@ class home extends React.Component {
     });
   }
 
-  componentWillMount(){
-
-
-
-  }
 
   render() {
       return(
@@ -490,14 +579,12 @@ class home extends React.Component {
 
 }
 
-
-
 const HomeStack = createStackNavigator({
-  Home: { screen: gradeList },
+  Home: { screen: home },
 });
 
 const AssignmentsStack = createStackNavigator({
-  Assignments: { screen: home},
+  Assignments: { screen: gradeList},
 });
 
 const SettingsStack = createStackNavigator({
@@ -531,7 +618,6 @@ const TabNav = createBottomTabNavigator(
         } else if (routeName === 'Settings') {
           iconName = `settings`;
         }
-        console.log("LOGOS");
         // You can return any component that you like here! We usually use an
         // icon component from react-native-vector-icons
         return <Icon name={iconName} size={25} color={tintColor} type={type}/>;//<Ionicons name="md-checkmark-circle" size={32} color="green" />//
@@ -547,7 +633,6 @@ const TabNav = createBottomTabNavigator(
     swipeEnabled: false,
   }
 )
-
 
 
 class signIn extends React.Component {
