@@ -493,11 +493,12 @@ class home extends React.Component {
 
 
 const HomeStack = createStackNavigator({
-  Home: { screen: gradeList },
+  Home: { screen: home},
+  //Class:{ screen: class},
 });
 
 const AssignmentsStack = createStackNavigator({
-  Assignments: { screen: home},
+  Assignments: { screen: gradeList },
 });
 
 const SettingsStack = createStackNavigator({
@@ -506,8 +507,9 @@ const SettingsStack = createStackNavigator({
 
 const TabNav = createBottomTabNavigator(
   {
-    Home: { screen:  HomeStack},
     Assignments: { screen:  AssignmentsStack},
+    Home: { screen:  HomeStack},
+    
     Settings: { screen:  SettingsStack},
   },
   {
