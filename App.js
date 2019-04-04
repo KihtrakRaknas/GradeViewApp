@@ -483,12 +483,14 @@ class home extends LoadInComponent {
       var maxMarking=this.state.currentMarking;
       console.log(maxMarking);
       var avg = "";
+      var teach = "";
       if(grades[classN][maxMarking]){
 
         if(grades[classN][maxMarking]["avg"]){
           console.log("YEE2T")
           avg = grades[classN][maxMarking]["avg"]
           console.log(avg);
+          teach = grades[classN]["teacher"]
         }
       }
       console.log(classN);
@@ -498,7 +500,7 @@ class home extends LoadInComponent {
         first = false;
       }
       if(classN!="Status")
-      table.push(<View style={{flex: 1, flexDirection: 'row',justifyContent: 'space-between', padding:10,paddingVertical:20}}><View style={{backgroundColor: 'skyblue', maxWidth: 50,}}><Text style={{fontSize:30, width:"80%"}}>{classN}</Text><Text style={{fontSize:20}}>Teacher</Text></View><View right style={{backgroundColor: 'skyblue'}}><Text style={{fontSize:30}}>{avg}</Text></View></View>)
+      table.push(<View style={{flex: 1, flexDirection: 'row',justifyContent: 'space-between', padding:10,paddingVertical:20}}><View style={{flex: 7,backgroundColor: 'blue', }}><Text style={{fontSize:30, }}>{classN}</Text><Text style={{fontSize:20}}>{teach}</Text></View><View right style={{flex: 2,backgroundColor: 'skyblue'}}><Text style={{fontSize:30,textAlign:"right"}}>{avg}</Text></View></View>)
     }
     console.log("DONE");
     return table
