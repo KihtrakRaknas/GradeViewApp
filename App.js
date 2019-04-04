@@ -498,19 +498,102 @@ class home extends LoadInComponent {
         first = false;
       }
       if(classN!="Status")
-      table.push(<View style={{flex: 1, flexDirection: 'row',justifyContent: 'space-between', padding:10,paddingVertical:20}}><View style={{backgroundColor: 'skyblue'}}><Text style={{fontSize:30, width:"80%"}}>{classN}</Text><Text style={{fontSize:20}}>Teacher</Text></View><View right style={{backgroundColor: 'skyblue'}}><Text style={{fontSize:30}}>{avg}</Text></View></View>)
+      table.push(<View style={{flex: 1, flexDirection: 'row',justifyContent: 'space-between', padding:10,paddingVertical:20}}><View style={{backgroundColor: 'skyblue', maxWidth: 50,}}><Text style={{fontSize:30, width:"80%"}}>{classN}</Text><Text style={{fontSize:20}}>Teacher</Text></View><View right style={{backgroundColor: 'skyblue'}}><Text style={{fontSize:30}}>{avg}</Text></View></View>)
     }
     console.log("DONE");
     return table
   }
 
-  click = () =>{
-    //console.log(grades);
-    this.setState({
-      visibleModal: !this.state.visibleModal,
-    });
+
+
+  render() {
+      return(
+        <ScrollView style={{flex: 1, flexDirection: 'column'}}>
+        <Modal isVisible={this.state.visibleModal}
+        style={{
+          justifyContent: 'flex-end',
+          margin: 0,
+        }}
+        onRequestClose={() => this.setState({ visibleModal: false })}
+        >
+              <View style={{backgroundColor: 'white',padding: 22,justifyContent: 'center',alignItems: 'center',borderRadius: 4,borderColor: 'rgba(0, 0, 0, 0.1)',}}>
+                <Picker
+                  selectedValue={this.state.currentMarking}
+                  style={{height: 200, width: 100}}
+                  onValueChange={(itemValue, itemIndex) =>
+                    this.setState({currentMarking: itemValue})
+                  }>
+                  {this.genMpSelector()}
+                </Picker>
+                <Button title="Set Marking Period" onPress={() => {
+                  AsyncStorage.setItem('MP', this.state.currentMarking)//.then(()=>{
+                    this.props.navigation.setParams({ currentMarking: this.state.currentMarking});
+                    this.setState({ visibleModal: false , currentMarking: this.state.currentMarking});
+                 //})
+                  
+                  
+              }
+            }/>
+              </View>
+        </Modal>
+
+        {this.genTable()}
+
+
+        </ScrollView>
+
+      )
   }
 
+}
+
+class classScreen extends React.Component {
+
+  constructor(props){
+    super(props);
+    console.log("GERNERATING")  
+    this.state ={ isLoading: false, email:"", password:"", num: 0, currentMarking: "Select MP"}
+    AsyncStorage.getItem('MP').then((mp)=>{
+      console.log(mp)
+      if(!mp){
+        var mps = this.genMpsArray();
+        if(mps.length>0){
+          AsyncStorage.setItem('MP', mps[mps.length-1]).then(()=>{
+            this.props.navigation.setParams({ currentMarking: mps[mps.length-1]});
+            this.setState({currentMarking: mps[mps.length-1]});
+          })
+        }
+      }else{
+        this.props.navigation.setParams({ currentMarking: mp});
+        this.setState({currentMarking: mp});
+      }
+    });
+    
+
+    this.props.navigation.setParams({ click: this.click,});
+  }
+
+  static navigationOptions = ({ navigation }) => {
+    console.log("TEXT: "+navigation.getParam('currentMarking','Select a MP'))
+    console.log(navigation.getParam('currentMarking','Select a MP'))
+    var text = navigation.getParam('currentMarking','Select a MP');
+    console.log(typeof text)
+    if(typeof text != "string"){
+      text = "Select a MP"
+    }
+    console.log("TEXTt: "+text)
+      return {
+        title: 'Home',
+      headerRight: (
+        <View>
+        <Button
+          onPress = {navigation.getParam('click')}
+          title = {text}//{navigation.getParam('currentMarking','Select a MP')}//{this.state.currentMarking}//
+        />
+        </View>
+      ),
+      }
+  };
 
   render() {
       return(
@@ -566,20 +649,12 @@ class home extends LoadInComponent {
 }
 
 const HomeStack = createStackNavigator({
-<<<<<<< HEAD
   Home: { screen: home},
   //Class:{ screen: class},
 });
 
 const AssignmentsStack = createStackNavigator({
   Assignments: { screen: gradeList },
-=======
-  Home: { screen: home },
-});
-
-const AssignmentsStack = createStackNavigator({
-  Assignments: { screen: gradeList},
->>>>>>> 41383252a9126e56d4a6915111263b53d6a80cd9
 });
 
 const SettingsStack = createStackNavigator({
@@ -588,9 +663,9 @@ const SettingsStack = createStackNavigator({
 
 const TabNav = createBottomTabNavigator(
   {
-    Assignments: { screen:  AssignmentsStack},
     Home: { screen:  HomeStack},
-    
+    Assignments: { screen:  AssignmentsStack},
+     
     Settings: { screen:  SettingsStack},
   },
   {
