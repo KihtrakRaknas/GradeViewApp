@@ -39,19 +39,15 @@ class LoadInComponent extends React.Component {
               var arr = assignments;
 
             /*var i, len = arr.length, el, j;
-
               for(i = 1; i<len; i++){
                 el = arr[i];
                 j = i;
-
                 while(j>0 && Date.parse(arr[j-1]["Date"].split("\n")[1])>Date.parse(arr[i]["Date"].split("\n")[1])){
                   arr[j] = arr[j-1];
                   j--;
               }
-
               arr[j] = el;
               }
-
               console.log(arr);
               */
               //console.log(arr);
@@ -273,7 +269,6 @@ runGetGrades(){
 /*
   parseJSON(obj){
     var assignments = [];
-
               for(className in obj){
                 if(className!="Status"){
                 for(markingPeriod in obj[className]){
@@ -294,23 +289,17 @@ runGetGrades(){
                 }
                 }
               }
-
               var arr = assignments;
-
             /*var i, len = arr.length, el, j;
-
               for(i = 1; i<len; i++){
                 el = arr[i];
                 j = i;
-
                 while(j>0 && Date.parse(arr[j-1]["Date"].split("\n")[1])>Date.parse(arr[i]["Date"].split("\n")[1])){
                   arr[j] = arr[j-1];
                   j--;
               }
-
               arr[j] = el;
               }
-
               console.log(arr);
               * /
               //console.log(arr);
@@ -328,17 +317,14 @@ runGetGrades(){
                   });
                   tempList= [];
                 }
-
                 console.log("a"+assignment["Grade"]+"b");
                 tempList.push(assignment);//+assignment["Date"].split("\n")[1]+" "+assignment["Timestamp"]
-
                 lastAssignment = assignment;
               }
               listOfAssignments.push({
                 title: assignment["Date"],
                 data: tempList,
               });
-
               return listOfAssignments;
   }*/
 }
