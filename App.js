@@ -146,6 +146,7 @@ _retrieveData = async () => {
     const value = await AsyncStorage.getItem('grades');
     if (value != null) {
       var jsonVal = JSON.parse(value)
+      grades = jsonVal;
       console.log("LOCALLY STORED");
         console.log(jsonVal)
         console.log("LOCALLY STORED");
@@ -485,14 +486,15 @@ class home extends LoadInComponent {
       var avg = "";
       var teach = "";
       if(grades[classN][maxMarking]){
-
         if(grades[classN][maxMarking]["avg"]){
           console.log("YEE2T")
           avg = grades[classN][maxMarking]["avg"]
           console.log(avg);
-          teach = grades[classN]["teacher"]
+          
         }
       }
+      if(grades[classN]["teacher"])
+      teach = grades[classN]["teacher"]
       console.log(classN);
       if(!first){
         table.push(<View style={{flex: 1, justifyContent: 'center', alignItems: 'center' }}><View style={{height: 0.5, width: '96%', backgroundColor: '#C8C8C8', }}/></View>);
@@ -500,15 +502,29 @@ class home extends LoadInComponent {
         first = false;
       }
       if(classN!="Status")
-      table.push(<View style={{flex: 1, flexDirection: 'row',justifyContent: 'space-between', padding:10,paddingVertical:20}}><View style={{flex: 7,backgroundColor: 'blue', }}><Text style={{fontSize:30, }}>{classN}</Text><Text style={{fontSize:20}}>{teach}</Text></View><View right style={{flex: 2,backgroundColor: 'skyblue'}}><Text style={{fontSize:30,textAlign:"right"}}>{avg}</Text></View></View>)
+      table.push(<View style={{flex: 1, flexDirection: 'row',justifyContent: 'space-between', padding:10,paddingVertical:10}}><View style={{flex: 7, }}><Text style={{fontSize:20, }}>{classN}</Text><Text style={{fontSize:15}}>{teach}</Text></View><View right style={{flex: 2,}}><Text style={{fontSize:30,textAlign:"right"}}>{avg}</Text></View></View>)
     }
     console.log("DONE");
     return table
   }
 
 
+  click = () =>{
+    //console.log(grades);
+    this.setState({
+      visibleModal: !this.state.visibleModal,
+    });
+  }
+
 
   render() {
+      if(this.state.isLoading)
+        return(
+          <View style={{flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+            <ActivityIndicator/>
+            <Text style={{padding:20}}>This is the first time we are retrieving your grades so this may take a bit longer. Future requests will be much faster!</Text>
+          </View>
+        )
       return(
         <ScrollView style={{flex: 1, flexDirection: 'column'}}>
         <Modal isVisible={this.state.visibleModal}
