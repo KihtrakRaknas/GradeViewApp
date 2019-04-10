@@ -7,6 +7,7 @@ import {AsyncStorage} from 'react-native';
 import DropdownMenu from 'react-native-dropdown-menu';
 import Modal from 'react-native-modal';
 //import gradeList from './gradeList.js'
+require('create-react-class');
 
 var grades;
 
@@ -66,7 +67,6 @@ class LoadInComponent extends React.Component {
                   tempList= [];
                 }
 
-                console.log("a"+assignment["Grade"]+"b");
                 tempList.push(assignment);//+assignment["Date"].split("\n")[1]+" "+assignment["Timestamp"]
 
                 lastAssignment = assignment;
@@ -398,27 +398,44 @@ class settings extends React.Component {
 
 }
 
+
+class ClassBtn extends React.Component {
+  constructor(props) {
+    super(props);
+    //title
+    //teacher
+    //avg
+  }
+
+  classClicked=(className)=>{
+
+  }
+
+  render() {
+    return (
+      <TouchableOpacity onPress={() => this.classClicked(this.props.title)} style={{flex: 1, flexDirection: 'row',justifyContent: 'space-between', padding:10,paddingVertical:10}}>
+        <View style={{flex: 7, }}>
+          <Text style={{fontSize:20, }}>{this.props.title}</Text>
+          <Text style={{fontSize:15}}>{this.props.teach}</Text>
+        </View>
+
+        <View right style={{flex: 2,}}>
+          <Text style={{fontSize:30,textAlign:"right"}}>{this.props.avg}</Text>
+        </View>
+      </TouchableOpacity>
+    );
+  }
+}
+
+
 class home extends LoadInComponent {
 
   constructor(props){
     super(props);
     console.log("GERNERATING")  
     this.state ={ isLoading: false, email:"", password:"", num: 0, currentMarking: "Select MP"}
-    AsyncStorage.getItem('MP').then((mp)=>{
-      console.log(mp)
-      if(!mp){
-        var mps = this.genMpsArray();
-        if(mps.length>0){
-          AsyncStorage.setItem('MP', mps[mps.length-1]).then(()=>{
-            this.props.navigation.setParams({ currentMarking: mps[mps.length-1]});
-            this.setState({currentMarking: mps[mps.length-1]});
-          })
-        }
-      }else{
-        this.props.navigation.setParams({ currentMarking: mp});
-        this.setState({currentMarking: mp});
-      }
-    });
+
+    console.log("GERNERATING DONE")
     
 
     
@@ -464,7 +481,7 @@ class home extends LoadInComponent {
     for(classN in grades){
       if(classN!="Status"){
       for(marking in grades[classN]){
-        console.log("MARK1: "+marking+"MARK2: "+classN);
+        //console.log("MARK1: "+marking+"MARK2: "+classN);
         //console.log(grades[classN]);
         if(Number(marking.substring(2))){
           if(!mps.includes(marking))
@@ -502,15 +519,17 @@ class home extends LoadInComponent {
         first = false;
       }
       if(classN!="Status")
-      table.push(<View style={{flex: 1, flexDirection: 'row',justifyContent: 'space-between', padding:10,paddingVertical:10}}><View style={{flex: 7, }}><Text style={{fontSize:20, }}>{classN}</Text><Text style={{fontSize:15}}>{teach}</Text></View><View right style={{flex: 2,}}><Text style={{fontSize:30,textAlign:"right"}}>{avg}</Text></View></View>)
+        table.push(<ClassBtn title={classN} teach = {teach} avg={avg}></ClassBtn>)
     }
     console.log("DONE");
     return table
   }
 
-
   click = () =>{
     //console.log(grades);
+    this.props.navigation.navigate('class')
+
+
     this.setState({
       visibleModal: !this.state.visibleModal,
     });
@@ -525,6 +544,27 @@ class home extends LoadInComponent {
             <Text style={{padding:20}}>This is the first time we are retrieving your grades so this may take a bit longer. Future requests will be much faster!</Text>
           </View>
         )
+
+        if(this.state.currentMarking == "Select MP")
+        AsyncStorage.getItem('MP').then((mp)=>{
+          console.log("mp")
+          console.log(mp)
+          if(!mp){
+            var mps = this.genMpsArray();
+            console.log(mps)
+            if(mps.length>0){
+              AsyncStorage.setItem('MP', mps[mps.length-1]).then(()=>{
+                
+                this.props.navigation.setParams({ currentMarking: mps[mps.length-1]});
+                this.setState({currentMarking: mps[mps.length-1]});
+                console.log(mps[mps.length-1])  
+              })
+            }
+          }else{
+            this.props.navigation.setParams({ currentMarking: mp});
+            this.setState({currentMarking: mp});
+          }
+        });
       return(
         <ScrollView style={{flex: 1, flexDirection: 'column'}}>
         <Modal isVisible={this.state.visibleModal}
@@ -565,7 +605,7 @@ class home extends LoadInComponent {
 
 }
 
-class classScreen extends React.Component {
+class ClassScreen extends React.Component {
 
   constructor(props){
     super(props);
@@ -592,61 +632,18 @@ class classScreen extends React.Component {
   }
 
   static navigationOptions = ({ navigation }) => {
-    console.log("TEXT: "+navigation.getParam('currentMarking','Select a MP'))
-    console.log(navigation.getParam('currentMarking','Select a MP'))
-    var text = navigation.getParam('currentMarking','Select a MP');
-    console.log(typeof text)
-    if(typeof text != "string"){
-      text = "Select a MP"
-    }
-    console.log("TEXTt: "+text)
+      /*return {
+        title: navigation.getParam('className',"Class Name"),
+      }*/
       return {
-        title: 'Home',
-      headerRight: (
-        <View>
-        <Button
-          onPress = {navigation.getParam('click')}
-          title = {text}//{navigation.getParam('currentMarking','Select a MP')}//{this.state.currentMarking}//
-        />
-        </View>
-      ),
+        title: navigation.getParam('className',"Class Name"),
       }
   };
 
   render() {
       return(
-        <ScrollView style={{flex: 1, flexDirection: 'column'}} onPress={this.click}>
-        <Modal isVisible={this.state.visibleModal}
-        style={{
-          justifyContent: 'flex-end',
-          margin: 0,
-        }}
-        onRequestClose={() => this.setState({ visibleModal: false })}
-        >
-              <View style={{backgroundColor: 'white',padding: 22,justifyContent: 'center',alignItems: 'center',borderRadius: 4,borderColor: 'rgba(0, 0, 0, 0.1)',}}>
-                <Picker
-                  selectedValue={this.state.currentMarking}
-                  style={{height: 200, width: 100}}
-                  onValueChange={(itemValue, itemIndex) =>
-                    this.setState({currentMarking: itemValue})
-                  }>
-                  {this.genMpSelector()}
-                </Picker>
-                <Button title="Set Marking Period" onPress={() => {
-                  AsyncStorage.setItem('MP', this.state.currentMarking)//.then(()=>{
-                    this.props.navigation.setParams({ currentMarking: this.state.currentMarking});
-                    this.setState({ visibleModal: false , currentMarking: this.state.currentMarking});
-                 //})
-                  
-                  
-              }
-            }/>
-              </View>
-        </Modal>
-
-        {this.genTable()
-          }
-
+        <ScrollView style={{flex: 1, flexDirection: 'column'}}>
+        
 
         <Picker
           selectedValue={this.state.language}
@@ -668,7 +665,7 @@ class classScreen extends React.Component {
 
 const HomeStack = createStackNavigator({
   Home: { screen: home},
-  //Class:{ screen: class},
+  Class:{ screen: ClassScreen},
 });
 
 const AssignmentsStack = createStackNavigator({
@@ -782,9 +779,9 @@ class signIn extends React.Component {
     render() {
       if(this.state.isLoading){//padding: 20
         return(
-          <KeyboardAvoidingView behavior="padding" style={{flex: 1, justifyContent: 'center', alignItems: 'center',backgroundColor: "#ededed" }}>
+          <KeyboardAvoidingView behavior="padding" style={{flex: 1, justifyContent: 'center', alignItems: 'center',backgroundColor: "#f3f9fb" }}>
 
-              <View style={{flexDirection: 'row',backgroundColor: "#FFFFFF",margin:10,borderRadius: 30,paddingHorizontal: 20,paddingVertical: 10,marginVertical: 15,}}>
+              <View style={{flexDirection: 'row',backgroundColor: "#FFFFFF",margin:10,borderRadius: 15,paddingHorizontal: 20,paddingVertical: 10,marginVertical: 15,}}>
               <Icon
                 name='email'
                 type='MaterialCommunityIcons'
@@ -795,7 +792,7 @@ class signIn extends React.Component {
 
 
             </View>
-          <View style={{flexDirection: 'row',backgroundColor: "#FFFFFF",margin:10,borderRadius: 30,paddingHorizontal: 20,paddingVertical: 10,marginVertical: 15,}}>
+          <View style={{flexDirection: 'row',backgroundColor: "#FFFFFF",margin:10,borderRadius: 15,paddingHorizontal: 20,paddingVertical: 10,marginVertical: 15,}}>
               <Icon
                 name='lock'
                 type='FontAwesome5'
@@ -809,10 +806,10 @@ class signIn extends React.Component {
 
             <TouchableOpacity
               style={{
-                backgroundColor: "#7a9145",
+                backgroundColor: "#113f67",
                 paddingHorizontal: 15,
-                paddingVertical: 30,
-                borderRadius: 30,
+                paddingVertical: 15,
+                borderRadius: 15,
                 width:"80%",alignItems: 'center',
                 marginVertical: 30,}}
 
@@ -825,9 +822,9 @@ class signIn extends React.Component {
         }
 
         return(
-          <KeyboardAvoidingView behavior="padding" style={{flex: 1, justifyContent: 'center', alignItems: 'center',backgroundColor: "#ededed" }}>
+          <KeyboardAvoidingView behavior="padding" style={{flex: 1, justifyContent: 'center', alignItems: 'center',backgroundColor: "#f3f9fb" }}>
 
-              <View style={{flexDirection: 'row',backgroundColor: "#FFFFFF",margin:10,borderRadius: 30,paddingHorizontal: 20,paddingVertical: 10,marginVertical: 15,}}>
+              <View style={{flexDirection: 'row',backgroundColor: "#FFFFFF",margin:20,borderRadius: 15,paddingHorizontal: 20,paddingVertical: 10,marginVertical: 15,}}>
               <Icon
                 name='email'
                 type='MaterialCommunityIcons'
@@ -842,7 +839,7 @@ class signIn extends React.Component {
                 />
 
             </View>
-          <View style={{flexDirection: 'row',backgroundColor: "#FFFFFF",margin:10,borderRadius: 30,paddingHorizontal: 20,paddingVertical: 10,marginVertical: 15,}}>
+          <View style={{flexDirection: 'row',backgroundColor: "#FFFFFF",margin:20,borderRadius: 15,paddingHorizontal: 20,paddingVertical: 10,marginVertical: 15,}}>
               <Icon
                 name='lock'
                 type='FontAwesome5'
@@ -861,10 +858,10 @@ class signIn extends React.Component {
 
             <TouchableOpacity
               style={{
-                backgroundColor: "#7a9145",
+                backgroundColor: "#113f67",
                 paddingHorizontal: 15,
-                paddingVertical: 30,
-                borderRadius: 30,
+                paddingVertical: 15,
+                borderRadius: 15,
                 width:"80%",alignItems: 'center',
                 marginVertical: 30,
               }}
