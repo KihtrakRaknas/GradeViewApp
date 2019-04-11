@@ -408,7 +408,7 @@ class ClassBtn extends React.Component {
   }
 
   classClicked=(className)=>{
-
+    this.props.onPress(className)
   }
 
   render() {
@@ -470,7 +470,7 @@ class home extends LoadInComponent {
     var mps = this.genMpsArray();
     console.log("MPS");
     for(mp of mps){
-      pickerArry.push(<Picker.Item label={mp} value={mp} />);
+      pickerArry.push(<Picker.Item label={mp} value={mp}/>);
     }
     return pickerArry
 
@@ -518,8 +518,10 @@ class home extends LoadInComponent {
       }else{
         first = false;
       }
+      console.log("avg")
+      console.log(avg)
       if(classN!="Status")
-        table.push(<ClassBtn title={classN} teach = {teach} avg={avg}></ClassBtn>)
+        table.push(<ClassBtn title={classN} teach = {teach} avg={avg} onPress={this.classClicked}></ClassBtn>)
     }
     console.log("DONE");
     return table
@@ -527,12 +529,14 @@ class home extends LoadInComponent {
 
   click = () =>{
     //console.log(grades);
-    this.props.navigation.navigate('class')
-
 
     this.setState({
       visibleModal: !this.state.visibleModal,
     });
+  }
+
+  classClicked = (className) =>{
+    this.props.navigation.navigate('Class',{className:className})
   }
 
 
@@ -611,24 +615,6 @@ class ClassScreen extends React.Component {
     super(props);
     console.log("GERNERATING")  
     this.state ={ isLoading: false, email:"", password:"", num: 0, currentMarking: "Select MP"}
-    AsyncStorage.getItem('MP').then((mp)=>{
-      console.log(mp)
-      if(!mp){
-        var mps = this.genMpsArray();
-        if(mps.length>0){
-          AsyncStorage.setItem('MP', mps[mps.length-1]).then(()=>{
-            this.props.navigation.setParams({ currentMarking: mps[mps.length-1]});
-            this.setState({currentMarking: mps[mps.length-1]});
-          })
-        }
-      }else{
-        this.props.navigation.setParams({ currentMarking: mp});
-        this.setState({currentMarking: mp});
-      }
-    });
-    
-
-    this.props.navigation.setParams({ click: this.click,});
   }
 
   static navigationOptions = ({ navigation }) => {
@@ -651,7 +637,7 @@ class ClassScreen extends React.Component {
           onValueChange={(itemValue, itemIndex) =>
             this.setState({language: itemValue})
           }>
-          <Picker.Item label="Java" value="java" />
+          <Picker.Item label="Java" value={this.props.navigation.getParam('className')} />
           <Picker.Item label="JavaScript" value="js" />
         </Picker>
 
