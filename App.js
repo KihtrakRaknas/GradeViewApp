@@ -626,25 +626,87 @@ class ClassScreen extends React.Component {
       }
   };
 
+  parseJSON(obj,className){
+    var assignments = [];
+
+                for(markingPeriod in obj[className]){
+                  if(markingPeriod!=null && markingPeriod != "teacher" && markingPeriod != "title"){
+                    //console.log(markingPeriod);
+                    //console.log(className)
+                    //console.log(obj[className][markingPeriod]["Assignments"]);
+                    for(var assignment of obj[className][markingPeriod]["Assignments"]){
+                      var year = "19";
+                      if(parseInt((assignment["Date"].split("\n")[1]).split("/")[0])>5)
+                        year = "18";
+                      //assignment["Name"] = (assignment["Date"].split("/")[1]).split("\n")[0];
+                      assignment["Timestamp"] = Date.parse(assignment["Date"]+"/"+year);
+                      assignments.push(assignment);
+                      //console.log(assignment["Date"]+"/"+year);
+                    }
+                  }
+                }
+
+              var arr = assignments;
+
+            /*var i, len = arr.length, el, j;
+              for(i = 1; i<len; i++){
+                el = arr[i];
+                j = i;
+                while(j>0 && Date.parse(arr[j-1]["Date"].split("\n")[1])>Date.parse(arr[i]["Date"].split("\n")[1])){
+                  arr[j] = arr[j-1];
+                  j--;
+              }
+              arr[j] = el;
+              }
+              console.log(arr);
+              */
+              //console.log(arr);
+              arr = arr.sort((a, b) => b["Timestamp"] - a["Timestamp"]);
+              //console.log("SORTED\n\n\n\n\n\n");
+              //console.log(arr);
+            var listOfAssignments =[];
+            var lastAssignment;
+            var tempList = []
+              for(var assignment of arr){
+                if(lastAssignment!=null&&lastAssignment["Date"]!=assignment["Date"]){
+                  listOfAssignments.push({
+                    title: assignment["Date"].replace("\n"," "),
+                    data: tempList,
+                  });
+                  tempList= [];
+                }
+
+                tempList.push(assignment);//+assignment["Date"].split("\n")[1]+" "+assignment["Timestamp"]
+
+                lastAssignment = assignment;
+              }
+              listOfAssignments.push({
+                title: assignment["Date"],
+                data: tempList,
+              });
+
+              return listOfAssignments;
+  }
+
   render() {
-      return(
-        <ScrollView style={{flex: 1, flexDirection: 'column'}}>
-        
+    var listOfAssignments = this.parseJSON(grades,navigation.getParam('className'))
+    return (
 
-        <Picker
-          selectedValue={this.state.language}
-          style={{height: 50, width: 100}}
-          onValueChange={(itemValue, itemIndex) =>
-            this.setState({language: itemValue})
-          }>
-          <Picker.Item label="Java" value={this.props.navigation.getParam('className')} />
-          <Picker.Item label="JavaScript" value="js" />
-        </Picker>
+      <View style={styles.container}>
+        <SectionList
+          ItemSeparatorComponent={({item}) => <View style={{flex: 1, justifyContent: 'center', alignItems: 'center' }}><View style={{height: 0.5, width: '96%', backgroundColor: '#C8C8C8', }}/></View>}
+          sections={listOfAssignments}
+          renderItem={({item}) => <View style={{flexDirection: 'row',
+          justifyContent: 'space-between'}}>
+            <Text style={styles.leftContainer} flex left>{item["Name"]}</Text>
+            <Text style={styles.rightContainer} flex right>{item["Grade"]}</Text>
+            </View>}
+          renderSectionHeader={({section}) => <Text style={styles.sectionHeader}>{section.title}</Text>}
+          keyExtractor={(item, index) => index}
+        />
+      </View>
+    );
 
-
-        </ScrollView>
-
-      )
   }
 
 }
