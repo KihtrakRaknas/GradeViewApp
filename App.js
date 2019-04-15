@@ -208,7 +208,12 @@ runGetGrades(){
     }
   };
 
+componentDidMount(){
+  this.props.navigation.setParams({ refresh: this.getGrade.bind(this),});
+}
+
 /*
+
   componentWillMount(){
     AsyncStorage.getItem('username').then((user)=>{
       console.log(user);
@@ -689,7 +694,7 @@ class ClassScreen extends React.Component {
   }
 
   render() {
-    var listOfAssignments = this.parseJSON(grades,navigation.getParam('className'))
+    var listOfAssignments = this.parseJSON(grades,this.props.navigation.getParam('className'))
     return (
 
       <View style={styles.container}>
