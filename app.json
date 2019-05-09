@@ -25,6 +25,9 @@
     "ios": {
       "supportsTablet": true
     },
-    "description": ""
+    "description": "",
+    "infoPlist": {
+      "NSNotificationDescription": "This app uses notifications to notify you of changes in your grades"
+    }
   }
 }
