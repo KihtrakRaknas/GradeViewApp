@@ -92,12 +92,12 @@ class LoadInComponent extends React.Component {
         this._retrieveData()
         this.getGrade()
         console.log("test")
-        this.registerForPushNotificationsAsync()
+        this.registerForPushNotificationsAsync(user)
       }
     })
   }
 
-     registerForPushNotificationsAsync = async() => {
+     registerForPushNotificationsAsync = async(user) => {
       const { status: existingStatus } = await Permissions.getAsync(
         Permissions.NOTIFICATIONS
       );
@@ -121,7 +121,7 @@ class LoadInComponent extends React.Component {
       let token = await Notifications.getExpoPushTokenAsync();
       console.log(token)
       // POST the token to your backend server from where you can retrieve it to send push notifications.
-      return fetch("", {
+      return fetch("https://gradeview.herokuapp.com/addToken", {
         method: 'POST',
         headers: {
           Accept: 'application/json',
@@ -132,7 +132,7 @@ class LoadInComponent extends React.Component {
             value: token,
           },
           user: {
-            username: 'Brent',
+            username: user,
           },
         }),
       });
