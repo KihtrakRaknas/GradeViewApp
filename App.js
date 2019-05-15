@@ -121,20 +121,23 @@ class LoadInComponent extends React.Component {
       let token = await Notifications.getExpoPushTokenAsync();
       console.log(token)
       // POST the token to your backend server from where you can retrieve it to send push notifications.
-      return fetch("https://gradeview.herokuapp.com/addToken", {
-        method: 'POST',
-        headers: {
-          Accept: 'application/json',
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          token: {
-            value: token,
+      AsyncStorage.getItem('password').then((pass)=>{
+        return fetch("https://gradeview.herokuapp.com/addToken", {
+          method: 'POST',
+          headers: {
+            Accept: 'application/json',
+            'Content-Type': 'application/json',
           },
-          user: {
-            username: user,
-          },
-        }),
+          body: JSON.stringify({
+            token: {
+              value: token,
+            },
+            user: {
+              username: user,
+              password: pass,
+            },
+          }),
+        });
       });
     }
 
