@@ -23,11 +23,11 @@
       "**/*"
     ],
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "infoPlist": {
+        "NSNotificationDescription": "This app uses notifications to notify you of changes in your grades"
+      }
     },
-    "description": "",
-    "infoPlist": {
-      "NSNotificationDescription": "This app uses notifications to notify you of changes in your grades"
-    }
+    "description": "App client for the gradebook that South Brunswick High School uses"
   }
 }
