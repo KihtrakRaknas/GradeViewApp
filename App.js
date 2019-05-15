@@ -425,10 +425,14 @@ class settings extends React.Component {
 
   constructor(props){
     super(props);
-    this.state ={ isLoading: false, email:"", password:"", pushToken:"No Token"}
+    this.state ={ isLoading: false, email:"", password:"", pushToken:"No Token", id: "loading"}
     Notifications.getExpoPushTokenAsync().then((token)=>{
       this.setState({pushToken:token})
     })
+    AsyncStorage.getItem('username').then((user)=>{
+      if(user)
+        this.state.id = user;
+    });
   }
 
   signOut = ()=>{
@@ -439,6 +443,7 @@ class settings extends React.Component {
   render() {
       return(
         <ScrollView style={{flex: 1, flexDirection: 'column'}}>
+          <Text>{this.state.id}</Text>
           <Text>{this.state.pushToken}</Text>
           <Button
           onPress = {this.signOut}
