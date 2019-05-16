@@ -936,6 +936,10 @@ class signIn extends React.Component {
         return(
           <KeyboardAvoidingView behavior="padding" style={{flex: 1, justifyContent: 'center', alignItems: 'center',backgroundColor: "#f3f9fb" }}>
 
+              <View>
+                <Text style={{fontSize: 20,padding:20,paddingBottom:10}}>Enter the email and password you normally use to access your grades</Text>
+              </View>
+                
               <View style={{flexDirection: 'row',backgroundColor: "#FFFFFF",margin:20,borderRadius: 15,paddingHorizontal: 20,paddingVertical: 10,marginVertical: 15,}}>
               <Icon
                 name='email'
@@ -944,7 +948,7 @@ class signIn extends React.Component {
               />
               <TextInput
                 editable={!this.state.isLoading}
-                style={{flex: 1,fontSize: 30,paddingHorizontal: 8}}
+                style={{flex: 1,fontSize: 20,paddingHorizontal: 8}}
                 keyboardType={'email-address'}
                   autoCorrect={false}
                   placeholder="Email"
@@ -960,7 +964,7 @@ class signIn extends React.Component {
               />
               <TextInput
                 editable={!this.state.isLoading}
-                style={{flex: 1,fontSize: 30,paddingHorizontal: 8}}
+                style={{flex: 1,fontSize: 20,paddingHorizontal: 8}}
                   autoCorrect={false}
                   secureTextEntry
                   placeholder="Password"
@@ -985,7 +989,9 @@ class signIn extends React.Component {
             >
               {btnText}
             </TouchableOpacity>
-
+            <View>
+                <Text style={{fontSize: 10,padding:10}}>Note: Your password will be stored on our servers so we can get your grades for you</Text>
+              </View>
         </KeyboardAvoidingView>
         )
     }
