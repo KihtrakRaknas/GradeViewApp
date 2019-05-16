@@ -26,7 +26,11 @@
       "supportsTablet": true,
       "infoPlist": {
         "NSNotificationDescription": "This app uses notifications to notify you of changes in your grades"
-      }
+      },
+      "bundleIdentifier": "com.kihtrak.REGEN"
+    },
+    "android": {
+      "package": "com.kihtrak.REGEN"
     },
     "description": "App client for the gradebook that South Brunswick High School uses"
   }
