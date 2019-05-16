@@ -513,7 +513,7 @@ class home extends LoadInComponent {
 
     
 
-    this.props.navigation.setParams({ click: this.click, genMpsArray: this.genMpsArray});
+    this.props.navigation.setParams({ click: this.click, genMpsArray: this.genMpsArray, genMpSelector: this.genMpSelector, updateMarkingPeriodSelectionAndriod: this.updateMarkingPeriodSelectionAndriod});
   }
 
   static navigationOptions = ({ navigation }) => {
@@ -527,6 +527,23 @@ class home extends LoadInComponent {
       text = "Select a MP"
     }
     console.log("TEXTt: "+text)
+
+    var androidEl =  <Text>Select a MP</Text>;
+    console.log('test')
+    //console.log(this.state.currentMarking)
+    console.log('te3st')
+    if(text != "Select a MP"){
+      androidEl =  <Picker 
+        selectedValue={text}
+        style={{height: 200, width: 100}}
+        onValueChange={(itemValue, itemIndex) =>{
+          navigation.getParam('updateMarkingPeriodSelectionAndriod',()=>{})(itemValue);
+          }
+        }>
+        {navigation.getParam("genMpSelector",<Text>Select a MP</Text>,)()}
+      </Picker>
+    }
+    console.log('te4st')
     const headerEl = Platform.select({
       ios: 
         <View>
@@ -535,17 +552,8 @@ class home extends LoadInComponent {
             title = {text}//{navigation.getParam('currentMarking','Select a MP')}//{this.state.currentMarking}//
           />
         </View>,
-      android:       
-        <Picker genMpsArray
-          selectedValue={this.state.currentMarking}
-          style={{height: 200, width: 100}}
-          onValueChange={(itemValue, itemIndex) =>{
-              this.setState({currentMarking: itemValue})
-              AsyncStorage.setItem('MP', this.state.currentMarking)
-            }
-          }>
-          {navigation.getParam("genMpsArray",<Text>Select a MP</Text>,)}
-        </Picker>
+      android: androidEl   
+
     });
     console.log("header done")
       return {
@@ -627,6 +635,12 @@ class home extends LoadInComponent {
 
   classClicked = (className) =>{
     this.props.navigation.navigate('Class',{className:className,markingPeriod:this.state.currentMarking})
+  }
+  
+  updateMarkingPeriodSelectionAndriod = (newMP)=>{
+    this.props.navigation.setParams({ currentMarking: newMP});
+    this.setState({currentMarking: newMP})
+    AsyncStorage.setItem('MP', newMP)
   }
 
 
@@ -1040,7 +1054,7 @@ class SignIn extends React.Component {
     });
   }
  
-
+  const AppContainer = createAppContainer(TabNav)
   export default class App extends React.Component {
     constructor(){
       super();
@@ -1055,11 +1069,11 @@ class SignIn extends React.Component {
     render(){
       if(this.state.user){
         console.log("tab nav");
-        var App = createAppContainer(TabNav)
-        return <App />;
+        
+        return <AppContainer />;
       } 
       return <SignIn/>;
-    }
+    } 
   }/*createStackNavigator(
     {
       Normal: {
