@@ -9,6 +9,7 @@ import Modal from 'react-native-modal';
 //import gradeList from './gradeList.js'
 require('create-react-class');
 import { Permissions, Notifications } from 'expo';
+import {Linking} from 'react-native';
 
 var grades;
 
@@ -313,7 +314,7 @@ componentDidMount(){
             <Text style={styles.leftContainer} flex left>{item["Name"]}</Text>
             <Text style={styles.rightContainer} flex right>{item["Grade"]}</Text>
             </View>}
-          renderSectionHeader={({section}) => <Text style={styles.sectionHeader}>{section.title}</Text>}
+          renderSectionHeader={({section}) =>     <View style={styles.sectionHeaderContainer}><Text style={styles.sectionHeaderText}>{section.title}</Text></View>}
           keyExtractor={(item, index) => index}
         />
       </View>
@@ -386,14 +387,15 @@ const styles = StyleSheet.create({
   container: {
    flex: 1,
   },
-  sectionHeader: {
-    paddingTop: 2,
-    paddingLeft: 10,
-    paddingRight: 10,
-    paddingBottom: 2,
+  sectionHeaderContainer: {
+    backgroundColor: '#fbfbfb',
+    paddingVertical: 8,
+    paddingHorizontal: 15,
+    borderWidth: StyleSheet.hairlineWidth,
+    borderColor: '#ededed',
+  },
+  sectionHeaderText: {
     fontSize: 14,
-    fontWeight: 'bold',
-    backgroundColor: 'rgba(247,247,247,1.0)',
   },
   item: {
     padding: 10,
@@ -448,9 +450,13 @@ class settings extends React.Component {
         <ScrollView style={{flex: 1, flexDirection: 'column'}}>
           <Text>{this.state.id}</Text>
           <Text>{this.state.pushToken}</Text>
+          <Button 
+          onPress={() => Linking.openURL('mailto:gradeViewApp@kihtrak.com?subject=Feedback%20about%20the%20app') }
+          title="Provide Feedback" 
+          />
           <Button
           onPress = {this.signOut}
-          title = "Sign Out"
+          title = "Switch Accounts"
           />
         </ScrollView>
       )
@@ -517,7 +523,7 @@ class home extends LoadInComponent {
       headerRight: (
         <View>
         <Button
-          onPress = {navigation.getParam('click')}
+          onPress = {navigation.getParam('click',()=>{})}
           title = {text}//{navigation.getParam('currentMarking','Select a MP')}//{this.state.currentMarking}//
         />
         </View>
@@ -530,7 +536,7 @@ class home extends LoadInComponent {
     var mps = this.genMpsArray();
     console.log("MPS");
     for(mp of mps){
-      pickerArry.push(<Picker.Item label={mp} value={mp}/>);
+      pickerArry.push(<Picker.Item label={mp} value={mp} key={mp}/>);
     }
     return pickerArry
 
@@ -550,12 +556,12 @@ class home extends LoadInComponent {
       }
       }
     }
-    return mps;
+    return mps.sort();
   }
 
   genTable = ()=>{
     var table = []
-    var first = true;
+    var count = 0;
     var mps = this.genMpsArray();
     for(classN in grades){
       var maxMarking=this.state.currentMarking;
@@ -573,15 +579,14 @@ class home extends LoadInComponent {
       if(grades[classN]["teacher"])
       teach = grades[classN]["teacher"]
       console.log(classN);
-      if(!first){
-        table.push(<View style={{flex: 1, justifyContent: 'center', alignItems: 'center' }}><View style={{height: 0.5, width: '96%', backgroundColor: '#C8C8C8', }}/></View>);
-      }else{
-        first = false;
+      if(count!=0){
+        table.push(<View key={count} style={{flex: 1, justifyContent: 'center', alignItems: 'center' }}><View style={{height: 0.5, width: '96%', backgroundColor: '#C8C8C8', }}/></View>);
       }
+      count++;
       console.log("avg")
       console.log(avg)
       if(classN!="Status")
-        table.push(<ClassBtn title={classN} teach = {teach} avg={avg} onPress={this.classClicked}></ClassBtn>)
+        table.push(<ClassBtn key={classN+count} title={classN} teach = {teach} avg={avg} onPress={this.classClicked}></ClassBtn>)
     }
     console.log("DONE");
     return table
@@ -596,7 +601,7 @@ class home extends LoadInComponent {
   }
 
   classClicked = (className) =>{
-    this.props.navigation.navigate('Class',{className:className})
+    this.props.navigation.navigate('Class',{className:className,markingPeriod:this.state.currentMarking})
   }
 
 
@@ -686,11 +691,9 @@ class ClassScreen extends React.Component {
       }
   };
 
-  parseJSON(obj,className){
+  parseJSON(obj,className,markingPeriod){
     var assignments = [];
 
-                for(markingPeriod in obj[className]){
-                  if(markingPeriod!=null && markingPeriod != "teacher" && markingPeriod != "title"){
                     //console.log(markingPeriod);
                     //console.log(className)
                     //console.log(obj[className][markingPeriod]["Assignments"]);
@@ -703,8 +706,6 @@ class ClassScreen extends React.Component {
                       assignments.push(assignment);
                       //console.log(assignment["Date"]+"/"+year);
                     }
-                  }
-                }
 
               var arr = assignments;
 
@@ -730,7 +731,7 @@ class ClassScreen extends React.Component {
               for(var assignment of arr){
                 if(lastAssignment!=null&&lastAssignment["Date"]!=assignment["Date"]){
                   listOfAssignments.push({
-                    title: assignment["Date"].replace("\n"," "),
+                    title: lastAssignment["Date"].replace("\n"," "),
                     data: tempList,
                   });
                   tempList= [];
@@ -741,7 +742,7 @@ class ClassScreen extends React.Component {
                 lastAssignment = assignment;
               }
               listOfAssignments.push({
-                title: assignment["Date"],
+                title: assignment["Date"].replace("\n"," "),
                 data: tempList,
               });
 
@@ -749,7 +750,7 @@ class ClassScreen extends React.Component {
   }
 
   render() {
-    var listOfAssignments = this.parseJSON(grades,this.props.navigation.getParam('className'))
+    var listOfAssignments = this.parseJSON(grades,this.props.navigation.getParam('className'),this.props.navigation.getParam('markingPeriod'))
     return (
 
       <View style={styles.container}>
@@ -761,7 +762,7 @@ class ClassScreen extends React.Component {
             <Text style={styles.leftContainer} flex left>{item["Name"]}</Text>
             <Text style={styles.rightContainer} flex right>{item["Grade"]}</Text>
             </View>}
-          renderSectionHeader={({section}) => <Text style={styles.sectionHeader}>{section.title}</Text>}
+          renderSectionHeader={({section}) =>     <View style={styles.sectionHeaderContainer}><Text style={styles.sectionHeaderText}>{section.title}</Text></View>}
           keyExtractor={(item, index) => index}
         />
       </View>
@@ -885,48 +886,51 @@ class signIn extends React.Component {
     }
 
     render() {
-      if(this.state.isLoading){//padding: 20
-        return(
-          <KeyboardAvoidingView behavior="padding" style={{flex: 1, justifyContent: 'center', alignItems: 'center',backgroundColor: "#f3f9fb" }}>
+      var btnText = <Text style={{fontSize: 30,fontWeight: '400',color: "#fff",}}>Sign In</Text>
+      if(this.state.isLoading){
+        btnText = <ActivityIndicator size="large" color="#ffffff"/>;
+        //padding: 20
+        // return(
+        //   <KeyboardAvoidingView behavior="padding" style={{flex: 1, justifyContent: 'center', alignItems: 'center',backgroundColor: "#f3f9fb" }}>
 
-              <View style={{flexDirection: 'row',backgroundColor: "#FFFFFF",margin:10,borderRadius: 15,paddingHorizontal: 20,paddingVertical: 10,marginVertical: 15,}}>
-              <Icon
-                name='email'
-                type='MaterialCommunityIcons'
-                size={30}
-              />
-              <Text
-                style={{flex: 1,fontSize: 30,paddingHorizontal: 8,color:"#ededed"}}>{this.state.email}</Text>
+        //       <View style={{flexDirection: 'row',backgroundColor: "#FFFFFF",margin:10,borderRadius: 15,paddingHorizontal: 20,paddingVertical: 10,marginVertical: 15,}}>
+        //       <Icon
+        //         name='email'
+        //         type='MaterialCommunityIcons'
+        //         size={30}
+        //       />
+        //       <Text
+        //         style={{flex: 1,fontSize: 30,paddingHorizontal: 8,color:"#ededed"}}>{this.state.email}</Text>
 
 
-            </View>
-          <View style={{flexDirection: 'row',backgroundColor: "#FFFFFF",margin:10,borderRadius: 15,paddingHorizontal: 20,paddingVertical: 10,marginVertical: 15,}}>
-              <Icon
-                name='lock'
-                type='FontAwesome5'
-                size={30}
-              />
-              <Text
-                style={{flex: 1,fontSize: 30,paddingHorizontal: 8,color:"#ededed"}}
-                >verifying credentials</Text>
+        //     </View>
+        //   <View style={{flexDirection: 'row',backgroundColor: "#FFFFFF",margin:10,borderRadius: 15,paddingHorizontal: 20,paddingVertical: 10,marginVertical: 15,}}>
+        //       <Icon
+        //         name='lock'
+        //         type='FontAwesome5'
+        //         size={30}
+        //       />
+        //       <Text
+        //         style={{flex: 1,fontSize: 30,paddingHorizontal: 8,color:"#ededed"}}
+        //         >verifying credentials</Text>
 
-            </View>
+        //     </View>
 
-            <TouchableOpacity
-              style={{
-                backgroundColor: "#113f67",
-                paddingHorizontal: 15,
-                paddingVertical: 15,
-                borderRadius: 15,
-                width:"80%",alignItems: 'center',
-                marginVertical: 30,}}
+        //     <TouchableOpacity
+        //       style={{
+        //         backgroundColor: "#113f67",
+        //         paddingHorizontal: 15,
+        //         paddingVertical: 15,
+        //         borderRadius: 15,
+        //         width:"80%",alignItems: 'center',
+        //         marginVertical: 30,}}
 
-            >
-              <ActivityIndicator size="large" color="#ffffff"/>
-            </TouchableOpacity>
+        //     >
+        //       <ActivityIndicator size="large" color="#ffffff"/>
+        //     </TouchableOpacity>
 
-        </KeyboardAvoidingView>
-        )
+        // </KeyboardAvoidingView>
+        // )
         }
 
         return(
@@ -939,6 +943,7 @@ class signIn extends React.Component {
                 size={30}
               />
               <TextInput
+                editable={!this.state.isLoading}
                 style={{flex: 1,fontSize: 30,paddingHorizontal: 8}}
                 keyboardType={'email-address'}
                   autoCorrect={false}
@@ -954,6 +959,7 @@ class signIn extends React.Component {
                 size={30}
               />
               <TextInput
+                editable={!this.state.isLoading}
                 style={{flex: 1,fontSize: 30,paddingHorizontal: 8}}
                   autoCorrect={false}
                   secureTextEntry
@@ -965,6 +971,7 @@ class signIn extends React.Component {
             </View>
 
             <TouchableOpacity
+              disabled={this.state.isLoading}
               style={{
                 backgroundColor: "#113f67",
                 paddingHorizontal: 15,
@@ -976,7 +983,7 @@ class signIn extends React.Component {
               onPress={this.verify}
 
             >
-              <Text style={{fontSize: 30,fontWeight: '400',color: "#fff",}}>Sign In</Text>
+              {btnText}
             </TouchableOpacity>
 
         </KeyboardAvoidingView>
