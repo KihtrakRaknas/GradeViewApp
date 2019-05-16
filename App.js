@@ -9,7 +9,7 @@ import Modal from 'react-native-modal';
 //import gradeList from './gradeList.js'
 require('create-react-class');
 import { Permissions, Notifications } from 'expo';
-import {Linking} from 'react-native';
+import {Linking, Platform} from 'react-native';
 
 var grades;
 
@@ -27,12 +27,16 @@ class LoadInComponent extends React.Component {
                     //console.log(obj[className][markingPeriod]["Assignments"]);
                     for(var assignment of obj[className][markingPeriod]["Assignments"]){
                       var year = "19";
-                      if(parseInt((assignment["Date"].split("\n")[1]).split("/")[0])>5)
-                        year = "18";
-                      //assignment["Name"] = (assignment["Date"].split("/")[1]).split("\n")[0];
-                      assignment["Timestamp"] = Date.parse(assignment["Date"]+"/"+year);
-                      assignments.push(assignment);
-                      //console.log(assignment["Date"]+"/"+year);
+                      if(assignment["Date"].includes("\n")){
+                        if(parseInt((assignment["Date"].split("\n")[1]).split("/")[0])>5)
+                          year = "18";
+                        //assignment["Name"] = (assignment["Date"].split("/")[1]).split("\n")[0];
+                        assignment["Timestamp"] = Date.parse(assignment["Date"]+"/"+year);
+                      }else{
+                        assignment["Timestamp"] = Date.parse("12/12"+year-2);
+                      }
+                        assignments.push(assignment);
+                        //console.log(assignment["Date"]+"/"+year);
                     }
                   }
                 }
@@ -62,8 +66,11 @@ class LoadInComponent extends React.Component {
             var tempList = []
               for(var assignment of arr){
                 if(lastAssignment!=null&&lastAssignment["Date"]!=assignment["Date"]){
+                  var title = lastAssignment["Date"].replace("\n"," ")
+                  if(!title)
+                    title = "No date"
                   listOfAssignments.push({
-                    title: assignment["Date"].replace("\n"," "),
+                    title: title,
                     data: tempList,
                   });
                   tempList= [];
@@ -73,8 +80,11 @@ class LoadInComponent extends React.Component {
 
                 lastAssignment = assignment;
               }
+              var title = assignment["Date"].replace("\n"," ")
+              if(!title)
+                title = "No date"
               listOfAssignments.push({
-                title: assignment["Date"],
+                title: title,
                 data: tempList,
               });
 
@@ -192,8 +202,8 @@ _retrieveData = async () => {
     if (value != null) {
       var jsonVal = JSON.parse(value)
       grades = jsonVal;
-      console.log("LOCALLY STORED");
-        console.log(jsonVal)
+      // console.log("LOCALLY STORED");
+      //   console.log(jsonVal)
         console.log("LOCALLY STORED");
 
         parsedJSON = this.parseJSON(jsonVal)
@@ -309,7 +319,7 @@ componentDidMount(){
           renderItem={({item}) => <View style={{flexDirection: 'row',
           justifyContent: 'space-between'}}>
             <Text style={styles.leftContainer} flex left>{item["Name"]}</Text>
-            <Text style={styles.rightContainer} flex right>{item["Grade"]}</Text>
+            <Text style={styles.rightContainer} flex>{item["Grade"]}</Text>
             </View>}
           renderSectionHeader={({section}) =>     <View style={styles.sectionHeaderContainer}><Text style={styles.sectionHeaderText}>{section.title}</Text></View>}
           keyExtractor={(item, index) => index}
@@ -482,8 +492,8 @@ class ClassBtn extends React.Component {
           <Text style={{fontSize:15}}>{this.props.teach}</Text>
         </View>
 
-        <View right style={{flex: 2,}}>
-          <Text style={{fontSize:30,textAlign:"right"}}>{this.props.avg}</Text>
+        <View style={{flex: 2,}}>
+          <Text style={{fontSize:30,textAlign:'right'}}>{this.props.avg}</Text>
         </View>
       </TouchableOpacity>
     );
@@ -503,28 +513,46 @@ class home extends LoadInComponent {
 
     
 
-    this.props.navigation.setParams({ click: this.click,});
+    this.props.navigation.setParams({ click: this.click, genMpsArray: this.genMpsArray});
   }
 
   static navigationOptions = ({ navigation }) => {
     console.log("TEXT: "+navigation.getParam('currentMarking','Select a MP'))
     console.log(navigation.getParam('currentMarking','Select a MP'))
     var text = navigation.getParam('currentMarking','Select a MP');
+    //var genMpsArray = navigation.getParam('genMpsArray',()=>{})();
+
     console.log(typeof text)
     if(typeof text != "string"){
       text = "Select a MP"
     }
     console.log("TEXTt: "+text)
+    const headerEl = Platform.select({
+      ios: 
+        <View>
+          <Button
+            onPress = {navigation.getParam('click',()=>{})}
+            title = {text}//{navigation.getParam('currentMarking','Select a MP')}//{this.state.currentMarking}//
+          />
+        </View>,
+      android:       
+        <Picker genMpsArray
+          selectedValue={this.state.currentMarking}
+          style={{height: 200, width: 100}}
+          onValueChange={(itemValue, itemIndex) =>{
+              this.setState({currentMarking: itemValue})
+              AsyncStorage.setItem('MP', this.state.currentMarking)
+            }
+          }>
+          {navigation.getParam("genMpsArray",<Text>Select a MP</Text>,)}
+        </Picker>
+    });
+    console.log("header done")
       return {
         title: 'Home',
-      headerRight: (
-        <View>
-        <Button
-          onPress = {navigation.getParam('click',()=>{})}
-          title = {text}//{navigation.getParam('currentMarking','Select a MP')}//{this.state.currentMarking}//
-        />
-        </View>
-      ),
+        headerRight: (
+          headerEl
+        ),
       }
   };
 
@@ -567,21 +595,21 @@ class home extends LoadInComponent {
       var teach = "";
       if(grades[classN][maxMarking]){
         if(grades[classN][maxMarking]["avg"]){
-          console.log("YEE2T")
+          // console.log("YEE2T")
           avg = grades[classN][maxMarking]["avg"]
-          console.log(avg);
+          // console.log(avg);
           
         }
       }
       if(grades[classN]["teacher"])
       teach = grades[classN]["teacher"]
-      console.log(classN);
+      // console.log(classN);
       if(count!=0){
         table.push(<View key={count} style={{flex: 1, justifyContent: 'center', alignItems: 'center' }}><View style={{height: 0.5, width: '96%', backgroundColor: '#C8C8C8', }}/></View>);
       }
       count++;
-      console.log("avg")
-      console.log(avg)
+      // console.log("avg")
+      // console.log(avg)
       if(classN!="Status")
         table.push(<ClassBtn key={classN+count} title={classN} teach = {teach} avg={avg} onPress={this.classClicked}></ClassBtn>)
     }
@@ -696,10 +724,14 @@ class ClassScreen extends React.Component {
                     //console.log(obj[className][markingPeriod]["Assignments"]);
                     for(var assignment of obj[className][markingPeriod]["Assignments"]){
                       var year = "19";
-                      if(parseInt((assignment["Date"].split("\n")[1]).split("/")[0])>5)
-                        year = "18";
-                      //assignment["Name"] = (assignment["Date"].split("/")[1]).split("\n")[0];
-                      assignment["Timestamp"] = Date.parse(assignment["Date"]+"/"+year);
+                      if(assignment["Date"].includes("\n")){
+                        if(parseInt((assignment["Date"].split("\n")[1]).split("/")[0])>5)
+                          year = "18";
+                        //assignment["Name"] = (assignment["Date"].split("/")[1]).split("\n")[0];
+                        assignment["Timestamp"] = Date.parse(assignment["Date"]+"/"+year);
+                      }else{
+                        assignment["Timestamp"] = Date.parse(+"12/12/"+year-2);
+                      }
                       assignments.push(assignment);
                       //console.log(assignment["Date"]+"/"+year);
                     }
@@ -727,8 +759,11 @@ class ClassScreen extends React.Component {
             var tempList = []
               for(var assignment of arr){
                 if(lastAssignment!=null&&lastAssignment["Date"]!=assignment["Date"]){
+                  var title = lastAssignment["Date"].replace("\n"," ");
+                  if(!title)
+                    title = "No date"
                   listOfAssignments.push({
-                    title: lastAssignment["Date"].replace("\n"," "),
+                    title: title,
                     data: tempList,
                   });
                   tempList= [];
@@ -738,8 +773,11 @@ class ClassScreen extends React.Component {
 
                 lastAssignment = assignment;
               }
+              var title = assignment["Date"].replace("\n"," ");
+              if(!title)
+                title = "No date"
               listOfAssignments.push({
-                title: assignment["Date"].replace("\n"," "),
+                title: title,
                 data: tempList,
               });
 
@@ -757,7 +795,7 @@ class ClassScreen extends React.Component {
           renderItem={({item}) => <View style={{flexDirection: 'row',
           justifyContent: 'space-between'}}>
             <Text style={styles.leftContainer} flex left>{item["Name"]}</Text>
-            <Text style={styles.rightContainer} flex right>{item["Grade"]}</Text>
+            <Text style={styles.rightContainer} flex>{item["Grade"]}</Text>
             </View>}
           renderSectionHeader={({section}) =>     <View style={styles.sectionHeaderContainer}><Text style={styles.sectionHeaderText}>{section.title}</Text></View>}
           keyExtractor={(item, index) => index}
@@ -862,10 +900,7 @@ class SignIn extends React.Component {
         if(responseJson['valid']==true){
           AsyncStorage.setItem('username', email).then(()=>{
             AsyncStorage.setItem('password', pass).then(()=>{
-              this.props.navigation.navigate('Normal')
-              let refreshFunc = this.props.navigation.getParam('refresh');
-              if(refreshFunc)
-              refreshFunc();
+              signInGlobal();
             });
           });
 
@@ -998,12 +1033,19 @@ class SignIn extends React.Component {
   function signOutGlobal() {
     this.setState({ user: null });
   }
-
+  function signInGlobal() {
+    AsyncStorage.getItem('username').then((user)=>{
+      console.log(user);
+      this.setState({user:user})
+    });
+  }
+ 
 
   export default class App extends React.Component {
     constructor(){
       super();
       signOutGlobal = signOutGlobal.bind(this);
+      signInGlobal = signInGlobal.bind(this);
       this.state = {user:null};
       AsyncStorage.getItem('username').then((user)=>{
         console.log(user);
