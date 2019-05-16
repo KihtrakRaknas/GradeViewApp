@@ -86,13 +86,10 @@ class LoadInComponent extends React.Component {
     AsyncStorage.getItem('username').then((user)=>{
       console.log(user);
       if(user==null){
-        this.props.navigation.navigate('SignIn',{refresh: () =>{
-            this.componentWillMount();
-        }})
+        signOutGlobal();
       }else{
         this._retrieveData()
         this.getGrade()
-        console.log("test")
         this.registerForPushNotificationsAsync(user)
       }
     })
@@ -442,7 +439,7 @@ class settings extends React.Component {
 
   signOut = ()=>{
     AsyncStorage.clear()
-    this.props.navigation.navigate('SignIn')
+    signOutGlobal();
   }
 
   render() {
@@ -830,7 +827,7 @@ const TabNav = createBottomTabNavigator(
 )
 
 
-class signIn extends React.Component {
+class SignIn extends React.Component {
 
 	  constructor(props){
       super(props);
@@ -998,10 +995,30 @@ class signIn extends React.Component {
 
   }
 
+  function signOutGlobal() {
+    this.setState({ user: null });
+  }
 
 
-
-  export default createAppContainer(createStackNavigator(
+  export default class App extends React.Component {
+    constructor(){
+      super();
+      signOutGlobal = signOutGlobal.bind(this);
+      this.state = {user:null};
+      AsyncStorage.getItem('username').then((user)=>{
+        console.log(user);
+        this.setState({user:user})
+      });
+    }
+    render(){
+      if(this.state.user){
+        console.log("tab nav");
+        var App = createAppContainer(TabNav)
+        return <App />;
+      } 
+      return <SignIn/>;
+    }
+  }/*createStackNavigator(
     {
       Normal: {
         screen: TabNav,
@@ -1014,4 +1031,6 @@ class signIn extends React.Component {
       //mode: 'modal',
       headerMode: 'none',
     }
-  ));
+  )*/
+  
+  //;
