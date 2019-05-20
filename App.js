@@ -124,7 +124,6 @@ class LoadInComponent extends React.Component {
       if (finalStatus !== 'granted') {
         return;
       }
-    
       // Get the token that uniquely identifies this device
       let token = await Notifications.getExpoPushTokenAsync();
       console.log(token)
@@ -613,7 +612,7 @@ class home extends LoadInComponent {
       teach = grades[classN]["teacher"]
       // console.log(classN);
       if(count!=0){
-        table.push(<View key={count} style={{flex: 1, justifyContent: 'center', alignItems: 'center' }}><View style={{height: 0.5, width: '96%', backgroundColor: '#C8C8C8', }}/></View>);
+        table.push(<View key={count} style={{flex: 1, justifyContent: 'center', alignItems: 'center' }}><View style={{height: 0.5, width: '90%', backgroundColor: '#C8C8C8', }}/></View>);
       }
       count++;
       // console.log("avg")
@@ -919,8 +918,14 @@ class SignIn extends React.Component {
           });
 
         }else{
-          Alert.alert("Invalid username or password!");
+          Alert.alert("Invalid username - password combination!");
         }
+        this.setState({
+          isLoading: false,
+        });
+      }).catch((error) => {
+        Alert.alert("Network Issue! Make sure you have a internet connection")
+        console.log(error);
         this.setState({
           isLoading: false,
         });
