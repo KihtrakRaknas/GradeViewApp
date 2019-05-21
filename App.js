@@ -613,12 +613,14 @@ class home extends LoadInComponent {
       // console.log(classN);
       if(count!=0){
         table.push(<View key={count} style={{flex: 1, justifyContent: 'center', alignItems: 'center' }}><View style={{height: 0.5, width: '90%', backgroundColor: '#C8C8C8', }}/></View>);
+        count++;
       }
-      count++;
       // console.log("avg")
       // console.log(avg)
-      if(classN!="Status")
+      if(classN!="Status"&&avg){
         table.push(<ClassBtn key={classN+count} title={classN} teach = {teach} avg={avg} onPress={this.classClicked}></ClassBtn>)
+        count++;
+      }
     }
     console.log("DONE");
     return table
