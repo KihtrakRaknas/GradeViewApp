@@ -987,17 +987,18 @@ class SignIn extends React.Component {
         }
 
         return(
-          <KeyboardAvoidingView behavior="padding" style={{flex: 1, justifyContent: 'center', alignItems: 'center',backgroundColor: "#f3f9fb" }}>
+          <KeyboardAvoidingView behavior="padding" style={{flex: 1, justifyContent: 'center', alignItems: 'center',backgroundColor: "#373a6d" }}>
 
               <View>
-                <Text style={{fontSize: 20,padding:20,paddingBottom:10}}>Enter the email and password you normally use to access your grades</Text>
+                <Text style={{fontSize: 20,padding:20,paddingBottom:10,color:"white"}}>Enter the email and password you normally use to access your grades</Text>
               </View>
                 
-              <View style={{flexDirection: 'row',backgroundColor: "#FFFFFF",margin:20,borderRadius: 15,paddingHorizontal: 20,paddingVertical: 10,marginVertical: 15,}}>
+              <View style={{flexDirection: 'row',backgroundColor: "#FFFFFF",margin:20,borderRadius: 5,paddingHorizontal: 10,paddingVertical: 10,marginVertical: 15,}}>
               <Icon
-                name='email'
-                type='MaterialCommunityIcons'
+                name='user'
+                type='AntDesign'
                 size={30}
+                color="#373a6d"
               />
               <TextInput
                 editable={!this.state.isLoading}
@@ -1009,11 +1010,12 @@ class SignIn extends React.Component {
                 />
 
             </View>
-          <View style={{flexDirection: 'row',backgroundColor: "#FFFFFF",margin:20,borderRadius: 15,paddingHorizontal: 20,paddingVertical: 10,marginVertical: 15,}}>
+          <View style={{flexDirection: 'row',backgroundColor: "#FFFFFF",margin:20,borderRadius: 5,paddingHorizontal: 10,paddingVertical: 10,marginVertical: 15,}}>
               <Icon
-                name='lock'
+                name='user-o'
                 type='FontAwesome5'
                 size={30}
+                color="#373a6d"
               />
               <TextInput
                 editable={!this.state.isLoading}
@@ -1030,7 +1032,7 @@ class SignIn extends React.Component {
             <TouchableOpacity
               disabled={this.state.isLoading}
               style={{
-                backgroundColor: "#113f67",
+                backgroundColor: "#6fc2d0",
                 paddingHorizontal: 15,
                 paddingVertical: 15,
                 borderRadius: 15,
@@ -1043,7 +1045,7 @@ class SignIn extends React.Component {
               {btnText}
             </TouchableOpacity>
             <View>
-                <Text style={{fontSize: 10,padding:10}}>Note: Your password will be stored on our servers so we can get your grades for you</Text>
+                <Text style={{fontSize: 10,padding:10,color:"white"}}>Note: Your password will be stored on our servers so we can get your grades for you</Text>
               </View>
         </KeyboardAvoidingView>
         )
