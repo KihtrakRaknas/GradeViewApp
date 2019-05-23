@@ -10,12 +10,11 @@ import Modal from 'react-native-modal';
 require('create-react-class');
 import { Permissions, Notifications } from 'expo';
 import {Linking, Platform} from 'react-native';
-
+import Toast, {DURATION} from 'react-native-easy-toast';
 
 var grades;
 
 class LoadInComponent extends React.Component {
-
   parseJSON(obj){
     var assignments = [];
 
@@ -1098,13 +1097,25 @@ class SignIn extends React.Component {
         this.setState({user:user})
       });
     }
+
+    componentDidMount(){
+      this._notificationSubscription = Notifications.addListener(this._handleNotification);
+    }
+
+    _handleNotification = (notification) => {
+      console.log(notification)
+      console.log(this.refs)
+      if(notification.data.txt)
+        this.refs.toast.show(notification.data.txt);
+    };
+
     render(){
       if(this.state.user == 9)
         return null;
       if(this.state.user){
         console.log("tab nav");
         
-        return <AppContainer />;
+        return <View style={{flex:1}}><Toast ref="toast"/><AppContainer toastRef = {this.refs.toast}/></View>;
       } 
       return <SignIn/>;
     } 
