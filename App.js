@@ -1115,9 +1115,9 @@ class SignIn extends React.Component {
       if(this.state.user){
         console.log("tab nav");
         
-        return <View style={{flex:1}}> <StatusBar barStyle="light-content" /> <Toast ref="toast"/><AppContainer toastRef = {this.refs.toast}/></View>;
+        return <View style={{flex:1}}><StatusBar barStyle="dark-content" /><Toast ref="toast"/><AppContainer/></View>;
       } 
-      return <View style={{flex:1}}> <StatusBar barStyle="light-content" /> <SignIn/> </View>;
+      return <SignIn/>;
     } 
   }/*createStackNavigator(
     {
