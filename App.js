@@ -1,6 +1,6 @@
 import React from 'react';
 import { AppRegistry, SectionList, StyleSheet, Text, View ,ActivityIndicator, Alert, Button, TouchableOpacity,TextInput ,KeyboardAvoidingView , ScrollView, Picker} from 'react-native';
-import { Ionicons } from '@expo/vector-icons'; // 6.2.2
+import { Ionicons ,FontAwesome  } from '@expo/vector-icons';
 import { createBottomTabNavigator, createAppContainer, TabBarBottom, createStackNavigator} from 'react-navigation';
 import { Icon, Input  } from 'react-native-elements'
 import {AsyncStorage} from 'react-native';
@@ -10,6 +10,7 @@ import Modal from 'react-native-modal';
 require('create-react-class');
 import { Permissions, Notifications } from 'expo';
 import {Linking, Platform} from 'react-native';
+
 
 var grades;
 
@@ -236,30 +237,24 @@ runGetGrades(){
 
  class gradeList extends LoadInComponent {
   static navigationOptions = ({ navigation }) => {
-    if(navigation.getParam('loading')){
-      return {
-        title: 'Your Assignments',
-      headerRight: (
-        <View paddingRight={10}>
-          <ActivityIndicator/>
-        </View>
-      ),
-      }
-    }
-
-    return {
-      title: 'Your Assignments',
-    headerRight: (
-      <View paddingRight={10}>
-      <Icon
+    var icon =       <Icon
         name="refresh"
         type = "MaterialIcons"
         onPress={navigation.getParam('refresh')}
 
-      />
-      </View>
-    ),
+      />;
+    if(navigation.getParam('loading')){
+      icon =<ActivityIndicator/>;
     }
+      return {
+        title: 'Your Assignments',
+        headerStyle: styles.navigationHeader,
+      headerRight: (
+        <View paddingRight={10}>
+          {icon}
+        </View>
+      ),
+      }
   };
 
 componentDidMount(){
@@ -394,7 +389,7 @@ const styles = StyleSheet.create({
    flex: 1,
   },
   sectionHeaderContainer: {
-    backgroundColor: '#fbfbfb',
+    backgroundColor: '#beeef7',
     paddingVertical: 8,
     paddingHorizontal: 15,
     borderWidth: StyleSheet.hairlineWidth,
@@ -428,6 +423,12 @@ const styles = StyleSheet.create({
     //backgroundColor: 'blue',
     //alignItems: 'center',
   },
+  navigationHeader:{
+    backgroundColor: '#6fc2d0'
+  },
+  tabNav: {
+    backgroundColor: '#373a6d'
+  }
 })
 
 
@@ -451,9 +452,27 @@ class settings extends React.Component {
     signOutGlobal();
   }
 
+  calcGPA = () =>{
+    if(!grades)
+      return null;
+    for(classN in grades){
+      if(classN!="Status"){
+      for(marking in grades[classN]){
+        //console.log("MARK1: "+marking+"MARK2: "+classN);
+        //console.log(grades[classN]);
+        if(Number(marking.substring(2))){
+          if(!mps.includes(marking))
+            mps.push(marking);
+        }
+      }
+      }
+    }
+  }
+
   render() {
       return(
         <ScrollView style={{flex: 1, flexDirection: 'column'}}>
+          <Text>GPA: [Feature Coming Soon]</Text>
           <Text>{this.state.id}</Text>
           <Text>{this.state.pushToken}</Text>
           <Button 
@@ -557,6 +576,7 @@ class home extends LoadInComponent {
     console.log("header done")
       return {
         title: 'Home',
+        headerStyle: styles.navigationHeader,
         headerRight: (
           headerEl
         ),
@@ -727,6 +747,7 @@ class ClassScreen extends React.Component {
         title: navigation.getParam('className',"Class Name"),
       }*/
       return {
+        headerStyle: styles.navigationHeader,
         title: navigation.getParam('className',"Class Name"),
       }
   };
@@ -840,7 +861,7 @@ const TabNav = createBottomTabNavigator(
     Home: { screen:  HomeStack},
     Assignments: { screen:  AssignmentsStack},
      
-    Settings: { screen:  SettingsStack},
+    More: { screen:  SettingsStack},
   },
   {
     defaultNavigationOptions: ({ navigation }) => ({
@@ -860,8 +881,9 @@ const TabNav = createBottomTabNavigator(
           }
 
           //iconName = `${focused ? 'ios-list-box' : 'view-headline'}`; // assignment
-        } else if (routeName === 'Settings') {
-          iconName = `settings`;
+        } else if (routeName === 'More') {
+          iconName = `more-horiz`;
+          type = 'MaterialIcons';
         }
         // You can return any component that you like here! We usually use an
         // icon component from react-native-vector-icons
@@ -871,8 +893,9 @@ const TabNav = createBottomTabNavigator(
     tabBarComponent: TabBarBottom,
     tabBarPosition: 'bottom',
     tabBarOptions: {
-      activeTintColor: 'tomato',
-      inactiveTintColor: 'gray',
+      activeTintColor: '#ff8246',
+      inactiveTintColor: 'white',
+      style: styles.tabNav,
     },
     animationEnabled: false,
     swipeEnabled: false,
@@ -889,11 +912,16 @@ class SignIn extends React.Component {
     }
 
     verify = () =>{
+      var email = this.state.email;
+      var pass = this.state.password;
+      if(!(email&&pass)){
+        Alert.alert("Enter an ID number and password");
+        return 0;
+      }
+      email = email+"@sbstudents.org";
       this.setState({
         isLoading: true,
       });
-      var email = this.state.email;
-      var pass = this.state.password;
       //Alert.alert(this.state.email+":"+this.state.password);
       return fetch('https://gradeview.herokuapp.com/check', {
         method: 'POST',
@@ -988,31 +1016,26 @@ class SignIn extends React.Component {
 
         return(
           <KeyboardAvoidingView behavior="padding" style={{flex: 1, justifyContent: 'center', alignItems: 'center',backgroundColor: "#373a6d" }}>
-
-              <View>
-                <Text style={{fontSize: 20,padding:20,paddingBottom:10,color:"white"}}>Enter the email and password you normally use to access your grades</Text>
-              </View>
                 
-              <View style={{flexDirection: 'row',backgroundColor: "#FFFFFF",margin:20,borderRadius: 5,paddingHorizontal: 10,paddingVertical: 10,marginVertical: 15,}}>
-              <Icon
-                name='user'
-                type='AntDesign'
+              <View style={{flexDirection: 'row',backgroundColor: "#FFFFFF",margin:20,borderRadius: 5,paddingHorizontal: 14,paddingVertical: 10,marginVertical: 15,}}>
+              <FontAwesome
+                name='id-badge'
                 size={30}
                 color="#373a6d"
               />
               <TextInput
                 editable={!this.state.isLoading}
-                style={{flex: 1,fontSize: 20,paddingHorizontal: 8}}
-                keyboardType={'email-address'}
+                style={{flex: 1,fontSize: 20,paddingHorizontal: 11}}
+                keyboardType={'number-pad'}
                   autoCorrect={false}
-                  placeholder="Email"
+                  placeholder="ID number"
                   onChangeText={val => this.onChangeText('email', val)}
                 />
 
             </View>
           <View style={{flexDirection: 'row',backgroundColor: "#FFFFFF",margin:20,borderRadius: 5,paddingHorizontal: 10,paddingVertical: 10,marginVertical: 15,}}>
               <Icon
-                name='user-o'
+                name='lock'
                 type='FontAwesome5'
                 size={30}
                 color="#373a6d"
@@ -1069,13 +1092,15 @@ class SignIn extends React.Component {
       super();
       signOutGlobal = signOutGlobal.bind(this);
       signInGlobal = signInGlobal.bind(this);
-      this.state = {user:null};
+      this.state = {user:9};
       AsyncStorage.getItem('username').then((user)=>{
         console.log(user);
         this.setState({user:user})
       });
     }
     render(){
+      if(this.state.user == 9)
+        return null;
       if(this.state.user){
         console.log("tab nav");
         

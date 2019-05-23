@@ -7,6 +7,7 @@
     "eject": "expo eject"
   },
   "dependencies": {
+    "@expo/vector-icons": "^9.0.0",
     "create-react-class": "^15.6.3",
     "create-react-context": "^0.2.3",
     "expo": "^32.0.0",
@@ -15,7 +16,8 @@
     "react-native-dropdown-menu": "^2.0.0",
     "react-native-elements": "^1.1.0",
     "react-native-modal": "^9.0.0",
-    "react-native-vector-icons": "^6.3.0",
+    "react-native-paper": "^2.15.2",
+    "react-native-vector-icons": "^6.4.2",
     "react-navigation": "^3.6.1",
     "uninstall-all-modules": "^1.0.5"
   },
