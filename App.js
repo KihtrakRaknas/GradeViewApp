@@ -1,5 +1,5 @@
 import React from 'react';
-import { AppRegistry, SectionList, StyleSheet, Text, View ,ActivityIndicator, Alert, Button, TouchableOpacity,TextInput ,KeyboardAvoidingView , ScrollView, Picker,StatusBar} from 'react-native';
+import { AppRegistry, SectionList, StyleSheet, Text, View ,ActivityIndicator, Alert, Button, TouchableOpacity,TextInput ,KeyboardAvoidingView , ScrollView, Picker,StatusBar,RefreshControl} from 'react-native';
 import { Ionicons ,FontAwesome  } from '@expo/vector-icons';
 import { createBottomTabNavigator, createAppContainer, TabBarBottom, createStackNavigator} from 'react-navigation';
 import { Icon, Input  } from 'react-native-elements'
@@ -663,6 +663,11 @@ class home extends LoadInComponent {
     AsyncStorage.setItem('MP', newMP)
   }
 
+  refresh = () =>{
+    this.getGrade().then(()=>{
+      this.setState({refreshing: false});
+    })
+  }
 
   render() {
       if(this.state.isLoading)
@@ -694,7 +699,12 @@ class home extends LoadInComponent {
           }
         });
       return(
-        <ScrollView style={{flex: 1, flexDirection: 'column'}}>
+        <ScrollView style={{flex: 1, flexDirection: 'column'}}         refreshControl={
+          <RefreshControl
+            refreshing={this.state.refreshing}
+            onRefresh={this.refresh}
+          />
+        }>
         <Modal isVisible={this.state.visibleModal}
         style={{
           justifyContent: 'flex-end',
