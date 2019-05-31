@@ -614,7 +614,11 @@ class home extends LoadInComponent {
     var table = []
     var count = 0;
     var mps = this.genMpsArray();
-    for(classN in grades){
+    console.log(grades)
+    var ClassNames = [];
+    if(grades)
+      ClassNames = Object.keys(grades).sort()
+    for(classN of ClassNames){
       var maxMarking=this.state.currentMarking;
       console.log(maxMarking);
       var avg = "";
