@@ -436,7 +436,7 @@ class settings extends React.Component {
 
   constructor(props){
     super(props);
-    this.state ={ isLoading: false, email:"", password:"", pushToken:"No Token", id: "loading"}
+    this.state ={ isLoading: false, email:"", password:"", pushToken:"No Token", id: "loading", unweightedOldGPA:"Not Available", weightedOldGPA:"Not Available"}
     Notifications.getExpoPushTokenAsync().then((token)=>{
       this.setState({pushToken:token})
     })
@@ -445,10 +445,146 @@ class settings extends React.Component {
         this.state.id = user;
     });
   }
+  static navigationOptions = ({ navigation }) => {
+    return {
+      title: 'More',
+      headerStyle: styles.navigationHeader,
+    }
+  }
+
+  weightToGPABoost = (weight) =>{
+    if(weight.includes("A.P."))
+      return 1;
+    else if(weight.includes("Honors"))
+      return .5;
+    else
+      return 0;
+  };
+
+  letterGradeToGPA = (letter) =>{
+    switch(letter) {
+      case "A+":
+        return 4.0
+        break;
+      case "A":
+        return 4.0
+        break;
+      case "A-":
+        return 3.7
+        break;
+      case "B+":
+        return 3.3
+        break;
+      case "B":
+        return 3.0
+        break;  
+      case "B-":
+        return 2.7
+        break;
+      case "C+":
+        return 2.3
+        break;
+      case "C":
+        return 2.0
+        break;
+      case "C-":
+        return 1.7
+        break;
+      case "D+":
+        return 1.3
+        break;
+      case "D":
+        return 1.0
+        break;  
+      case "D-":
+        return 0.7
+        break;
+      case "F":
+        return 0.0
+        break;
+      default:
+        Alert.alert("There was a an error getting your GPA, please report this using the provide feedback button")
+    }
+  }
+
+  getOldFGs = async () => {
+    this.props.navigation.setParams({loading: true});
+    console.log("TEST")
+      return fetch('https://gradeview.herokuapp.com/oldGrades', {
+      method: 'POST',
+      headers: {
+      Accept: 'application/json',
+      'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        username: await AsyncStorage.getItem('username'),//"10012734@sbstudents.org",//10012734 //
+        password: await AsyncStorage.getItem('password'),//"Sled%2#9",//Sled%2#9 //
+      }),
+    })
+    .then((response) => {
+    //console.log(response);
+    //response.json()
+    console.log(typeof response)
+      return response.json();
+    })
+    .then((responseJson) => {
+      return responseJson
+    });
+  }
+
+  componentDidMount = () =>{
+    this.getOldFGs().then((FGs)=>{
+      var GPA = null;
+      console.log(FGs)
+      for(var year of FGs){
+        var yrGPA = 0;
+        var totalCredits=0;
+        for(var classs of year){
+          totalCredits += classs["Credits"];
+          yrGPA += this.letterGradeToGPA(classs["FG"])*classs["Credits"];
+        }
+        yrGPA = yrGPA/totalCredits;
+        GPA += yrGPA/FGs.length
+      }
+      if(GPA)
+        this.setState({unweightedOldGPA:GPA.toFixed(2)})
+
+      var weightedGPA = null;
+      var failed = false;
+      console.log(FGs)
+      for(var year of FGs){
+        var yrGPA = 0;
+        var totalCredits=0;
+        for(var classs of year){
+          totalCredits += classs["Credits"];
+          if(classs["Weight"]){
+            yrGPA += (this.letterGradeToGPA(classs["FG"])+this.weightToGPABoost(classs["Weight"]))*classs["Credits"];
+          }else{
+            failed = true;
+            Alert.alert('One or more of your classes does not have a known weighting. Please report this using the "Provide Feedback button"')
+          }
+        }
+        yrGPA = yrGPA/totalCredits;
+        weightedGPA += yrGPA/FGs.length
+      }
+      if(weightedGPA&&!failed)
+        this.setState({weightedOldGPA:weightedGPA.toFixed(2)})
+    })
+  }
 
   signOut = ()=>{
-    AsyncStorage.clear()
-    signOutGlobal();
+    
+    AsyncStorage.getItem('username').then((user)=>{
+      AsyncStorage.getItem('password').then((pass)=>{
+        AsyncStorage.clear().then(()=>{
+          AsyncStorage.setItem('oldUsername',user).then(()=>{
+            AsyncStorage.setItem('oldPassword',pass).then(()=>{
+              signOutGlobal();
+            });
+          });
+        })
+      });
+    });
   }
 
   calcGPA = () =>{
@@ -470,10 +606,18 @@ class settings extends React.Component {
 
   render() {
       return(
-        <ScrollView style={{flex: 1, flexDirection: 'column'}}>
-          <Text>GPA: [Feature Coming Soon]</Text>
+        <ScrollView style={{flex: 1, flexDirection: 'column', padding:10}}>
+          <Text style={{fontSize:40}}>GPA</Text>
+          <Text style={{fontSize:20}}>Unweighted: {this.state.unweightedOldGPA}</Text>
+          <Text style={{fontSize:20}}>Weighted: {this.state.weightedOldGPA}</Text>
+
+          <Text style={{fontSize:40,marginTop:20}}>Current GPA (BETA)</Text>
+          <Text style={{fontSize:10}}>An estimate of your GPA considering your grades for this year</Text>
+          <Text style={{fontSize:20}}>Coming Soon!</Text>
+
+          <Text style={{fontSize:40,marginTop:20}}>Debuging info:</Text>
           <Text>{this.state.id}</Text>
-          <Text>{this.state.pushToken}</Text>
+          <Text style={{marginBottom:20}}>{this.state.pushToken}</Text>
           <Button 
           onPress={() => Linking.openURL('mailto:gradeViewApp@kihtrak.com?subject=Feedback%20about%20the%20app') }
           title="Provide Feedback" 
@@ -924,6 +1068,16 @@ class SignIn extends React.Component {
 
     }
 
+    componentWillMount = () =>{
+      AsyncStorage.getItem('oldUsername').then((user)=>{
+        if(user){
+          this.setState({OldAccount:true})
+        }else{
+          this.setState({OldAccount:false})
+        }
+      })
+    }
+
     verify = () =>{
       var email = this.state.email;
       var pass = this.state.password;
@@ -932,6 +1086,23 @@ class SignIn extends React.Component {
         return 0;
       }
       email = email+"@sbstudents.org";
+      this.verifyWithParams(email,pass)
+    }
+
+    verifyUsingOldCredentials = () =>{
+      AsyncStorage.getItem('oldUsername').then((user)=>{
+        AsyncStorage.getItem('oldPassword').then((pass)=>{
+          this.verifyWithParams(user,pass)
+        })
+      })
+    }
+
+    verifyWithParams = (email, pass) =>{
+      if(!(email&&pass)){
+        Alert.alert("Enter an ID number and password");
+        return 0;
+      }
+      //email = email+"@sbstudents.org"; Done in verify function
       this.setState({
         isLoading: true,
       });
@@ -980,9 +1151,13 @@ class SignIn extends React.Component {
     }
 
     render() {
+      var cancelBtn = null;
+      if(this.state.OldAccount)
+        cancelBtn = <Button title="Cancel (Go back to your account)" color="#ff5c5c" onPress={this.verifyUsingOldCredentials}/>
       var btnText = <Text style={{fontSize: 30,fontWeight: '400',color: "#fff",}}>Sign In</Text>
       if(this.state.isLoading){
         btnText = <ActivityIndicator size="large" color="#ffffff"/>;
+
         //padding: 20
         // return(
         //   <KeyboardAvoidingView behavior="padding" style={{flex: 1, justifyContent: 'center', alignItems: 'center',backgroundColor: "#f3f9fb" }}>
@@ -1029,7 +1204,7 @@ class SignIn extends React.Component {
 
         return(
           <KeyboardAvoidingView behavior="padding" style={{flex: 1, justifyContent: 'center', alignItems: 'center',backgroundColor: "#373a6d" }}>
-                
+              
               <View style={{flexDirection: 'row',backgroundColor: "#FFFFFF",margin:20,borderRadius: 5,paddingHorizontal: 14,paddingVertical: 10,marginVertical: 15,}}>
               <FontAwesome
                 name='id-badge'
@@ -1064,7 +1239,6 @@ class SignIn extends React.Component {
                 />
 
             </View>
-
             <TouchableOpacity
               disabled={this.state.isLoading}
               style={{
@@ -1080,6 +1254,9 @@ class SignIn extends React.Component {
             >
               {btnText}
             </TouchableOpacity>
+
+            {cancelBtn}
+
             <View>
                 <Text style={{fontSize: 10,padding:10,color:"white"}}>Note: Your password will be stored on our servers so we can get your grades for you</Text>
               </View>
