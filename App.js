@@ -436,7 +436,7 @@ class settings extends React.Component {
 
   constructor(props){
     super(props);
-    this.state ={ isLoading: false, email:"", password:"", pushToken:"No Token", id: "loading", unweightedOldGPA:"Not Available", weightedOldGPA:"Not Available"}
+    this.state ={ isLoading: false, email:"", password:"", pushToken:"No Token", id: "loading", unweightedOldGPA:"Not Available", weightedOldGPA:"Not Available", unweightedNewGPA:"Not Available",weightedNewGPA:"Not Available"}
     Notifications.getExpoPushTokenAsync().then((token)=>{
       this.setState({pushToken:token})
     })
@@ -532,6 +532,31 @@ class settings extends React.Component {
     });
   }
 
+  getNewFGs = async () => {
+    this.props.navigation.setParams({loading: true});
+    console.log("TEST")
+      return fetch('https://gradeview.herokuapp.com/newGrades', {
+      method: 'POST',
+      headers: {
+      Accept: 'application/json',
+      'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        username: await AsyncStorage.getItem('username'),//"10012734@sbstudents.org",//10012734 //
+        password: await AsyncStorage.getItem('password'),//"Sled%2#9",//Sled%2#9 //
+      }),
+    })
+    .then((response) => {
+    //console.log(response);
+    //response.json()
+    console.log(typeof response)
+      return response.json();
+    })
+    .then((responseJson) => {
+      return responseJson
+    });
+  }
+
   componentDidMount = () =>{
     this.getOldFGs().then((FGs)=>{
       var GPA = null;
@@ -569,6 +594,104 @@ class settings extends React.Component {
       }
       if(weightedGPA&&!failed)
         this.setState({weightedOldGPA:weightedGPA.toFixed(2)})
+
+      this.getNewFGs().then((newFGs)=>{
+        var newGPA = null;
+        console.log(FGs)
+        for(var year of FGs){
+          var yrGPA = 0;
+          var totalCredits=0;
+          for(var classs of year){
+            totalCredits += classs["Credits"];
+            yrGPA += this.letterGradeToGPA(classs["FG"])*classs["Credits"];
+          }
+          yrGPA = yrGPA/totalCredits;
+          newGPA += yrGPA/(FGs.length+1)
+        }
+
+        var yrGPA = 0;
+        var totalCredits=0;
+        for(var classs of newFGs){
+          totalCredits += classs["Credits"];
+          
+          let total = 0;
+          let totalGPA = 0;
+          for(gradePerMP in classs){
+            if(gradePerMP.includes("MP")){
+              total++;
+              totalGPA+=this.letterGradeToGPA(classs[gradePerMP])
+            }
+          }
+          let classGPA = totalGPA/total
+          if(classs["ME"]&&classs["FE"])
+            classGPA = classGPA*.8+this.letterGradeToGPA(classs["ME"])*.1+this.letterGradeToGPA(classs["FE"])*.1
+          else if(classs["ME"])
+            classGPA = classGPA*.9+this.letterGradeToGPA(classs["ME"])*.1
+          else if(classs["FE"])
+            classGPA = classGPA*.9+this.letterGradeToGPA(classs["FE"])*.1
+          yrGPA += classGPA*classs["Credits"];
+        }
+        yrGPA = yrGPA/totalCredits;
+        newGPA += yrGPA/(FGs.length+1)
+
+        if(newGPA)
+          this.setState({unweightedNewGPA:newGPA.toFixed(2)})
+
+
+
+          var newWeightedGPA = null;
+          var failed = false;
+          console.log(FGs)
+          for(var year of FGs){
+            var yrGPA = 0;
+            var totalCredits=0;
+            for(var classs of year){
+              totalCredits += classs["Credits"];
+              if(classs["Weight"]){
+                yrGPA += (this.letterGradeToGPA(classs["FG"])+this.weightToGPABoost(classs["Weight"]))*classs["Credits"];
+              }else{
+                failed = true;
+                Alert.alert('One or more of your classes does not have a known weighting. Please report this using the "Provide Feedback button"')
+              }
+            }
+            yrGPA = yrGPA/totalCredits;
+            newWeightedGPA += yrGPA/(newFGs.length+1)
+          }
+
+          var yrGPA = 0;
+          var totalCredits=0;
+          for(var classs of newFGs){
+            totalCredits += classs["Credits"];
+            
+            let total = 0;
+            let totalGPA = 0;
+            for(gradePerMP in classs){
+              if(gradePerMP.includes("MP")){
+                total++;
+                totalGPA+=this.letterGradeToGPA(classs[gradePerMP])
+              }
+            }
+            let classGPA = totalGPA/total
+            if(classs["ME"]&&classs["FE"])
+              classGPA = classGPA*.8+this.letterGradeToGPA(classs["ME"])*.1+this.letterGradeToGPA(classs["FE"])*.1
+            else if(classs["ME"])
+              classGPA = classGPA*.9+this.letterGradeToGPA(classs["ME"])*.1
+            else if(classs["FE"])
+              classGPA = classGPA*.9+this.letterGradeToGPA(classs["FE"])*.1
+            
+            if(classs["Weight"]){
+              yrGPA += (classGPA+this.weightToGPABoost(classs["Weight"]))*classs["Credits"];
+            }else{
+              failed = true;
+              Alert.alert('One or more of your classes does not have a known weighting. Please report this using the "Provide Feedback button"')
+            }
+          }
+          yrGPA = yrGPA/totalCredits;
+          newWeightedGPA += yrGPA/(newFGs.length+1)
+
+          if(newWeightedGPA&&!failed)
+            this.setState({weightedOldGPA:newWeightedGPA.toFixed(2)})
+      });
     })
   }
 
@@ -613,7 +736,8 @@ class settings extends React.Component {
 
           <Text style={{fontSize:40,marginTop:20}}>Current GPA (BETA)</Text>
           <Text style={{fontSize:10}}>An estimate of your GPA considering your grades for this year</Text>
-          <Text style={{fontSize:20}}>Coming Soon!</Text>
+          <Text style={{fontSize:20}}>Weighted: {this.state.unweightedNewGPA}</Text>
+          <Text style={{fontSize:20}}>Weighted: {this.state.weightedNewGPA}</Text>
 
           <Text style={{fontSize:40,marginTop:20}}>Debuging info:</Text>
           <Text>{this.state.id}</Text>
