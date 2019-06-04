@@ -444,6 +444,22 @@ class settings extends React.Component {
       if(user)
         this.state.id = user;
     });
+    AsyncStorage.getItem('weightedOldGPA').then((gpa)=>{
+      if(gpa)
+        this.state.weightedOldGPA = gpa;
+    });
+    AsyncStorage.getItem('unweightedOldGPA').then((gpa)=>{
+      if(gpa)
+        this.state.unweightedOldGPA = gpa;
+    });
+    AsyncStorage.getItem('unweightedNewGPA').then((gpa)=>{
+      if(gpa)
+        this.state.unweightedNewGPA = gpa;
+    });
+    AsyncStorage.getItem('weightedNewGPA').then((gpa)=>{
+      if(gpa)
+        this.state.weightedNewGPA = gpa;
+    });
   }
   static navigationOptions = ({ navigation }) => {
     return {
@@ -571,8 +587,11 @@ class settings extends React.Component {
         yrGPA = yrGPA/totalCredits;
         GPA += yrGPA/FGs.length
       }
-      if(GPA)
+      if(GPA){
         this.setState({unweightedOldGPA:GPA.toFixed(2)})
+        AsyncStorage.setItem('unweightedOldGPA',GPA.toFixed(2))
+      }
+        
 
       var weightedGPA = null;
       var failed = false;
@@ -592,8 +611,11 @@ class settings extends React.Component {
         yrGPA = yrGPA/totalCredits;
         weightedGPA += yrGPA/FGs.length
       }
-      if(weightedGPA&&!failed)
+      if(weightedGPA&&!failed){
         this.setState({weightedOldGPA:weightedGPA.toFixed(2)})
+        AsyncStorage.setItem('weightedOldGPA',weightedGPA.toFixed(2));
+      }
+        
 
       this.getNewFGs().then((newFGs)=>{
         var newGPA = null;
@@ -634,8 +656,11 @@ class settings extends React.Component {
         yrGPA = yrGPA/totalCredits;
         newGPA += yrGPA/(FGs.length+1)
 
-        if(newGPA)
+        if(newGPA){
           this.setState({unweightedNewGPA:newGPA.toFixed(2)})
+          AsyncStorage.setItem('unweightedNewGPA',newGPA.toFixed(2))
+        }
+          
 
 
 
@@ -655,7 +680,7 @@ class settings extends React.Component {
               }
             }
             yrGPA = yrGPA/totalCredits;
-            newWeightedGPA += yrGPA/(newFGs.length+1)
+            newWeightedGPA += yrGPA/(FGs.length+1)
           }
 
           var yrGPA = 0;
@@ -687,10 +712,13 @@ class settings extends React.Component {
             }
           }
           yrGPA = yrGPA/totalCredits;
-          newWeightedGPA += yrGPA/(newFGs.length+1)
+          newWeightedGPA += yrGPA/(FGs.length+1)
 
-          if(newWeightedGPA&&!failed)
-            this.setState({weightedOldGPA:newWeightedGPA.toFixed(2)})
+          if(newWeightedGPA&&!failed){
+            this.setState({weightedNewGPA:newWeightedGPA.toFixed(2)})
+            AsyncStorage.setItem('weightedNewGPA',newWeightedGPA.toFixed(2))
+          }
+            
       });
     })
   }
