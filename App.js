@@ -775,8 +775,8 @@ class settings extends React.Component {
           <Text style={{fontSize:20}}>Weighted: {this.state.weightedOldGPA}</Text>
 
           <Text style={{fontSize:40,marginTop:20}}>Current GPA (BETA)</Text>
-          <Text style={{fontSize:10}}>An estimate of your GPA considering your grades for this year</Text>
-          <Text style={{fontSize:20}}>Weighted: {this.state.unweightedNewGPA}</Text>
+          <Text style={{fontSize:10}}>An estimate of your HS GPA based your grades for this year</Text>
+          <Text style={{fontSize:20}}>Unweighted: {this.state.unweightedNewGPA}</Text>
           <Text style={{fontSize:20}}>Weighted: {this.state.weightedNewGPA}</Text>
 
           <Text style={{fontSize:40,marginTop:20}}>Debuging info:</Text>
