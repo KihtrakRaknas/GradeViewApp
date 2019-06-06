@@ -447,7 +447,11 @@ class settings extends React.Component {
       var needBiometricR = false;
       if(needBiometric === 'true')
         needBiometricR = true;
-        this.state.needBiometric = needBiometricR;
+      LocalAuthentication.isEnrolledAsync().then((isEnrolled)=>{
+          if(isEnrolled)
+            this.state.needBiometric = needBiometricR;
+      })
+      
     });
     AsyncStorage.getItem('username').then((user)=>{
       if(user)
@@ -777,14 +781,10 @@ class settings extends React.Component {
   }
 
   render() {
-    var switchEl = null
-    if(this.state.needBiometric !=null)
-      switchEl = <Switch onValueChange={()=>{ 
-        var val = !this.state.needBiometric; 
-        AsyncStorage.setItem('needBiometric',val.toString()).then((result)=>{
-          this.setState({needBiometric: val});
-        })
-    }} value={this.state.needBiometric}/>
+    var switchEl = <Text>Not Available</Text>
+    if(this.state.needBiometric != null)
+          switchEl = <Switch onValueChange={()=>{ var val = !this.state.needBiometric; AsyncStorage.setItem('needBiometric',val.toString()).then((result)=>{this.setState({needBiometric: val});})}} value={this.state.needBiometric}/>
+
       return(
         <ScrollView style={{flex: 1, flexDirection: 'column', padding:10}}>
           <Text style={{fontSize:40}}>GPA</Text>
