@@ -11,6 +11,7 @@ require('create-react-class');
 import { Permissions, Notifications } from 'expo';
 import {Linking, Platform} from 'react-native';
 import Toast, {DURATION} from 'react-native-easy-toast';
+import * as LocalAuthentication from 'expo-local-authentication';
 
 var grades;
 
@@ -93,7 +94,10 @@ class LoadInComponent extends React.Component {
 
   componentWillMount(){
     console.log("LOADIN COMPONENT RUNNIN")
+    LocalAuthentication.authenticateAsync().then(()=>{console.log("AHHHH")})
+    console.log("LOADIN COMPONENT DONE!!!")
     AsyncStorage.getItem('username').then((user)=>{
+      console.log("TEST")
       console.log(user);
       if(user==null){
         signOutGlobal();
@@ -546,7 +550,7 @@ class settings extends React.Component {
     })
     .then((responseJson) => {
       console.log("old")
-      console.log(responseJson)
+      //console.log(responseJson)
       return responseJson
     });
   }
@@ -922,13 +926,13 @@ class home extends LoadInComponent {
     var table = []
     var count = 0;
     var mps = this.genMpsArray();
-    console.log(grades)
+    //console.log(grades)
     var ClassNames = [];
     if(grades)
       ClassNames = Object.keys(grades).sort()
     for(classN of ClassNames){
       var maxMarking=this.state.currentMarking;
-      console.log(maxMarking);
+      //console.log(maxMarking);
       var avg = "";
       var teach = "";
       if(grades[classN][maxMarking]){
@@ -993,16 +997,16 @@ class home extends LoadInComponent {
         if(this.state.currentMarking == "Select MP")
         AsyncStorage.getItem('MP').then((mp)=>{
           console.log("mp")
-          console.log(mp)
+          //console.log(mp)
           if(!mp){
             var mps = this.genMpsArray();
-            console.log(mps)
+            //console.log(mps)
             if(mps.length>0){
               AsyncStorage.setItem('MP', mps[mps.length-1]).then(()=>{
                 
                 this.props.navigation.setParams({ currentMarking: mps[mps.length-1]});
                 this.setState({currentMarking: mps[mps.length-1]});
-                console.log(mps[mps.length-1])  
+                //console.log(mps[mps.length-1])  
               })
             }
           }else{
@@ -1191,8 +1195,8 @@ const TabNav = createBottomTabNavigator(
         let iconName = "list_alt";
         let type = "material"
         if (routeName === 'Home') {
-          type="antdesign"
-          iconName = `${focused ? 'infocirlce' : 'infocirlceo'}`;
+          type="FontAwesome5"
+          iconName = "home"//`${focused ? 'infocirlce' : 'infocirlceo'}`;
         } else if (routeName === 'Assignments') {
           if(focused){
             type = "ionicon";
@@ -1287,7 +1291,7 @@ class SignIn extends React.Component {
 			  return response.json();
 	  	})
 			.then((responseJson) => {
-        console.log(responseJson);
+        //console.log(responseJson);
         if(responseJson['valid']==true){
           AsyncStorage.setItem('username', email).then(()=>{
             AsyncStorage.setItem('password', pass).then(()=>{
