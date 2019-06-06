@@ -28,7 +28,7 @@ class LoadInComponent extends React.Component {
                     for(var assignment of obj[className][markingPeriod]["Assignments"]){
                       var year = "19";
                       if(assignment["Date"].includes("\n")){
-                        if(parseInt((assignment["Date"].split("\n")[1]).split("/")[0])>5)
+                        if(parseInt((assignment["Date"].split("\n")[1]).split("/")[0])>6)
                           year = "18";
                         //assignment["Name"] = (assignment["Date"].split("/")[1]).split("\n")[0];
                         assignment["Timestamp"] = Date.parse(assignment["Date"]+"/"+year);
@@ -332,7 +332,7 @@ componentDidMount(){
                     //console.log(obj[className][markingPeriod]["Assignments"]);
                     for(var assignment of obj[className][markingPeriod]["Assignments"]){
                       var year = "19";
-                      if(parseInt((assignment["Date"].split("\n")[1]).split("/")[0])>5)
+                      if(parseInt((assignment["Date"].split("\n")[1]).split("/")[0])>6)
                         year = "18";
                       //assignment["Name"] = (assignment["Date"].split("/")[1]).split("\n")[0];
                       assignment["Timestamp"] = Date.parse(assignment["Date"]+"/"+year);
@@ -478,7 +478,7 @@ class settings extends React.Component {
   };
 
   letterGradeToGPA = (letter) =>{
-    switch(letter) {
+    switch(letter.substring(0,2).trim()) {
       case "A+":
         return 4.0
         break;
@@ -520,6 +520,7 @@ class settings extends React.Component {
         break;
       default:
         Alert.alert("There was a an error getting your GPA, please report this using the provide feedback button")
+        return "error"
     }
   }
 
@@ -544,6 +545,8 @@ class settings extends React.Component {
       return response.json();
     })
     .then((responseJson) => {
+      console.log("old")
+      console.log(responseJson)
       return responseJson
     });
   }
@@ -569,6 +572,7 @@ class settings extends React.Component {
       return response.json();
     })
     .then((responseJson) => {
+      console.log("new")
       return responseJson
     });
   }
@@ -576,11 +580,12 @@ class settings extends React.Component {
   componentDidMount = () =>{
     this.getOldFGs().then((FGs)=>{
       var GPA = null;
-      console.log(FGs)
       for(var year of FGs){
         var yrGPA = 0;
         var totalCredits=0;
         for(var classs of year){
+          if(this.letterGradeToGPA(classs["FG"]) == "error")
+            continue;
           totalCredits += classs["Credits"];
           yrGPA += this.letterGradeToGPA(classs["FG"])*classs["Credits"];
         }
@@ -595,11 +600,12 @@ class settings extends React.Component {
 
       var weightedGPA = null;
       var failed = false;
-      console.log(FGs)
       for(var year of FGs){
         var yrGPA = 0;
         var totalCredits=0;
         for(var classs of year){
+          if(this.letterGradeToGPA(classs["FG"]) == "error")
+            continue;
           totalCredits += classs["Credits"];
           if(classs["Weight"]){
             yrGPA += (this.letterGradeToGPA(classs["FG"])+this.weightToGPABoost(classs["Weight"]))*classs["Credits"];
@@ -619,11 +625,12 @@ class settings extends React.Component {
 
       this.getNewFGs().then((newFGs)=>{
         var newGPA = null;
-        console.log(FGs)
         for(var year of FGs){
           var yrGPA = 0;
           var totalCredits=0;
           for(var classs of year){
+            if(this.letterGradeToGPA(classs["FG"]) == "error")
+              continue;
             totalCredits += classs["Credits"];
             yrGPA += this.letterGradeToGPA(classs["FG"])*classs["Credits"];
           }
@@ -640,16 +647,18 @@ class settings extends React.Component {
           let totalGPA = 0;
           for(gradePerMP in classs){
             if(gradePerMP.includes("MP")){
+              if(this.letterGradeToGPA(classs[gradePerMP]) == "error")
+                continue;
               total++;
               totalGPA+=this.letterGradeToGPA(classs[gradePerMP])
             }
           }
           let classGPA = totalGPA/total
-          if(classs["ME"]&&classs["FE"])
+          if(classs["ME"]&&classs["FE"]&&this.letterGradeToGPA(classs["ME"]) != "error"&&this.letterGradeToGPA(classs["FE"]) != "error")
             classGPA = classGPA*.8+this.letterGradeToGPA(classs["ME"])*.1+this.letterGradeToGPA(classs["FE"])*.1
-          else if(classs["ME"])
+          else if(classs["ME"]&&this.letterGradeToGPA(classs["ME"]) != "error")
             classGPA = classGPA*.9+this.letterGradeToGPA(classs["ME"])*.1
-          else if(classs["FE"])
+          else if(classs["FE"]&&this.letterGradeToGPA(classs["FE"]) != "error")
             classGPA = classGPA*.9+this.letterGradeToGPA(classs["FE"])*.1
           yrGPA += classGPA*classs["Credits"];
         }
@@ -666,11 +675,12 @@ class settings extends React.Component {
 
           var newWeightedGPA = null;
           var failed = false;
-          console.log(FGs)
           for(var year of FGs){
             var yrGPA = 0;
             var totalCredits=0;
             for(var classs of year){
+              if(this.letterGradeToGPA(classs["FG"]) == "error")
+                continue;
               totalCredits += classs["Credits"];
               if(classs["Weight"]){
                 yrGPA += (this.letterGradeToGPA(classs["FG"])+this.weightToGPABoost(classs["Weight"]))*classs["Credits"];
@@ -692,16 +702,18 @@ class settings extends React.Component {
             let totalGPA = 0;
             for(gradePerMP in classs){
               if(gradePerMP.includes("MP")){
+                if(this.letterGradeToGPA(classs[gradePerMP]) == "error")
+                  continue;
                 total++;
                 totalGPA+=this.letterGradeToGPA(classs[gradePerMP])
               }
             }
             let classGPA = totalGPA/total
-            if(classs["ME"]&&classs["FE"])
+            if(classs["ME"]&&classs["FE"]&&this.letterGradeToGPA(classs["ME"])!="error"&&this.letterGradeToGPA(classs["FE"])!="error")
               classGPA = classGPA*.8+this.letterGradeToGPA(classs["ME"])*.1+this.letterGradeToGPA(classs["FE"])*.1
-            else if(classs["ME"])
+            else if(classs["ME"]&&this.letterGradeToGPA(classs["ME"])!="error")
               classGPA = classGPA*.9+this.letterGradeToGPA(classs["ME"])*.1
-            else if(classs["FE"])
+            else if(classs["FE"]&&this.letterGradeToGPA(classs["FE"])!="error")
               classGPA = classGPA*.9+this.letterGradeToGPA(classs["FE"])*.1
             
             if(classs["Weight"]){
@@ -1070,7 +1082,7 @@ class ClassScreen extends React.Component {
                     for(var assignment of obj[className][markingPeriod]["Assignments"]){
                       var year = "19";
                       if(assignment["Date"].includes("\n")){
-                        if(parseInt((assignment["Date"].split("\n")[1]).split("/")[0])>5)
+                        if(parseInt((assignment["Date"].split("\n")[1]).split("/")[0])>6)
                           year = "18";
                         //assignment["Name"] = (assignment["Date"].split("/")[1]).split("\n")[0];
                         assignment["Timestamp"] = Date.parse(assignment["Date"]+"/"+year);
