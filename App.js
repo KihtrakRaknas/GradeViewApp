@@ -1,5 +1,5 @@
 import React from 'react';
-import { AppRegistry, SectionList, StyleSheet, Text, View ,ActivityIndicator, Alert, Button, TouchableOpacity,TextInput ,KeyboardAvoidingView , ScrollView, Picker,StatusBar,RefreshControl} from 'react-native';
+import { AppRegistry, SectionList, StyleSheet, Text, View ,ActivityIndicator, Alert, Button, TouchableOpacity,TextInput ,KeyboardAvoidingView , ScrollView, Picker,StatusBar,RefreshControl, Switch} from 'react-native';
 import { Ionicons ,FontAwesome  } from '@expo/vector-icons';
 import { createBottomTabNavigator, createAppContainer, TabBarBottom, createStackNavigator} from 'react-navigation';
 import { Icon, Input  } from 'react-native-elements'
@@ -11,7 +11,7 @@ require('create-react-class');
 import { Permissions, Notifications } from 'expo';
 import {Linking, Platform} from 'react-native';
 import Toast, {DURATION} from 'react-native-easy-toast';
-import * as LocalAuthentication from 'expo-local-authentication';
+import { LocalAuthentication } from 'expo';
 
 var grades;
 
@@ -94,7 +94,6 @@ class LoadInComponent extends React.Component {
 
   componentWillMount(){
     console.log("LOADIN COMPONENT RUNNIN")
-    LocalAuthentication.authenticateAsync().then(()=>{console.log("AHHHH")})
     console.log("LOADIN COMPONENT DONE!!!")
     AsyncStorage.getItem('username').then((user)=>{
       console.log("TEST")
@@ -444,6 +443,12 @@ class settings extends React.Component {
     Notifications.getExpoPushTokenAsync().then((token)=>{
       this.setState({pushToken:token})
     })
+    AsyncStorage.getItem('needBiometric').then((needBiometric)=>{
+      var needBiometricR = false;
+      if(needBiometric === 'true')
+        needBiometricR = true;
+        this.state.needBiometric = needBiometricR;
+    });
     AsyncStorage.getItem('username').then((user)=>{
       if(user)
         this.state.id = user;
@@ -772,6 +777,14 @@ class settings extends React.Component {
   }
 
   render() {
+    var switchEl = null
+    if(this.state.needBiometric !=null)
+      switchEl = <Switch onValueChange={()=>{ 
+        var val = !this.state.needBiometric; 
+        AsyncStorage.setItem('needBiometric',val.toString()).then((result)=>{
+          this.setState({needBiometric: val});
+        })
+    }} value={this.state.needBiometric}/>
       return(
         <ScrollView style={{flex: 1, flexDirection: 'column', padding:10}}>
           <Text style={{fontSize:40}}>GPA</Text>
@@ -783,9 +796,14 @@ class settings extends React.Component {
           <Text style={{fontSize:20}}>Unweighted: {this.state.unweightedNewGPA}</Text>
           <Text style={{fontSize:20}}>Weighted: {this.state.weightedNewGPA}</Text>
 
-          <Text style={{fontSize:40,marginTop:20}}>Debuging info:</Text>
+          <Text style={{fontSize:40,marginTop:20}}>Options:</Text>
+          <Text style={{fontSize:20}}>Secure biometrics: {switchEl}</Text>
+
+          <Text style={{fontSize:40,marginTop:20}}>Debugging info:</Text>
           <Text>{this.state.id}</Text>
           <Text style={{marginBottom:20}}>{this.state.pushToken}</Text>
+
+          
           <Button 
           onPress={() => Linking.openURL('mailto:gradeViewApp@kihtrak.com?subject=Feedback%20about%20the%20app') }
           title="Provide Feedback" 
@@ -1451,12 +1469,31 @@ class SignIn extends React.Component {
       signOutGlobal = signOutGlobal.bind(this);
       signInGlobal = signInGlobal.bind(this);
       this.state = {user:9};
-      AsyncStorage.getItem('username').then((user)=>{
-        console.log(user);
-        this.setState({user:user})
-      });
+      this.returningUser();
     }
 
+    returningUser = () =>{
+      AsyncStorage.getItem('username').then((user)=>{
+        console.log(user);
+        AsyncStorage.getItem('needBiometric').then((needBiometric)=>{
+          if(needBiometric === 'true')
+            LocalAuthentication.isEnrolledAsync().then((valid)=>{
+              if(valid)
+                LocalAuthentication.authenticateAsync("Authenticate to view grades").then((result)=>{
+                  if(result["success"])
+                    this.setState({user:user})
+                  else  
+                  this.setState({user:8})
+                }) 
+              else
+                this.setState({user:user})
+            })
+          else 
+            this.setState({user:user})
+        })
+        
+      });
+    }
     componentDidMount(){
       this._notificationSubscription = Notifications.addListener(this._handleNotification);
     }
@@ -1471,6 +1508,8 @@ class SignIn extends React.Component {
     render(){
       if(this.state.user == 9)
         return null;
+      if(this.state.user == 8)
+        return <View style={{flex:1,justifyContent: 'center',alignItems: 'center'}}><Text>Please Authenticate</Text><Button title="Authenticate Again" onPress={this.returningUser}></Button></View>;
       if(this.state.user){
         console.log("tab nav");
         
