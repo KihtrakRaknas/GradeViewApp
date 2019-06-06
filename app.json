@@ -25,7 +25,8 @@
     "ios": {
       "supportsTablet": true,
       "infoPlist": {
-        "NSNotificationDescription": "This app uses notifications to notify you of changes in your grades"
+        "NSNotificationDescription": "This app uses notifications to notify you of changes in your grades",
+        "NSFaceIDUsageDescription": "Face ID can be used to secure your grades"
       },
       "bundleIdentifier": "com.kihtrak.REGEN"
     },
