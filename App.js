@@ -666,14 +666,16 @@ class settings extends React.Component {
               totalGPA+=this.letterGradeToGPA(classs[gradePerMP])
             }
           }
-          let classGPA = totalGPA/total
-          if(classs["ME"]&&classs["FE"]&&this.letterGradeToGPA(classs["ME"]) != "error"&&this.letterGradeToGPA(classs["FE"]) != "error")
-            classGPA = classGPA*.8+this.letterGradeToGPA(classs["ME"])*.1+this.letterGradeToGPA(classs["FE"])*.1
-          else if(classs["ME"]&&this.letterGradeToGPA(classs["ME"]) != "error")
-            classGPA = classGPA*.9+this.letterGradeToGPA(classs["ME"])*.1
-          else if(classs["FE"]&&this.letterGradeToGPA(classs["FE"]) != "error")
-            classGPA = classGPA*.9+this.letterGradeToGPA(classs["FE"])*.1
-          yrGPA += classGPA*classs["Credits"];
+          if(total){
+            let classGPA = totalGPA/total
+            if(classs["ME"]&&classs["FE"]&&this.letterGradeToGPA(classs["ME"]) != "error"&&this.letterGradeToGPA(classs["FE"]) != "error")
+              classGPA = classGPA*.8+this.letterGradeToGPA(classs["ME"])*.1+this.letterGradeToGPA(classs["FE"])*.1
+            else if(classs["ME"]&&this.letterGradeToGPA(classs["ME"]) != "error")
+              classGPA = classGPA*.9+this.letterGradeToGPA(classs["ME"])*.1
+            else if(classs["FE"]&&this.letterGradeToGPA(classs["FE"]) != "error")
+              classGPA = classGPA*.9+this.letterGradeToGPA(classs["FE"])*.1
+            yrGPA += classGPA*classs["Credits"];
+          }
         }
         yrGPA = yrGPA/totalCredits;
         newGPA += yrGPA/(FGs.length+1)
@@ -721,19 +723,21 @@ class settings extends React.Component {
                 totalGPA+=this.letterGradeToGPA(classs[gradePerMP])
               }
             }
-            let classGPA = totalGPA/total
-            if(classs["ME"]&&classs["FE"]&&this.letterGradeToGPA(classs["ME"])!="error"&&this.letterGradeToGPA(classs["FE"])!="error")
-              classGPA = classGPA*.8+this.letterGradeToGPA(classs["ME"])*.1+this.letterGradeToGPA(classs["FE"])*.1
-            else if(classs["ME"]&&this.letterGradeToGPA(classs["ME"])!="error")
-              classGPA = classGPA*.9+this.letterGradeToGPA(classs["ME"])*.1
-            else if(classs["FE"]&&this.letterGradeToGPA(classs["FE"])!="error")
-              classGPA = classGPA*.9+this.letterGradeToGPA(classs["FE"])*.1
-            
-            if(classs["Weight"]){
-              yrGPA += (classGPA+this.weightToGPABoost(classs["Weight"]))*classs["Credits"];
-            }else{
-              failed = true;
-              Alert.alert('One or more of your classes does not have a known weighting. Please report this using the "Provide Feedback button"')
+            if(total){
+              let classGPA = totalGPA/total
+              if(classs["ME"]&&classs["FE"]&&this.letterGradeToGPA(classs["ME"])!="error"&&this.letterGradeToGPA(classs["FE"])!="error")
+                classGPA = classGPA*.8+this.letterGradeToGPA(classs["ME"])*.1+this.letterGradeToGPA(classs["FE"])*.1
+              else if(classs["ME"]&&this.letterGradeToGPA(classs["ME"])!="error")
+                classGPA = classGPA*.9+this.letterGradeToGPA(classs["ME"])*.1
+              else if(classs["FE"]&&this.letterGradeToGPA(classs["FE"])!="error")
+                classGPA = classGPA*.9+this.letterGradeToGPA(classs["FE"])*.1
+              
+              if(classs["Weight"]){
+                yrGPA += (classGPA+this.weightToGPABoost(classs["Weight"]))*classs["Credits"];
+              }else{
+                failed = true;
+                Alert.alert('One or more of your classes does not have a known weighting. Please report this using the "Provide Feedback button"')
+              }
             }
           }
           yrGPA = yrGPA/totalCredits;
