@@ -12,6 +12,7 @@ import { Permissions, Notifications } from 'expo';
 import {Linking, Platform} from 'react-native';
 import Toast, {DURATION} from 'react-native-easy-toast';
 import { LocalAuthentication } from 'expo';
+import { SearchBar } from 'react-native-elements';
 
 var grades;
 
@@ -1201,6 +1202,7 @@ const AssignmentsStack = createStackNavigator({
 
 const SettingsStack = createStackNavigator({
   Settings: { screen: settings },
+  Contacts: (screen: Contacts)
 });
 
 const TabNav = createBottomTabNavigator(
@@ -1465,6 +1467,102 @@ class SignIn extends React.Component {
       this.setState({user:user})
     });
   }
+
+
+
+
+  var options = {
+    shouldSort: true,
+    threshold: 0.6,
+    location: 0,
+    distance: 100,
+    maxPatternLength: 32,
+    minMatchCharLength: 1,
+    keys: [
+      "name",
+      "email"
+    ]
+  };
+  
+
+  class Contacts extends React.Component {
+
+	  constructor(props){
+      super(props);
+      this.state ={ contacts: {}, search: '', result:{}}
+      AsyncStorage.getItem('contacts').then((contacts)=>{
+        if(contacts)
+          this.state.contacts = contacts;
+      })
+    }
+
+    componentWillMount = () =>{
+      AsyncStorage.getItem('oldUsername').then((user)=>{
+        if(user){
+          this.setState({OldAccount:true})
+        }else{
+          this.setState({OldAccount:false})
+        }
+      })
+    }
+
+    updateSearch = search => {
+      if(this.state.contacts){
+        var fuse = new Fuse(this.state.contacts, options);
+        this.setState({ search: search, result: fuse.search(search)});
+      }
+    };
+
+    getContacts = () =>{
+      return fetch('https://raw.githubusercontent.com/KihtrakRaknas/DirectoryScraper/master/output.json', {
+        method: 'GET',
+        headers: {
+          Accept: 'application/json',
+          'Content-Type': 'application/json',
+          },
+        })
+        .then((response) => {
+          console.log(typeof response)
+          return response.json();
+        })
+        .then((responseJson) => {
+          AsyncStorage.setItem('contacts',responseJson)
+          return responseJson
+        })
+    }
+
+
+    render() {
+      let list = <Text>No results</Text>
+      if(this.state.result)
+        list = <FlatList
+          data={this.state.result}
+          renderItem={({item}) => <Text>{item.name}\n{item.email}</Text>}
+        />
+        return(
+          <View>
+            <SearchBar
+              placeholder="Type Here..."
+              onChangeText={this.updateSearch}
+              value={this.state.search}
+            />
+            {list}
+          </View>
+        )
+    }
+
+  }
+
+
+
+
+
+
+
+
+
+
+
  
   const AppContainer = createAppContainer(TabNav)
   export default class App extends React.Component {
