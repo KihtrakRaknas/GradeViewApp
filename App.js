@@ -1,5 +1,5 @@
 import React from 'react';
-import { AppRegistry, SectionList, StyleSheet, Text, View ,ActivityIndicator, Alert, Button, TouchableOpacity,TextInput ,KeyboardAvoidingView , ScrollView, Picker,StatusBar,RefreshControl, Switch} from 'react-native';
+import { AppRegistry, SectionList, StyleSheet, Text, View ,ActivityIndicator, Alert, Button, TouchableOpacity,TextInput ,KeyboardAvoidingView , ScrollView, Picker,StatusBar,RefreshControl, Switch, FlatList} from 'react-native';
 import { Ionicons ,FontAwesome  } from '@expo/vector-icons';
 import { createBottomTabNavigator, createAppContainer, TabBarBottom, createStackNavigator} from 'react-navigation';
 import { Icon, Input  } from 'react-native-elements'
@@ -12,8 +12,8 @@ import { Permissions, Notifications } from 'expo';
 import {Linking, Platform} from 'react-native';
 import Toast, {DURATION} from 'react-native-easy-toast';
 import { LocalAuthentication } from 'expo';
-import { SearchBar } from 'react-native-elements';
-
+import { SearchBar, ListItem } from 'react-native-elements';
+import Fuse from 'fuse.js';
 var grades;
 
 class LoadInComponent extends React.Component {
@@ -808,11 +808,18 @@ class settings extends React.Component {
           <Text>{this.state.id}</Text>
           <Text style={{marginBottom:20}}>{this.state.pushToken}</Text>
 
-          
+          <Button 
+          onPress={() => this.props.navigation.navigate('Contacts') }
+          title="Global Name Lookup" 
+          />
+
+
           <Button 
           onPress={() => Linking.openURL('mailto:gradeViewApp@kihtrak.com?subject=Feedback%20about%20the%20app') }
           title="Provide Feedback" 
           />
+
+
           <Button
           onPress = {this.signOut}
           title = "Switch Accounts"
@@ -1191,6 +1198,124 @@ class ClassScreen extends React.Component {
 
 }
 
+
+var options = {
+  shouldSort: true,
+  threshold: 0.1,
+  location: 0,
+  distance: 100,
+  maxPatternLength: 32,
+  minMatchCharLength: 1,
+  keys: [
+    "name",
+    "email"
+  ]
+};
+let totalFuse = 0;
+var fuse = new Fuse([], options);
+class Contacts extends React.Component {
+
+  constructor(props){
+    super(props);
+    this.state ={ contacts: {}, search: '', result:{}}
+    AsyncStorage.getItem('contacts').then((contacts)=>{
+      if(contacts&&JSON.parse(contacts)){
+        let newContacts = JSON.parse(contacts)
+        fuse = new Fuse(newContacts, options);
+        this.setState({contacts:newContacts});
+      }
+    })
+  }
+
+  componentWillMount = () =>{
+    this.getContacts()
+  }
+
+  
+
+  updateSearch = async search => {
+    if(this.state.contacts){
+      totalFuse++
+      let result = fuse.search(search)
+      this.setState({ search: search, result: result});
+      console.log(totalFuse)
+      totalFuse--;
+    }
+  };
+
+  getContacts = () =>{
+    return fetch('https://raw.githubusercontent.com/KihtrakRaknas/DirectoryScraper/master/output.json', {
+      method: 'GET',
+      headers: {
+        Accept: 'application/json',
+        'Content-Type': 'application/json',
+        },
+      })
+      .then((response) => {
+        console.log(typeof response)
+        return response.json();
+      })
+      .then((responseJson) => {
+        fuse = new Fuse(responseJson, options);
+        AsyncStorage.setItem('contacts',JSON.stringify(responseJson))
+        this.setState({contacts:responseJson});
+        return responseJson
+      })
+  }
+
+
+  render() {
+    let list = <View style={{flex:1,justifyContent: 'center',alignItems: 'center'}}><Text style={{fontSize:20}}>Contacts are not current available, connect to the internet and try again</Text></View>
+    
+    if(Object.keys(this.state.contacts).length>0){
+      arr = this.state.contacts;
+      if(this.state.search)//Object.keys(this.state.result).length>0
+        arr = this.state.result;
+      list = <FlatList
+        data={arr}
+        ListEmptyComponent={<View style={{flex:1,justifyContent: 'center',alignItems: 'center'}}><Text style={{fontSize:20}}>No results</Text></View>}
+        keyExtractor={item => item.email}
+        ListHeaderComponent={          <SearchBar
+          placeholder="Search Name/ID #"
+          onChangeText={this.updateSearch}
+          value={this.state.search}
+          lightTheme
+          showLoading = {totalFuse!=0}
+          onCancel = {()=>{this.setState({search:null});console.log("kill")}}
+        />}
+        ItemSeparatorComponent={({item}) => <View style={{flex: 1, justifyContent: 'center', alignItems: 'center' }}><View style={{height: 0.5, width: '96%', backgroundColor: '#C8C8C8', }}/></View>}
+        renderItem={({item}) => <NameIDItem item={item}/>}
+      />
+    }
+      return(
+        //<View style={{flex:1,justifyContent: 'center',alignItems: 'center'}}>
+        <View>
+
+          {list}
+        </View>
+      )
+  }
+
+}
+
+
+class NameIDItem extends React.PureComponent {
+  constructor(props){
+    super(props);
+    this.state ={ name: this.props.nams, id:""}
+  }
+  render() {
+    return (
+<ListItem
+          title={this.props.item.name}
+          subtitle={this.props.item.email}
+        />
+    )
+  }
+}
+
+
+
 const HomeStack = createStackNavigator({
   Home: { screen: home},
   Class:{ screen: ClassScreen},
@@ -1202,7 +1327,7 @@ const AssignmentsStack = createStackNavigator({
 
 const SettingsStack = createStackNavigator({
   Settings: { screen: settings },
-  Contacts: (screen: Contacts)
+  Contacts: {screen: Contacts}
 });
 
 const TabNav = createBottomTabNavigator(
@@ -1467,99 +1592,6 @@ class SignIn extends React.Component {
       this.setState({user:user})
     });
   }
-
-
-
-
-  var options = {
-    shouldSort: true,
-    threshold: 0.6,
-    location: 0,
-    distance: 100,
-    maxPatternLength: 32,
-    minMatchCharLength: 1,
-    keys: [
-      "name",
-      "email"
-    ]
-  };
-  
-
-  class Contacts extends React.Component {
-
-	  constructor(props){
-      super(props);
-      this.state ={ contacts: {}, search: '', result:{}}
-      AsyncStorage.getItem('contacts').then((contacts)=>{
-        if(contacts)
-          this.state.contacts = contacts;
-      })
-    }
-
-    componentWillMount = () =>{
-      AsyncStorage.getItem('oldUsername').then((user)=>{
-        if(user){
-          this.setState({OldAccount:true})
-        }else{
-          this.setState({OldAccount:false})
-        }
-      })
-    }
-
-    updateSearch = search => {
-      if(this.state.contacts){
-        var fuse = new Fuse(this.state.contacts, options);
-        this.setState({ search: search, result: fuse.search(search)});
-      }
-    };
-
-    getContacts = () =>{
-      return fetch('https://raw.githubusercontent.com/KihtrakRaknas/DirectoryScraper/master/output.json', {
-        method: 'GET',
-        headers: {
-          Accept: 'application/json',
-          'Content-Type': 'application/json',
-          },
-        })
-        .then((response) => {
-          console.log(typeof response)
-          return response.json();
-        })
-        .then((responseJson) => {
-          AsyncStorage.setItem('contacts',responseJson)
-          return responseJson
-        })
-    }
-
-
-    render() {
-      let list = <Text>No results</Text>
-      if(this.state.result)
-        list = <FlatList
-          data={this.state.result}
-          renderItem={({item}) => <Text>{item.name}\n{item.email}</Text>}
-        />
-        return(
-          <View>
-            <SearchBar
-              placeholder="Type Here..."
-              onChangeText={this.updateSearch}
-              value={this.state.search}
-            />
-            {list}
-          </View>
-        )
-    }
-
-  }
-
-
-
-
-
-
-
-
 
 
 
