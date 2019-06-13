@@ -1,5 +1,5 @@
 import React from 'react';
-import { AppRegistry, SectionList, StyleSheet, Text, View ,ActivityIndicator, Alert, Button, TouchableOpacity,TextInput ,KeyboardAvoidingView , ScrollView, Picker,StatusBar,RefreshControl, Switch, FlatList} from 'react-native';
+import { AppRegistry, SectionList, StyleSheet, Text, View ,ActivityIndicator, Alert, Button, TouchableOpacity,TextInput ,KeyboardAvoidingView , ScrollView, Picker,StatusBar,RefreshControl, Switch, FlatList, AppState} from 'react-native';
 import { Ionicons ,FontAwesome  } from '@expo/vector-icons';
 import { createBottomTabNavigator, createAppContainer, TabBarBottom, createStackNavigator} from 'react-navigation';
 import { Icon, Input  } from 'react-native-elements'
@@ -13,6 +13,7 @@ import {Linking, Platform} from 'react-native';
 import Toast, {DURATION} from 'react-native-easy-toast';
 import { LocalAuthentication } from 'expo';
 import { SearchBar, ListItem } from 'react-native-elements';
+import {SplashScreen } from 'expo';
 import Fuse from 'fuse.js';
 var grades;
 
@@ -96,6 +97,8 @@ class LoadInComponent extends React.Component {
   componentWillMount(){
     console.log("LOADIN COMPONENT RUNNIN")
     console.log("LOADIN COMPONENT DONE!!!")
+    console.log(AppState.currentState)
+    AppState.addEventListener('change', this._handleAppStateChange);
     AsyncStorage.getItem('username').then((user)=>{
       console.log("TEST")
       console.log(user);
@@ -108,6 +111,20 @@ class LoadInComponent extends React.Component {
       }
     })
   }
+
+  componentWillUnmount() {
+    AppState.removeEventListener('change', this._handleAppStateChange);
+  }
+
+  _handleAppStateChange = (nextAppState) => {
+    if (
+      this.state.appState&&this.state.appState.match(/inactive|background/) &&
+      nextAppState === 'active'
+    ) {
+      this.getGrade()
+    }
+    this.setState({appState: nextAppState});
+  };
 
      registerForPushNotificationsAsync = async(user) => {
       const { status: existingStatus } = await Permissions.getAsync(
@@ -440,39 +457,13 @@ class settings extends React.Component {
 
   constructor(props){
     super(props);
-    this.state ={ isLoading: false, email:"", password:"", pushToken:"No Token", id: "loading", unweightedOldGPA:"Not Available", weightedOldGPA:"Not Available", unweightedNewGPA:"Not Available",weightedNewGPA:"Not Available"}
+    this.state ={ isLoading: false, email:"", password:"", pushToken:"No Token", id: "loading", }
     Notifications.getExpoPushTokenAsync().then((token)=>{
       this.setState({pushToken:token})
     })
-    AsyncStorage.getItem('needBiometric').then((needBiometric)=>{
-      var needBiometricR = false;
-      if(needBiometric === 'true')
-        needBiometricR = true;
-      LocalAuthentication.isEnrolledAsync().then((isEnrolled)=>{
-          if(isEnrolled)
-            this.state.needBiometric = needBiometricR;
-      })
-      
-    });
     AsyncStorage.getItem('username').then((user)=>{
       if(user)
         this.state.id = user;
-    });
-    AsyncStorage.getItem('weightedOldGPA').then((gpa)=>{
-      if(gpa)
-        this.state.weightedOldGPA = gpa;
-    });
-    AsyncStorage.getItem('unweightedOldGPA').then((gpa)=>{
-      if(gpa)
-        this.state.unweightedOldGPA = gpa;
-    });
-    AsyncStorage.getItem('unweightedNewGPA').then((gpa)=>{
-      if(gpa)
-        this.state.unweightedNewGPA = gpa;
-    });
-    AsyncStorage.getItem('weightedNewGPA').then((gpa)=>{
-      if(gpa)
-        this.state.weightedNewGPA = gpa;
     });
   }
   static navigationOptions = ({ navigation }) => {
@@ -482,349 +473,55 @@ class settings extends React.Component {
     }
   }
 
-  weightToGPABoost = (weight) =>{
-    if(weight.includes("A.P."))
-      return 1;
-    else if(weight.includes("Honors"))
-      return .5;
-    else
-      return 0;
-  };
-
-  letterGradeToGPA = (letter) =>{
-    switch(letter.substring(0,2).trim()) {
-      case "A+":
-        return 4.0
-        break;
-      case "A":
-        return 4.0
-        break;
-      case "A-":
-        return 3.7
-        break;
-      case "B+":
-        return 3.3
-        break;
-      case "B":
-        return 3.0
-        break;  
-      case "B-":
-        return 2.7
-        break;
-      case "C+":
-        return 2.3
-        break;
-      case "C":
-        return 2.0
-        break;
-      case "C-":
-        return 1.7
-        break;
-      case "D+":
-        return 1.3
-        break;
-      case "D":
-        return 1.0
-        break;  
-      case "D-":
-        return 0.7
-        break;
-      case "F":
-        return 0.0
-        break;
-      default:
-        Alert.alert("There was a an error getting your GPA, please report this using the provide feedback button")
-        return "error"
-    }
-  }
-
-  getOldFGs = async () => {
-    this.props.navigation.setParams({loading: true});
-    console.log("TEST")
-      return fetch('https://gradeview.herokuapp.com/oldGrades', {
-      method: 'POST',
-      headers: {
-      Accept: 'application/json',
-      'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        username: await AsyncStorage.getItem('username'),//"10012734@sbstudents.org",//10012734 //
-        password: await AsyncStorage.getItem('password'),//"Sled%2#9",//Sled%2#9 //
-      }),
-    })
-    .then((response) => {
-    //console.log(response);
-    //response.json()
-    console.log(typeof response)
-      return response.json();
-    })
-    .then((responseJson) => {
-      console.log("old")
-      //console.log(responseJson)
-      return responseJson
-    });
-  }
-
-  getNewFGs = async () => {
-    this.props.navigation.setParams({loading: true});
-    console.log("TEST")
-      return fetch('https://gradeview.herokuapp.com/newGrades', {
-      method: 'POST',
-      headers: {
-      Accept: 'application/json',
-      'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        username: await AsyncStorage.getItem('username'),//"10012734@sbstudents.org",//10012734 //
-        password: await AsyncStorage.getItem('password'),//"Sled%2#9",//Sled%2#9 //
-      }),
-    })
-    .then((response) => {
-    //console.log(response);
-    //response.json()
-    console.log(typeof response)
-      return response.json();
-    })
-    .then((responseJson) => {
-      console.log("new")
-      return responseJson
-    });
-  }
-
-  componentDidMount = () =>{
-    this.getOldFGs().then((FGs)=>{
-      var GPA = null;
-      for(var year of FGs){
-        var yrGPA = 0;
-        var totalCredits=0;
-        for(var classs of year){
-          if(this.letterGradeToGPA(classs["FG"]) == "error")
-            continue;
-          totalCredits += classs["Credits"];
-          yrGPA += this.letterGradeToGPA(classs["FG"])*classs["Credits"];
-        }
-        yrGPA = yrGPA/totalCredits;
-        GPA += yrGPA/FGs.length
-      }
-      if(GPA){
-        this.setState({unweightedOldGPA:GPA.toFixed(2)})
-        AsyncStorage.setItem('unweightedOldGPA',GPA.toFixed(2))
-      }
-        
-
-      var weightedGPA = null;
-      var failed = false;
-      for(var year of FGs){
-        var yrGPA = 0;
-        var totalCredits=0;
-        for(var classs of year){
-          if(this.letterGradeToGPA(classs["FG"]) == "error")
-            continue;
-          totalCredits += classs["Credits"];
-          if(classs["Weight"]){
-            yrGPA += (this.letterGradeToGPA(classs["FG"])+this.weightToGPABoost(classs["Weight"]))*classs["Credits"];
-          }else{
-            failed = true;
-            Alert.alert('One or more of your classes does not have a known weighting. Please report this using the "Provide Feedback button"')
-          }
-        }
-        yrGPA = yrGPA/totalCredits;
-        weightedGPA += yrGPA/FGs.length
-      }
-      if(weightedGPA&&!failed){
-        this.setState({weightedOldGPA:weightedGPA.toFixed(2)})
-        AsyncStorage.setItem('weightedOldGPA',weightedGPA.toFixed(2));
-      }
-        
-
-      this.getNewFGs().then((newFGs)=>{
-        var newGPA = null;
-        for(var year of FGs){
-          var yrGPA = 0;
-          var totalCredits=0;
-          for(var classs of year){
-            if(this.letterGradeToGPA(classs["FG"]) == "error")
-              continue;
-            totalCredits += classs["Credits"];
-            yrGPA += this.letterGradeToGPA(classs["FG"])*classs["Credits"];
-          }
-          yrGPA = yrGPA/totalCredits;
-          newGPA += yrGPA/(FGs.length+1)
-        }
-
-        var yrGPA = 0;
-        var totalCredits=0;
-        for(var classs of newFGs){
-          totalCredits += classs["Credits"];
-          
-          let total = 0;
-          let totalGPA = 0;
-          for(gradePerMP in classs){
-            if(gradePerMP.includes("MP")){
-              if(this.letterGradeToGPA(classs[gradePerMP]) == "error")
-                continue;
-              total++;
-              totalGPA+=this.letterGradeToGPA(classs[gradePerMP])
-            }
-          }
-          if(total){
-            let classGPA = totalGPA/total
-            if(classs["ME"]&&classs["FE"]&&this.letterGradeToGPA(classs["ME"]) != "error"&&this.letterGradeToGPA(classs["FE"]) != "error")
-              classGPA = classGPA*.8+this.letterGradeToGPA(classs["ME"])*.1+this.letterGradeToGPA(classs["FE"])*.1
-            else if(classs["ME"]&&this.letterGradeToGPA(classs["ME"]) != "error")
-              classGPA = classGPA*.9+this.letterGradeToGPA(classs["ME"])*.1
-            else if(classs["FE"]&&this.letterGradeToGPA(classs["FE"]) != "error")
-              classGPA = classGPA*.9+this.letterGradeToGPA(classs["FE"])*.1
-            yrGPA += classGPA*classs["Credits"];
-          }
-        }
-        yrGPA = yrGPA/totalCredits;
-        newGPA += yrGPA/(FGs.length+1)
-
-        if(newGPA){
-          this.setState({unweightedNewGPA:newGPA.toFixed(2)})
-          AsyncStorage.setItem('unweightedNewGPA',newGPA.toFixed(2))
-        }
-          
-
-
-
-          var newWeightedGPA = null;
-          var failed = false;
-          for(var year of FGs){
-            var yrGPA = 0;
-            var totalCredits=0;
-            for(var classs of year){
-              if(this.letterGradeToGPA(classs["FG"]) == "error")
-                continue;
-              totalCredits += classs["Credits"];
-              if(classs["Weight"]){
-                yrGPA += (this.letterGradeToGPA(classs["FG"])+this.weightToGPABoost(classs["Weight"]))*classs["Credits"];
-              }else{
-                failed = true;
-                Alert.alert('One or more of your classes does not have a known weighting. Please report this using the "Provide Feedback button"')
-              }
-            }
-            yrGPA = yrGPA/totalCredits;
-            newWeightedGPA += yrGPA/(FGs.length+1)
-          }
-
-          var yrGPA = 0;
-          var totalCredits=0;
-          for(var classs of newFGs){
-            totalCredits += classs["Credits"];
-            
-            let total = 0;
-            let totalGPA = 0;
-            for(gradePerMP in classs){
-              if(gradePerMP.includes("MP")){
-                if(this.letterGradeToGPA(classs[gradePerMP]) == "error")
-                  continue;
-                total++;
-                totalGPA+=this.letterGradeToGPA(classs[gradePerMP])
-              }
-            }
-            if(total){
-              let classGPA = totalGPA/total
-              if(classs["ME"]&&classs["FE"]&&this.letterGradeToGPA(classs["ME"])!="error"&&this.letterGradeToGPA(classs["FE"])!="error")
-                classGPA = classGPA*.8+this.letterGradeToGPA(classs["ME"])*.1+this.letterGradeToGPA(classs["FE"])*.1
-              else if(classs["ME"]&&this.letterGradeToGPA(classs["ME"])!="error")
-                classGPA = classGPA*.9+this.letterGradeToGPA(classs["ME"])*.1
-              else if(classs["FE"]&&this.letterGradeToGPA(classs["FE"])!="error")
-                classGPA = classGPA*.9+this.letterGradeToGPA(classs["FE"])*.1
-              
-              if(classs["Weight"]){
-                yrGPA += (classGPA+this.weightToGPABoost(classs["Weight"]))*classs["Credits"];
-              }else{
-                failed = true;
-                Alert.alert('One or more of your classes does not have a known weighting. Please report this using the "Provide Feedback button"')
-              }
-            }
-          }
-          yrGPA = yrGPA/totalCredits;
-          newWeightedGPA += yrGPA/(FGs.length+1)
-
-          if(newWeightedGPA&&!failed){
-            this.setState({weightedNewGPA:newWeightedGPA.toFixed(2)})
-            AsyncStorage.setItem('weightedNewGPA',newWeightedGPA.toFixed(2))
-          }
-            
-      });
-    })
-  }
-
-  signOut = ()=>{
-    
-    AsyncStorage.getItem('username').then((user)=>{
-      AsyncStorage.getItem('password').then((pass)=>{
-        AsyncStorage.clear().then(()=>{
-          AsyncStorage.setItem('oldUsername',user).then(()=>{
-            AsyncStorage.setItem('oldPassword',pass).then(()=>{
-              signOutGlobal();
-            });
-          });
-        })
-      });
-    });
-  }
-
-  calcGPA = () =>{
-    if(!grades)
-      return null;
-    for(classN in grades){
-      if(classN!="Status"){
-      for(marking in grades[classN]){
-        //console.log("MARK1: "+marking+"MARK2: "+classN);
-        //console.log(grades[classN]);
-        if(Number(marking.substring(2))){
-          if(!mps.includes(marking))
-            mps.push(marking);
-        }
-      }
-      }
-    }
-  }
-
+  
   render() {
-    var switchEl = <Text>Not Available</Text>
-    if(this.state.needBiometric != null)
-          switchEl = <Switch onValueChange={()=>{ var val = !this.state.needBiometric; AsyncStorage.setItem('needBiometric',val.toString()).then((result)=>{this.setState({needBiometric: val});})}} value={this.state.needBiometric}/>
+          const list = [
+            {
+              name: 'GPA',
+              iconName: 'calculator',
+              iconType: 'material-community',
+              subtitle: 'View your Grade Point Average',
+              action: () => this.props.navigation.navigate('GPA'),
+              bottomMargin:5,
+            },
+            {
+              name: 'Global Name Lookup',
+              iconName: 'account-search',
+              iconType: 'material-community',
+              subtitle: 'Search for anyone based on name or ID number',
+              action: () => this.props.navigation.navigate('Contacts'),
+              bottomMargin:40,
+            },
+            {
+              name: 'Options',
+              iconName: 'settings',
+              iconType: 'Octicons',
+              subtitle: 'View configuration options',
+              action: () => this.props.navigation.navigate('Options'),
+              bottomMargin:80,
+            },
+          ]
 
       return(
-        <ScrollView style={{flex: 1, flexDirection: 'column', padding:10}}>
-          <Text style={{fontSize:40}}>GPA</Text>
-          <Text style={{fontSize:20}}>Unweighted: {this.state.unweightedOldGPA}</Text>
-          <Text style={{fontSize:20}}>Weighted: {this.state.weightedOldGPA}</Text>
-
-          <Text style={{fontSize:40,marginTop:20}}>Current GPA (BETA)</Text>
-          <Text style={{fontSize:10}}>An estimate of your HS GPA based your grades for this year</Text>
-          <Text style={{fontSize:20}}>Unweighted: {this.state.unweightedNewGPA}</Text>
-          <Text style={{fontSize:20}}>Weighted: {this.state.weightedNewGPA}</Text>
-
-          <Text style={{fontSize:40,marginTop:20}}>Options:</Text>
-          <Text style={{fontSize:20}}>Secure biometrics: {switchEl}</Text>
-
-          <Text style={{fontSize:40,marginTop:20}}>Debugging info:</Text>
-          <Text>{this.state.id}</Text>
-          <Text style={{marginBottom:20}}>{this.state.pushToken}</Text>
-
-          <Button 
-          onPress={() => this.props.navigation.navigate('Contacts') }
-          title="Global Name Lookup" 
-          />
-
-
-          <Button 
-          onPress={() => Linking.openURL('mailto:gradeViewApp@kihtrak.com?subject=Feedback%20about%20the%20app') }
-          title="Provide Feedback" 
-          />
-
-
-          <Button
-          onPress = {this.signOut}
-          title = "Switch Accounts"
-          />
-        </ScrollView>
+<ScrollView>
+  {
+    list.map((l, i) => (
+      <ListItem
+        key={i}
+        leftIcon={{ name: l.iconName , type: l.iconType }}
+        title={l.name}
+        subtitle={l.subtitle}
+        onPress={l.action}
+        style={{marginBottom:l.bottomMargin}}
+      />
+    ))
+  }
+  <View style={{flex: 1, flexDirection: 'column', padding:15}}>
+    <Text style={{fontSize:20}}>Debugging info:</Text>
+    <Text>{this.state.id}</Text>
+    <Text style={{marginBottom:20}}>{this.state.pushToken}</Text>
+  </View>
+</ScrollView>
       )
   }
 
@@ -873,6 +570,10 @@ class home extends LoadInComponent {
     
 
     this.props.navigation.setParams({ click: this.click, genMpsArray: this.genMpsArray, genMpSelector: this.genMpSelector, updateMarkingPeriodSelectionAndriod: this.updateMarkingPeriodSelectionAndriod});
+  }
+
+  componentDidMount = () => {
+    //SplashScreen.hide()
   }
 
   static navigationOptions = ({ navigation }) => {
@@ -1201,7 +902,7 @@ class ClassScreen extends React.Component {
 
 var options = {
   shouldSort: true,
-  threshold: 0.1,
+  threshold: 0.8,
   location: 0,
   distance: 100,
   maxPatternLength: 32,
@@ -1217,7 +918,7 @@ class Contacts extends React.Component {
 
   constructor(props){
     super(props);
-    this.state ={ contacts: {}, search: '', result:{}}
+    this.state ={ contacts: [], search: '', result:null}
     AsyncStorage.getItem('contacts').then((contacts)=>{
       if(contacts&&JSON.parse(contacts)){
         let newContacts = JSON.parse(contacts)
@@ -1231,15 +932,26 @@ class Contacts extends React.Component {
     this.getContacts()
   }
 
-  
+  static navigationOptions = ({ navigation }) => {
+    return {
+      title: 'Global Lookup',
+      headerStyle: styles.navigationHeader,
+    }
+  }
 
-  updateSearch = async search => {
+  updateSearch = async => {
+    if(this.state.contacts&&this.state.search){
+      this.setState({searchLoading:true})
+      let result = fuse.search(this.state.search)
+      this.setState({result: result,searchLoading:false});
+    }
+  };
+
+  updateSearchVal = async search => {
+    if(!search)
+      this.setState({ results: null});
     if(this.state.contacts){
-      totalFuse++
-      let result = fuse.search(search)
-      this.setState({ search: search, result: result});
-      console.log(totalFuse)
-      totalFuse--;
+      this.setState({ search: search});
     }
   };
 
@@ -1266,23 +978,16 @@ class Contacts extends React.Component {
 
   render() {
     let list = <View style={{flex:1,justifyContent: 'center',alignItems: 'center'}}><Text style={{fontSize:20}}>Contacts are not current available, connect to the internet and try again</Text></View>
-    
     if(Object.keys(this.state.contacts).length>0){
       arr = this.state.contacts;
-      if(this.state.search)//Object.keys(this.state.result).length>0
+      if(this.state.result)//Object.keys(this.state.result).length>0
         arr = this.state.result;
+      
       list = <FlatList
         data={arr}
         ListEmptyComponent={<View style={{flex:1,justifyContent: 'center',alignItems: 'center'}}><Text style={{fontSize:20}}>No results</Text></View>}
         keyExtractor={item => item.email}
-        ListHeaderComponent={          <SearchBar
-          placeholder="Search Name/ID #"
-          onChangeText={this.updateSearch}
-          value={this.state.search}
-          lightTheme
-          showLoading = {totalFuse!=0}
-          onCancel = {()=>{this.setState({search:null});console.log("kill")}}
-        />}
+        //ListHeaderComponent={          }
         ItemSeparatorComponent={({item}) => <View style={{flex: 1, justifyContent: 'center', alignItems: 'center' }}><View style={{height: 0.5, width: '96%', backgroundColor: '#C8C8C8', }}/></View>}
         renderItem={({item}) => <NameIDItem item={item}/>}
       />
@@ -1290,7 +995,16 @@ class Contacts extends React.Component {
       return(
         //<View style={{flex:1,justifyContent: 'center',alignItems: 'center'}}>
         <View>
-
+          <SearchBar
+            returnKeyType='search'
+            placeholder="Search Name/ID #"
+            onSubmitEditing={this.updateSearch}
+            onChangeText={this.updateSearchVal}
+            value={this.state.search}
+            lightTheme
+            showLoading = {this.state.searchLoading}
+            onClear = {()=>{this.setState({search:null,result:null});console.log("kill")}}
+          />
           {list}
         </View>
       )
@@ -1308,11 +1022,427 @@ class NameIDItem extends React.PureComponent {
     return (
 <ListItem
           title={this.props.item.name}
-          subtitle={this.props.item.email}
+          subtitle={this.props.item.email.split("@")[0]}
         />
     )
   }
 }
+
+
+
+class GPA extends React.Component {
+  constructor(props){
+    super(props);
+    this.state ={unweightedOldGPA:"Not Available", weightedOldGPA:"Not Available", unweightedNewGPA:"Not Available",weightedNewGPA:"Not Available"}
+    AsyncStorage.getItem('weightedOldGPA').then((gpa)=>{
+      if(gpa)
+        this.state.weightedOldGPA = gpa;
+    });
+    AsyncStorage.getItem('unweightedOldGPA').then((gpa)=>{
+      if(gpa)
+        this.state.unweightedOldGPA = gpa;
+    });
+    AsyncStorage.getItem('unweightedNewGPA').then((gpa)=>{
+      if(gpa)
+        this.state.unweightedNewGPA = gpa;
+    });
+    AsyncStorage.getItem('weightedNewGPA').then((gpa)=>{
+      if(gpa)
+        this.state.weightedNewGPA = gpa;
+    });
+  }
+
+  static navigationOptions = ({ navigation }) => {
+    return {
+      title: 'GPA',
+      headerStyle: styles.navigationHeader,
+    }
+  }
+
+  weightToGPABoost = (weight) =>{
+    if(weight.includes("A.P."))
+      return 1;
+    else if(weight.includes("Honors"))
+      return .5;
+    else
+      return 0;
+  };
+
+  letterGradeToGPA = (letter) =>{
+    switch(letter.substring(0,2).trim()) {
+      case "A+":
+        return 4.0
+        break;
+      case "A":
+        return 4.0
+        break;
+      case "A-":
+        return 3.7
+        break;
+      case "B+":
+        return 3.3
+        break;
+      case "B":
+        return 3.0
+        break;  
+      case "B-":
+        return 2.7
+        break;
+      case "C+":
+        return 2.3
+        break;
+      case "C":
+        return 2.0
+        break;
+      case "C-":
+        return 1.7
+        break;
+      case "D+":
+        return 1.3
+        break;
+      case "D":
+        return 1.0
+        break;  
+      case "D-":
+        return 0.7
+        break;
+      case "F":
+        return 0.0
+        break;
+      default:
+        console.log("Unrecognised Letter Grade")
+        return "error"
+    }
+  }
+
+  getOldFGs = async () => {
+    this.props.navigation.setParams({loading: true});
+    console.log("TEST")
+      return fetch('https://gradeview.herokuapp.com/oldGrades', {
+      method: 'POST',
+      headers: {
+      Accept: 'application/json',
+      'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        username: await AsyncStorage.getItem('username'),//"10012734@sbstudents.org",//10012734 //
+        password: await AsyncStorage.getItem('password'),//"Sled%2#9",//Sled%2#9 //
+      }),
+    })
+    .then((response) => {
+    //console.log(response);
+    //response.json()
+    console.log(typeof response)
+      return response.json();
+    })
+    .then((responseJson) => {
+      console.log("old")
+      //console.log(responseJson)
+      return responseJson
+    });
+  }
+
+  getNewFGs = async () => {
+    this.props.navigation.setParams({loading: true});
+    console.log("TEST")
+      return fetch('https://gradeview.herokuapp.com/newGrades', {
+      method: 'POST',
+      headers: {
+      Accept: 'application/json',
+      'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        username: await AsyncStorage.getItem('username'),//"10012734@sbstudents.org",//10012734 //
+        password: await AsyncStorage.getItem('password'),//"Sled%2#9",//Sled%2#9 //
+      }),
+    })
+    .then((response) => {
+    //console.log(response);
+    //response.json()
+    console.log(typeof response)
+      return response.json();
+    })
+    .then((responseJson) => {
+      console.log("new")
+      return responseJson
+    });
+  }
+
+  componentDidMount = () =>{
+    this.getOldFGs().then((FGs)=>{
+      var GPA = null;
+      for(var year of FGs){
+        var yrGPA = 0;
+        var totalCredits=0;
+        for(var classs of year){
+          if(this.letterGradeToGPA(classs["FG"]) == "error")
+            continue;
+          totalCredits += classs["Credits"];
+          yrGPA += this.letterGradeToGPA(classs["FG"])*classs["Credits"];
+        }
+        yrGPA = yrGPA/totalCredits;
+        GPA += yrGPA/FGs.length
+      }
+      if(GPA){
+        this.setState({unweightedOldGPA:GPA.toFixed(2)})
+        AsyncStorage.setItem('unweightedOldGPA',GPA.toFixed(2))
+      }
+        
+
+      var weightedGPA = null;
+      var failed = false;
+      for(var year of FGs){
+        var yrGPA = 0;
+        var totalCredits=0;
+        for(var classs of year){
+          if(this.letterGradeToGPA(classs["FG"]) == "error")
+            continue;
+          totalCredits += classs["Credits"];
+          if(classs["Weight"]){
+            yrGPA += (this.letterGradeToGPA(classs["FG"])+this.weightToGPABoost(classs["Weight"]))*classs["Credits"];
+          }else{
+            failed = true;
+            Alert.alert('One or more of your classes does not have a known weighting. Please report this using the "Provide Feedback button"')
+          }
+        }
+        yrGPA = yrGPA/totalCredits;
+        weightedGPA += yrGPA/FGs.length
+      }
+      if(weightedGPA&&!failed){
+        this.setState({weightedOldGPA:weightedGPA.toFixed(2)})
+        AsyncStorage.setItem('weightedOldGPA',weightedGPA.toFixed(2));
+      }
+        
+
+      this.getNewFGs().then((newFGs)=>{
+        var newGPA = null;
+        for(var year of FGs){
+          var yrGPA = 0;
+          var totalCredits=0;
+          for(var classs of year){
+            if(this.letterGradeToGPA(classs["FG"]) == "error")
+              continue;
+            totalCredits += classs["Credits"];
+            yrGPA += this.letterGradeToGPA(classs["FG"])*classs["Credits"];
+          }
+          yrGPA = yrGPA/totalCredits;
+          newGPA += yrGPA/(FGs.length+1)
+        }
+
+        var yrGPA = 0;
+        var totalCredits=0;
+        for(var classs of newFGs){
+          totalCredits += classs["Credits"];
+          
+          let total = 0;
+          let totalGPA = 0;
+          for(gradePerMP in classs){
+            if(gradePerMP.includes("MP")){
+              if(this.letterGradeToGPA(classs[gradePerMP]) == "error")
+                continue;
+              total++;
+              totalGPA+=this.letterGradeToGPA(classs[gradePerMP])
+            }
+          }
+          if(total){
+            let classGPA = totalGPA/total
+            if(classs["ME"]&&classs["FE"]&&this.letterGradeToGPA(classs["ME"]) != "error"&&this.letterGradeToGPA(classs["FE"]) != "error")
+              classGPA = classGPA*.8+this.letterGradeToGPA(classs["ME"])*.1+this.letterGradeToGPA(classs["FE"])*.1
+            else if(classs["ME"]&&this.letterGradeToGPA(classs["ME"]) != "error")
+              classGPA = classGPA*.9+this.letterGradeToGPA(classs["ME"])*.1
+            else if(classs["FE"]&&this.letterGradeToGPA(classs["FE"]) != "error")
+              classGPA = classGPA*.9+this.letterGradeToGPA(classs["FE"])*.1
+            yrGPA += classGPA*classs["Credits"];
+          }
+        }
+        yrGPA = yrGPA/totalCredits;
+        newGPA += yrGPA/(FGs.length+1)
+
+        if(newGPA){
+          this.setState({unweightedNewGPA:newGPA.toFixed(2)})
+          AsyncStorage.setItem('unweightedNewGPA',newGPA.toFixed(2))
+        }
+          
+
+
+
+          var newWeightedGPA = null;
+          var failed = false;
+          for(var year of FGs){
+            var yrGPA = 0;
+            var totalCredits=0;
+            for(var classs of year){
+              if(this.letterGradeToGPA(classs["FG"]) == "error")
+                continue;
+              totalCredits += classs["Credits"];
+              if(classs["Weight"]){
+                yrGPA += (this.letterGradeToGPA(classs["FG"])+this.weightToGPABoost(classs["Weight"]))*classs["Credits"];
+              }else{
+                failed = true;
+                Alert.alert('One or more of your classes does not have a known weighting. Please report this using the "Provide Feedback button"')
+              }
+            }
+            yrGPA = yrGPA/totalCredits;
+            newWeightedGPA += yrGPA/(FGs.length+1)
+          }
+
+          var yrGPA = 0;
+          var totalCredits=0;
+          for(var classs of newFGs){
+            totalCredits += classs["Credits"];
+            
+            let total = 0;
+            let totalGPA = 0;
+            for(gradePerMP in classs){
+              if(gradePerMP.includes("MP")){
+                if(this.letterGradeToGPA(classs[gradePerMP]) == "error")
+                  continue;
+                total++;
+                totalGPA+=this.letterGradeToGPA(classs[gradePerMP])
+              }
+            }
+            if(total){
+              let classGPA = totalGPA/total
+              if(classs["ME"]&&classs["FE"]&&this.letterGradeToGPA(classs["ME"])!="error"&&this.letterGradeToGPA(classs["FE"])!="error")
+                classGPA = classGPA*.8+this.letterGradeToGPA(classs["ME"])*.1+this.letterGradeToGPA(classs["FE"])*.1
+              else if(classs["ME"]&&this.letterGradeToGPA(classs["ME"])!="error")
+                classGPA = classGPA*.9+this.letterGradeToGPA(classs["ME"])*.1
+              else if(classs["FE"]&&this.letterGradeToGPA(classs["FE"])!="error")
+                classGPA = classGPA*.9+this.letterGradeToGPA(classs["FE"])*.1
+              
+              if(classs["Weight"]){
+                yrGPA += (classGPA+this.weightToGPABoost(classs["Weight"]))*classs["Credits"];
+              }else{
+                failed = true;
+                Alert.alert('One or more of your classes does not have a known weighting. Please report this using the "Provide Feedback button"')
+              }
+            }
+          }
+          yrGPA = yrGPA/totalCredits;
+          newWeightedGPA += yrGPA/(FGs.length+1)
+
+          if(newWeightedGPA&&!failed){
+            this.setState({weightedNewGPA:newWeightedGPA.toFixed(2)})
+            AsyncStorage.setItem('weightedNewGPA',newWeightedGPA.toFixed(2))
+          }
+            
+      });
+    })
+  }
+
+
+  render() {
+      return(
+        <ScrollView style={{flex: 1, flexDirection: 'column', padding:10}}>
+          <Text style={{fontSize:40}}>GPA</Text>
+          <Text style={{fontSize:20}}>Unweighted: {this.state.unweightedOldGPA}</Text>
+          <Text style={{fontSize:20}}>Weighted: {this.state.weightedOldGPA}</Text>
+
+          <Text style={{fontSize:40,marginTop:20}}>Current GPA (BETA)</Text>
+          <Text style={{fontSize:10}}>An estimate of your HS GPA based your grades for this year</Text>
+          <Text style={{fontSize:20}}>Unweighted: {this.state.unweightedNewGPA}</Text>
+          <Text style={{fontSize:20}}>Weighted: {this.state.weightedNewGPA}</Text>
+        </ScrollView>
+      )
+  }
+
+}
+
+class Options extends React.Component {
+  constructor(props){
+    super(props);
+    this.state ={}
+
+    AsyncStorage.getItem('needBiometric').then((needBiometric)=>{
+      var needBiometricR = false;
+      if(needBiometric === 'true')
+        needBiometricR = true;
+      LocalAuthentication.isEnrolledAsync().then((isEnrolled)=>{
+          if(isEnrolled)
+            this.setState({needBiometric:needBiometricR});
+      })
+    });
+  }
+
+  static navigationOptions = ({ navigation }) => {
+    return {
+      title: 'Options',
+      headerStyle: styles.navigationHeader,
+    }
+  }
+
+  signOut = ()=>{
+    
+    AsyncStorage.getItem('username').then((user)=>{
+      AsyncStorage.getItem('password').then((pass)=>{
+        AsyncStorage.clear().then(()=>{
+          AsyncStorage.setItem('oldUsername',user).then(()=>{
+            AsyncStorage.setItem('oldPassword',pass).then(()=>{
+              signOutGlobal();
+            });
+          });
+        })
+      });
+    });
+  }
+
+  render() {
+    var switchEl = <Text>Not Available</Text>
+    //if()
+          //switchEl = 
+return(
+<ScrollView>
+<ListItem  
+  leftIcon={{ name: "fingerprint" , type: 'material-community' }}
+  title="Secure Biometrics"
+  subtitle={"Secure your grades with by requiring biometrics on app load"}
+  style={{marginBottom:40}}
+  switch = {{
+    onValueChange:()=>{ var val = !this.state.needBiometric; AsyncStorage.setItem('needBiometric',val.toString()).then((result)=>{this.setState({needBiometric: val});})},
+   value:this.state.needBiometric,
+   disabled: this.state.needBiometric == null
+  }}
+/>
+<ListItem  
+  leftIcon={{ name: "feedback" , type: 'MaterialIcons' }}
+  title="Provide Feedback"
+  subtitle={"Any kind of feedbacks is appricated!"}
+  style={{marginBottom:5}}
+  onPress={() => Linking.openURL('mailto:gradeViewApp@kihtrak.com?subject=Feedback%20about%20the%20app') }
+/>
+<ListItem  
+  leftIcon={{ name: "log-out" , type: 'entypo' }}
+  title="Switch User"
+  subtitle={"Sign into a different account"}
+  style={{marginBottom:20}}
+  onPress = {this.signOut}
+/>
+</ScrollView>
+    /*
+    
+          
+      return(
+        <ScrollView style={{flex: 1, flexDirection: 'column', padding:10}}>
+
+          <Text style={{fontSize:20}}>Secure biometrics: {switchEl}</Text>
+
+
+          <Button 
+          
+          title="Provide Feedback" 
+          />
+
+
+          <Button
+          onPress = {this.signOut}
+          title = "Switch Accounts"
+          />
+        */
+      )
+  }
+
+}
+
 
 
 
@@ -1327,7 +1457,9 @@ const AssignmentsStack = createStackNavigator({
 
 const SettingsStack = createStackNavigator({
   Settings: { screen: settings },
-  Contacts: {screen: Contacts}
+  Options: {screen: Options},
+  Contacts: {screen: Contacts},
+  GPA: {screen: GPA},
 });
 
 const TabNav = createBottomTabNavigator(
@@ -1383,6 +1515,10 @@ class SignIn extends React.Component {
       super(props);
       this.state ={ isLoading: false, email:"", password:"",}
 
+    }
+
+    componentDidMount = () =>{
+      //SplashScreen.hide()
     }
 
     componentWillMount = () =>{
@@ -1600,6 +1736,7 @@ class SignIn extends React.Component {
   export default class App extends React.Component {
     constructor(){
       super();
+      SplashScreen.preventAutoHide();
       signOutGlobal = signOutGlobal.bind(this);
       signInGlobal = signInGlobal.bind(this);
       this.state = {user:9};
@@ -1629,6 +1766,7 @@ class SignIn extends React.Component {
       });
     }
     componentDidMount(){
+      
       this._notificationSubscription = Notifications.addListener(this._handleNotification);
     }
 
@@ -1642,11 +1780,12 @@ class SignIn extends React.Component {
     render(){
       if(this.state.user == 9)
         return null;
+      else
+        setTimeout(()=>SplashScreen.hide(),10)
       if(this.state.user == 8)
         return <View style={{flex:1,justifyContent: 'center',alignItems: 'center'}}><Text>Please Authenticate</Text><Button title="Authenticate Again" onPress={this.returningUser}></Button></View>;
       if(this.state.user){
         console.log("tab nav");
-        
         return <View style={{flex:1}}><StatusBar barStyle="dark-content" /><Toast ref="toast"/><AppContainer/></View>;
       } 
       return <SignIn/>;
