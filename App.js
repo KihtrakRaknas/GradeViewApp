@@ -1013,16 +1013,24 @@ class Contacts extends React.Component {
 }
 
 
-class NameIDItem extends React.PureComponent {
+class NameIDItem extends React.Component {
   constructor(props){
     super(props);
     this.state ={ name: this.props.nams, id:""}
   }
   render() {
+    let email = this.props.item.email
+    if (email.split("@")[1] == "sbstudents.org")
+      email = email.split("@")[0]
+    let image = this.props.item.image;
+    if(image.split("=").length<2)
+      image = image.replace('/s36-p-k-rw-no','')
+    image = image.split("=")[0]
     return (
-<ListItem
+        <ListItem
+          leftAvatar={{ source: { uri: image } }}
           title={this.props.item.name}
-          subtitle={this.props.item.email.split("@")[0]}
+          subtitle={email}
         />
     )
   }
@@ -1033,7 +1041,7 @@ class NameIDItem extends React.PureComponent {
 class GPA extends React.Component {
   constructor(props){
     super(props);
-    this.state ={unweightedOldGPA:"Not Available", weightedOldGPA:"Not Available", unweightedNewGPA:"Not Available",weightedNewGPA:"Not Available"}
+    this.state ={unweightedOldGPA:"Not Available", weightedOldGPA:"Not Available", unweightedNewGPA:"Not Available",weightedNewGPA:"Not Available", unweightedCurrGPA:"Not Available",weightedCurrGPA:"Not Available"}
     AsyncStorage.getItem('weightedOldGPA').then((gpa)=>{
       if(gpa)
         this.state.weightedOldGPA = gpa;
@@ -1049,6 +1057,14 @@ class GPA extends React.Component {
     AsyncStorage.getItem('weightedNewGPA').then((gpa)=>{
       if(gpa)
         this.state.weightedNewGPA = gpa;
+    });
+    AsyncStorage.getItem('unweightedCurrGPA').then((gpa)=>{
+      if(gpa)
+        this.state.unweightedCurrGPA = gpa;
+    });
+    AsyncStorage.getItem('weightedCurrGPA').then((gpa)=>{
+      if(gpa)
+        this.state.weightedCurrGPA = gpa;
     });
   }
 
@@ -1258,6 +1274,11 @@ class GPA extends React.Component {
         yrGPA = yrGPA/totalCredits;
         newGPA += yrGPA/(FGs.length+1)
 
+        if(yrGPA){
+          this.setState({unweightedCurrGPA:yrGPA.toFixed(2)})
+          AsyncStorage.setItem('unweightedCurrGPA',yrGPA.toFixed(2))
+        }
+
         if(newGPA){
           this.setState({unweightedNewGPA:newGPA.toFixed(2)})
           AsyncStorage.setItem('unweightedNewGPA',newGPA.toFixed(2))
@@ -1321,6 +1342,11 @@ class GPA extends React.Component {
           yrGPA = yrGPA/totalCredits;
           newWeightedGPA += yrGPA/(FGs.length+1)
 
+          if(yrGPA&&!failed){
+            this.setState({weightedCurrGPA:yrGPA.toFixed(2)})
+            AsyncStorage.setItem('weightedCurrGPA',yrGPA.toFixed(2))
+          }
+
           if(newWeightedGPA&&!failed){
             this.setState({weightedNewGPA:newWeightedGPA.toFixed(2)})
             AsyncStorage.setItem('weightedNewGPA',newWeightedGPA.toFixed(2))
@@ -1334,11 +1360,17 @@ class GPA extends React.Component {
   render() {
       return(
         <ScrollView style={{flex: 1, flexDirection: 'column', padding:10}}>
-          <Text style={{fontSize:40}}>GPA</Text>
+          <Text style={{fontSize:40}}>Total GPA</Text>
+          <Text style={{fontSize:10}}>(Does not include current year)</Text>
           <Text style={{fontSize:20}}>Unweighted: {this.state.unweightedOldGPA}</Text>
           <Text style={{fontSize:20}}>Weighted: {this.state.weightedOldGPA}</Text>
 
-          <Text style={{fontSize:40,marginTop:20}}>Current GPA (BETA)</Text>
+          <Text style={{fontSize:40,marginTop:40}}>This year</Text>
+          <Text style={{fontSize:10}}>An estimate of your HS GPA based your grades for this year</Text>
+          <Text style={{fontSize:20}}>Unweighted: {this.state.unweightedCurrGPA}</Text>
+          <Text style={{fontSize:20}}>Weighted: {this.state.weightedCurrGPA}</Text>
+
+          <Text style={{fontSize:40,marginTop:40}}>Total GPA estimate</Text>
           <Text style={{fontSize:10}}>An estimate of your HS GPA based your grades for this year</Text>
           <Text style={{fontSize:20}}>Unweighted: {this.state.unweightedNewGPA}</Text>
           <Text style={{fontSize:20}}>Weighted: {this.state.weightedNewGPA}</Text>
