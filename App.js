@@ -2,7 +2,7 @@ import React from 'react';
 import { AppRegistry, SectionList, StyleSheet, Text, View ,ActivityIndicator, Alert, Button, TouchableOpacity,TextInput ,KeyboardAvoidingView , ScrollView, Picker,StatusBar,RefreshControl, Switch, FlatList, AppState} from 'react-native';
 import { Ionicons ,FontAwesome  } from '@expo/vector-icons';
 import { createBottomTabNavigator, createAppContainer, TabBarBottom, createStackNavigator} from 'react-navigation';
-import { Icon, Input  } from 'react-native-elements'
+import { Icon, Input ,ButtonGroup } from 'react-native-elements'
 import {AsyncStorage} from 'react-native';
 import DropdownMenu from 'react-native-dropdown-menu';
 import Modal from 'react-native-modal';
@@ -501,7 +501,7 @@ class settings extends React.Component {
               bottomMargin:80,
             },
           ]
-
+          const debug =  null// <View style={{flex: 1, flexDirection: 'column', padding:15}}><Text style={{fontSize:20}}>Debugging info:</Text><Text>{this.state.id}</Text><Text style={{marginBottom:20}}>{this.state.pushToken}</Text></View>
       return(
 <ScrollView>
   {
@@ -515,17 +515,15 @@ class settings extends React.Component {
         style={{marginBottom:l.bottomMargin}}
       />
     ))
+    
   }
-  <View style={{flex: 1, flexDirection: 'column', padding:15}}>
-    <Text style={{fontSize:20}}>Debugging info:</Text>
-    <Text>{this.state.id}</Text>
-    <Text style={{marginBottom:20}}>{this.state.pushToken}</Text>
-  </View>
+  {debug}
 </ScrollView>
       )
   }
 
 }
+
 
 
 class ClassBtn extends React.Component {
@@ -540,7 +538,74 @@ class ClassBtn extends React.Component {
     this.props.onPress(className)
   }
 
-  render() {
+  gradeToLetter = (percent) =>{
+    if(!Number(percent))
+      return "? "
+    else if(percent>=97)
+      return "A+"
+    else if(percent>=93)
+      return "A "
+    else if(percent>=90)
+      return "A-"
+    else if(percent>=87)
+      return "B+"
+    else if(percent>=83)
+      return "B "
+    else if(percent>=80)
+      return "B-"
+    else if(percent>=77)
+      return "C+"
+    else if(percent>=73)
+      return "C "
+    else if(percent>=70)
+      return "C-"
+    else if(percent>=67)
+      return "D+"
+    else if(percent>=63)
+      return "D"
+    else if(percent>=60)
+      return "D-"
+    else 
+      return "F "
+  }
+
+  gradeToEmoji = (percent) =>{
+    if(!Number(percent))
+      return "❓ "
+    else if(percent>=97)
+      return "🎉🎉"
+    else if(percent>=93)
+      return "😄😄"
+    else if(percent>=90)
+      return "😄"
+    else if(percent>=87)
+      return "😶😶"
+    else if(percent>=83)
+      return "😐😐"
+    else if(percent>=80)
+      return "😐"
+    else if(percent>=77)
+      return "😟"
+    else if(percent>=73)
+      return "😟😟"
+    else if(percent>=70)
+      return "😪"
+    else if(percent>=67)
+      return "😪😪"
+    else if(percent>=63)
+      return "😰"
+    else if(percent>=60)
+      return "😰😰"
+    else 
+      return "😭😭"
+  }
+
+  render () {
+    avg = this.props.avg
+    if(this.props.style == "Letter")
+      avg = this.gradeToLetter(avg.substring(0,avg.length-1))
+    if(this.props.style == "Hieroglyphic")
+      avg = this.gradeToEmoji(avg.substring(0,avg.length-1))
     return (
       <TouchableOpacity onPress={() => this.classClicked(this.props.title)} style={{flex: 1, flexDirection: 'row',justifyContent: 'space-between', padding:10,paddingVertical:10}}>
         <View style={{flex: 7, }}>
@@ -549,25 +614,33 @@ class ClassBtn extends React.Component {
         </View>
 
         <View style={{flex: 2,}}>
-          <Text style={{fontSize:30,textAlign:'right'}}>{this.props.avg}</Text>
+          <Text style={{fontSize:30,textAlign:'right'}}>{avg}</Text>
         </View>
       </TouchableOpacity>
     );
   }
 }
 
+function updateAvgDisplayGlobal(style){
+  AsyncStorage.setItem("avgDisplayStyle",style)
+  this.setState({style:style})
+}
 
 class home extends LoadInComponent {
 
   constructor(props){
     super(props);
     console.log("GERNERATING")  
-    this.state ={ isLoading: false, email:"", password:"", num: 0, currentMarking: "Select MP"}
+    this.state ={ isLoading: false, email:"", password:"", num: 0, currentMarking: "Select MP", style:"Percent"}
 
     console.log("GERNERATING DONE")
     
+    updateAvgDisplayGlobal = updateAvgDisplayGlobal.bind(this)
 
-    
+    AsyncStorage.getItem("avgDisplayStyle").then((style)=>{
+      if(style)
+        this.setState({style:style})
+    })
 
     this.props.navigation.setParams({ click: this.click, genMpsArray: this.genMpsArray, genMpSelector: this.genMpSelector, updateMarkingPeriodSelectionAndriod: this.updateMarkingPeriodSelectionAndriod});
   }
@@ -684,7 +757,7 @@ class home extends LoadInComponent {
       // console.log("avg")
       // console.log(avg)
       if(classN!="Status"&&avg){
-        table.push(<ClassBtn key={classN+count} title={classN} teach = {teach} avg={avg} onPress={this.classClicked}></ClassBtn>)
+        table.push(<ClassBtn key={classN+count} title={classN} teach = {teach} avg={avg} onPress={this.classClicked} style={this.state.style}></ClassBtn>)
         count++;
       }
     }
@@ -912,7 +985,7 @@ var options = {
     "email"
   ]
 };
-let totalFuse = 0;
+
 var fuse = new Fuse([], options);
 class Contacts extends React.Component {
 
@@ -1044,27 +1117,27 @@ class GPA extends React.Component {
     this.state ={unweightedOldGPA:"Not Available", weightedOldGPA:"Not Available", unweightedNewGPA:"Not Available",weightedNewGPA:"Not Available", unweightedCurrGPA:"Not Available",weightedCurrGPA:"Not Available"}
     AsyncStorage.getItem('weightedOldGPA').then((gpa)=>{
       if(gpa)
-        this.state.weightedOldGPA = gpa;
+        this.setState({weightedOldGPA: gpa})
     });
     AsyncStorage.getItem('unweightedOldGPA').then((gpa)=>{
       if(gpa)
-        this.state.unweightedOldGPA = gpa;
+        this.setState({unweightedOldGPA: gpa})
     });
     AsyncStorage.getItem('unweightedNewGPA').then((gpa)=>{
       if(gpa)
-        this.state.unweightedNewGPA = gpa;
+        this.setState({unweightedNewGPA: gpa})
     });
     AsyncStorage.getItem('weightedNewGPA').then((gpa)=>{
       if(gpa)
-        this.state.weightedNewGPA = gpa;
+        this.setState({weightedNewGPA: gpa})
     });
     AsyncStorage.getItem('unweightedCurrGPA').then((gpa)=>{
       if(gpa)
-        this.state.unweightedCurrGPA = gpa;
+        this.setState({unweightedCurrGPA: gpa})
     });
     AsyncStorage.getItem('weightedCurrGPA').then((gpa)=>{
       if(gpa)
-        this.state.weightedCurrGPA = gpa;
+        this.setState({weightedCurrGPA: gpa})
     });
   }
 
@@ -1383,7 +1456,7 @@ class GPA extends React.Component {
 class Options extends React.Component {
   constructor(props){
     super(props);
-    this.state ={}
+    this.state ={selectedIndex:0}
 
     AsyncStorage.getItem('needBiometric').then((needBiometric)=>{
       var needBiometricR = false;
@@ -1393,6 +1466,12 @@ class Options extends React.Component {
           if(isEnrolled)
             this.setState({needBiometric:needBiometricR});
       })
+    });
+    const displayOptions = ['Percent', 'Letter', 'Hieroglyphic']
+    AsyncStorage.getItem('avgDisplayStyle').then((avgDisplayStyle)=>{
+      if(avgDisplayStyle){
+        this.setState({selectedIndex:displayOptions.indexOf(avgDisplayStyle)});
+      }
     });
   }
 
@@ -1422,13 +1501,16 @@ class Options extends React.Component {
     var switchEl = <Text>Not Available</Text>
     //if()
           //switchEl = 
+
+          //updateAvgDisplayGlobal
+          const displayOptions = ['Percent', 'Letter', 'Hieroglyphic']
 return(
 <ScrollView>
 <ListItem  
   leftIcon={{ name: "fingerprint" , type: 'material-community' }}
   title="Secure Biometrics"
   subtitle={"Secure your grades with by requiring biometrics on app load"}
-  style={{marginBottom:40}}
+  style={{marginBottom:5}}
   switch = {{
     onValueChange:()=>{ var val = !this.state.needBiometric; AsyncStorage.setItem('needBiometric',val.toString()).then((result)=>{this.setState({needBiometric: val});})},
    value:this.state.needBiometric,
@@ -1436,10 +1518,23 @@ return(
   }}
 />
 <ListItem  
+  leftIcon={{ name: "eye" , type: 'font-awesome' }}
+  title="Display mode"
+  subtitle={"How your marking period grade will be displayed on the home screen"}
+/>
+
+<ButtonGroup
+    onPress={(selectedIndex)=>{this.setState({selectedIndex:selectedIndex});updateAvgDisplayGlobal(displayOptions[selectedIndex])}}
+    selectedIndex={this.state.selectedIndex}
+    buttons={displayOptions}
+    //containerStyle={{height: 100}}
+  />
+
+<ListItem  
   leftIcon={{ name: "feedback" , type: 'MaterialIcons' }}
   title="Provide Feedback"
   subtitle={"Any kind of feedbacks is appricated!"}
-  style={{marginBottom:5}}
+  style={{marginTop:40,marginBottom:5}}
   onPress={() => Linking.openURL('mailto:gradeViewApp@kihtrak.com?subject=Feedback%20about%20the%20app') }
 />
 <ListItem  
