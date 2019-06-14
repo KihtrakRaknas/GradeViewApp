@@ -1534,7 +1534,7 @@ return(
   leftIcon={{ name: "feedback" , type: 'MaterialIcons' }}
   title="Provide Feedback"
   subtitle={"Any kind of feedbacks is appricated!"}
-  style={{marginTop:40,marginBottom:5}}
+  style={{marginTop:60,marginBottom:5}}
   onPress={() => Linking.openURL('mailto:gradeViewApp@kihtrak.com?subject=Feedback%20about%20the%20app') }
 />
 <ListItem  

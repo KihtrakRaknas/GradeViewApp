@@ -8,13 +8,13 @@
       "ios",
       "android"
     ],
-    "version": "2.1.1",
+    "version": "2.3.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "splash": {
-      "image": "./assets/splash.png",
-      "resizeMode": "contain",
-      "backgroundColor": "#ffffff"
+      "image": "./assets/newSplash.png",
+      "resizeMode": "cover",
+      "backgroundColor": "#373a6d"
     },
     "updates": {
       "fallbackToCacheTimeout": 0
