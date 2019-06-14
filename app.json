@@ -32,11 +32,7 @@
     },
     "android": {
       "package": "com.kihtrak.REGEN",
-<<<<<<< HEAD
-      "versionCode":3,
-=======
-      "versionCode": 2
->>>>>>> ce07d04a106beebf7e4994e2fd340e0c0a8a3ca9
+      "versionCode":3
     },
     "description": "App client for the gradebook that South Brunswick High School uses"
   }
