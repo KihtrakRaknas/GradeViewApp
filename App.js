@@ -1901,7 +1901,8 @@ class SignIn extends React.Component {
       console.log(notification)
       console.log(this.refs)
       if(notification.data.txt)
-        this.refs.toast.show(notification.data.txt);
+        if(this.refs.toast)
+         this.refs.toast.show(notification.data.txt);
     };
 
     render(){
