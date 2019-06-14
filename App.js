@@ -1436,9 +1436,9 @@ class GPA extends React.Component {
       return(
         <ScrollView style={{flex: 1, flexDirection: 'column', padding:10}}>
       <ListItem  
-        title={<Text style={{fontSize:40}}>Total GPA</Text>}
-        subtitle={"Does not include current year"}
-        subtitleProps={{style:{fontSize:25}}}
+        title={<Text style={{fontSize:40,textAlign: 'center'}}>Past GPA</Text>}
+        subtitle={"GPA without factoring in the current year"}
+        subtitleProps={{style:{fontSize:17}}}
       />
       <ListItem  
         rightElement={<Text style={{fontSize:20}}>{this.state.unweightedOldGPA}</Text>}
@@ -1450,9 +1450,9 @@ class GPA extends React.Component {
         bottomDivider={true}
       />
       <ListItem  
-        title={<Text style={{fontSize:40}}>This Year</Text>}
-        subtitle={"An estimate of your HS GPA based your grades for this year"}
-        subtitleProps={{style:{fontSize:25}}}
+        title={<Text style={{fontSize:40,textAlign: 'center'}}>This Year</Text>}
+        subtitle={"GPA only for this year (estimate)"}
+        subtitleProps={{style:{fontSize:17}}}
       />
       <ListItem  
         rightElement={<Text style={{fontSize:20}}>{this.state.unweightedCurrGPA}</Text>}
@@ -1464,9 +1464,9 @@ class GPA extends React.Component {
         bottomDivider={true}
       />
       <ListItem  
-        title={<Text style={{fontSize:40}}>Total GPA estimate</Text>}
-        subtitle={"An estimate of your HS GPA based your grades for this year"}
-        subtitleProps={{style:{fontSize:25}}}
+        title={<Text style={{fontSize:40,textAlign: 'center'}}>Total GPA estimate</Text>}
+        subtitle={"GPA so far (estimate)"}
+        subtitleProps={{style:{fontSize:17}}}
       />
       <ListItem  
         rightElement={<Text style={{fontSize:20}}>{this.state.unweightedNewGPA}</Text>}
