@@ -513,6 +513,8 @@ class settings extends React.Component {
         subtitle={l.subtitle}
         onPress={l.action}
         style={{marginBottom:l.bottomMargin}}
+        bottomDivider={i!=list.length-1}
+        chevron
       />
     ))
     
@@ -1433,20 +1435,47 @@ class GPA extends React.Component {
   render() {
       return(
         <ScrollView style={{flex: 1, flexDirection: 'column', padding:10}}>
-          <Text style={{fontSize:40}}>Total GPA</Text>
-          <Text style={{fontSize:10}}>(Does not include current year)</Text>
-          <Text style={{fontSize:20}}>Unweighted: {this.state.unweightedOldGPA}</Text>
-          <Text style={{fontSize:20}}>Weighted: {this.state.weightedOldGPA}</Text>
-
-          <Text style={{fontSize:40,marginTop:40}}>This year</Text>
-          <Text style={{fontSize:10}}>An estimate of your HS GPA based your grades for this year</Text>
-          <Text style={{fontSize:20}}>Unweighted: {this.state.unweightedCurrGPA}</Text>
-          <Text style={{fontSize:20}}>Weighted: {this.state.weightedCurrGPA}</Text>
-
-          <Text style={{fontSize:40,marginTop:40}}>Total GPA estimate</Text>
-          <Text style={{fontSize:10}}>An estimate of your HS GPA based your grades for this year</Text>
-          <Text style={{fontSize:20}}>Unweighted: {this.state.unweightedNewGPA}</Text>
-          <Text style={{fontSize:20}}>Weighted: {this.state.weightedNewGPA}</Text>
+      <ListItem  
+        title={<Text style={{fontSize:40}}>Total GPA</Text>}
+        subtitle={"Does not include current year"}
+        subtitleProps={{style:{fontSize:25}}}
+      />
+      <ListItem  
+        rightElement={<Text style={{fontSize:20}}>{this.state.unweightedOldGPA}</Text>}
+        leftElement={<Text style={{fontSize:20}}>Unweighted:</Text>}
+      />
+      <ListItem  
+        rightElement={<Text style={{fontSize:20}}>{this.state.weightedOldGPA}</Text>}
+        leftElement={<Text style={{fontSize:20}}>Weighted:</Text>}
+        bottomDivider={true}
+      />
+      <ListItem  
+        title={<Text style={{fontSize:40}}>This Year</Text>}
+        subtitle={"An estimate of your HS GPA based your grades for this year"}
+        subtitleProps={{style:{fontSize:25}}}
+      />
+      <ListItem  
+        rightElement={<Text style={{fontSize:20}}>{this.state.unweightedCurrGPA}</Text>}
+        leftElement={<Text style={{fontSize:20}}>Unweighted:</Text>}
+      />
+      <ListItem  
+        rightElement={<Text style={{fontSize:20}}>{this.state.weightedCurrGPA}</Text>}
+        leftElement={<Text style={{fontSize:20}}>Weighted:</Text>}
+        bottomDivider={true}
+      />
+      <ListItem  
+        title={<Text style={{fontSize:40}}>Total GPA estimate</Text>}
+        subtitle={"An estimate of your HS GPA based your grades for this year"}
+        subtitleProps={{style:{fontSize:25}}}
+      />
+      <ListItem  
+        rightElement={<Text style={{fontSize:20}}>{this.state.unweightedNewGPA}</Text>}
+        leftElement={<Text style={{fontSize:20}}>Unweighted:</Text>}
+      />
+      <ListItem  
+        rightElement={<Text style={{fontSize:20}}>{this.state.weightedNewGPA}</Text>}
+        leftElement={<Text style={{fontSize:20}}>Weighted:</Text>}
+      />
         </ScrollView>
       )
   }
@@ -1511,6 +1540,7 @@ return(
   title="Secure Biometrics"
   subtitle={"Secure your grades with by requiring biometrics on app load"}
   style={{marginBottom:5}}
+  bottomDivider={true}
   switch = {{
     onValueChange:()=>{ var val = !this.state.needBiometric; AsyncStorage.setItem('needBiometric',val.toString()).then((result)=>{this.setState({needBiometric: val});})},
    value:this.state.needBiometric,
@@ -1535,6 +1565,7 @@ return(
   title="Provide Feedback"
   subtitle={"Any kind of feedbacks is appricated!"}
   style={{marginTop:60,marginBottom:5}}
+  topDivider={true}
   onPress={() => Linking.openURL('mailto:gradeViewApp@kihtrak.com?subject=Feedback%20about%20the%20app') }
 />
 <ListItem  
@@ -1542,6 +1573,7 @@ return(
   title="Switch User"
   subtitle={"Sign into a different account"}
   style={{marginBottom:20}}
+  topDivider={true}
   onPress = {this.signOut}
 />
 </ScrollView>
@@ -1901,7 +1933,8 @@ class SignIn extends React.Component {
       console.log(notification)
       console.log(this.refs)
       if(notification.data.txt)
-        this.refs.toast.show(notification.data.txt);
+        if(this.refs.toast)
+         this.refs.toast.show(notification.data.txt);
     };
 
     render(){
