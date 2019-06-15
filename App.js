@@ -1323,8 +1323,6 @@ class GPA extends React.Component {
         var yrGPA = 0;
         var totalCredits=0;
         for(var classs of newFGs){
-          totalCredits += classs["Credits"];
-          
           let total = 0;
           let totalGPA = 0;
           for(gradePerMP in classs){
@@ -1336,6 +1334,7 @@ class GPA extends React.Component {
             }
           }
           if(total){
+            totalCredits += classs["Credits"];
             let classGPA = totalGPA/total
             if(classs["ME"]&&classs["FE"]&&this.letterGradeToGPA(classs["ME"]) != "error"&&this.letterGradeToGPA(classs["FE"]) != "error")
               classGPA = classGPA*.8+this.letterGradeToGPA(classs["ME"])*.1+this.letterGradeToGPA(classs["FE"])*.1
@@ -1343,6 +1342,7 @@ class GPA extends React.Component {
               classGPA = classGPA*.9+this.letterGradeToGPA(classs["ME"])*.1
             else if(classs["FE"]&&this.letterGradeToGPA(classs["FE"]) != "error")
               classGPA = classGPA*.9+this.letterGradeToGPA(classs["FE"])*.1
+            console.log(classs["Name"]+": "+classGPA)
             yrGPA += classGPA*classs["Credits"];
           }
         }
@@ -1385,8 +1385,6 @@ class GPA extends React.Component {
           var yrGPA = 0;
           var totalCredits=0;
           for(var classs of newFGs){
-            totalCredits += classs["Credits"];
-            
             let total = 0;
             let totalGPA = 0;
             for(gradePerMP in classs){
@@ -1398,6 +1396,7 @@ class GPA extends React.Component {
               }
             }
             if(total){
+              totalCredits += classs["Credits"];
               let classGPA = totalGPA/total
               if(classs["ME"]&&classs["FE"]&&this.letterGradeToGPA(classs["ME"])!="error"&&this.letterGradeToGPA(classs["FE"])!="error")
                 classGPA = classGPA*.8+this.letterGradeToGPA(classs["ME"])*.1+this.letterGradeToGPA(classs["FE"])*.1
@@ -1450,6 +1449,7 @@ class GPA extends React.Component {
         bottomDivider={true}
       />
       <ListItem  
+        topDivider={true}
         title={<Text style={{fontSize:40,textAlign: 'center'}}>This Year</Text>}
         subtitle={"GPA only for this year (estimate)"}
         subtitleProps={{style:{fontSize:17}}}
@@ -1466,6 +1466,7 @@ class GPA extends React.Component {
       <ListItem  
         title={<Text style={{fontSize:40,textAlign: 'center'}}>Total GPA estimate</Text>}
         subtitle={"GPA so far (estimate)"}
+        topDivider={true}
         subtitleProps={{style:{fontSize:17}}}
       />
       <ListItem  
