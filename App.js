@@ -821,44 +821,48 @@ class home extends LoadInComponent {
           }
         });
       return(
-        <ScrollView style={{flex: 1, flexDirection: 'column'}}         refreshControl={
-          <RefreshControl
-            refreshing={this.state.refreshing}
-            onRefresh={this.refresh}
-          />
-        }>
-        <Modal isVisible={this.state.visibleModal}
-        style={{
-          justifyContent: 'flex-end',
-          margin: 0,
-        }}
-        onRequestClose={() => this.setState({ visibleModal: false })}
-        >
-              <View style={{backgroundColor: 'white',padding: 22,justifyContent: 'center',alignItems: 'center',borderRadius: 4,borderColor: 'rgba(0, 0, 0, 0.1)',}}>
-                <Picker
-                  selectedValue={this.state.currentMarking}
-                  style={{height: 200, width: 100}}
-                  onValueChange={(itemValue, itemIndex) =>
-                    this.setState({currentMarking: itemValue})
-                  }>
-                  {this.genMpSelector()}
-                </Picker>
-                <Button title="Set Marking Period" onPress={() => {
-                  AsyncStorage.setItem('MP', this.state.currentMarking)//.then(()=>{
-                    this.props.navigation.setParams({ currentMarking: this.state.currentMarking});
-                    this.setState({ visibleModal: false , currentMarking: this.state.currentMarking});
-                 //})
-                  
-                  
-              }
-            }/>
-              </View>
-        </Modal>
+          <ScrollView style={{flex: 1, flexDirection: 'column'}}         refreshControl={
+            <RefreshControl
+              refreshing={this.state.refreshing}
+              onRefresh={this.refresh}
+            />
+          }>
 
-        {this.genTable()}
+          <Modal 
+          isVisible={this.state.visibleModal}
+          isOpen = {this.state.visibleModal}
+          style={{
+            justifyContent: 'flex-end',
+            margin: 0,
+          }}
+          onRequestClose={() => this.setState({ visibleModal: false })}
+          >
+                <View style={{backgroundColor: 'white',padding: 22,justifyContent: 'center',alignItems: 'center',borderRadius: 4,borderColor: 'rgba(0, 0, 0, 0.1)',}}>
+                  <Picker
+                    selectedValue={this.state.currentMarking}
+                    style={{height: 200, width: 100}}
+                    onValueChange={(itemValue, itemIndex) =>
+                      this.setState({currentMarking: itemValue})
+                    }>
+                    {this.genMpSelector()}
+                  </Picker>
+                  <Button title="Close" onPress={() => {
+                    AsyncStorage.setItem('MP', this.state.currentMarking)//.then(()=>{
+                      this.props.navigation.setParams({ currentMarking: this.state.currentMarking});
+                      this.setState({ visibleModal: false , currentMarking: this.state.currentMarking});
+                  //})
+                    
+                    
+                }
+              }/>
+                </View>
+          </Modal>
+
+          {this.genTable()}
 
 
-        </ScrollView>
+          </ScrollView>
+        
 
       )
   }
