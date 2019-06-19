@@ -981,6 +981,7 @@ class ClassScreen extends React.Component {
 
 var options = {
   shouldSort: true,
+  tokenize: true,
   threshold: 0.8,
   location: 0,
   distance: 100,
