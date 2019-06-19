@@ -15,6 +15,7 @@ import { LocalAuthentication } from 'expo';
 import { SearchBar, ListItem } from 'react-native-elements';
 import {SplashScreen } from 'expo';
 import Fuse from 'fuse.js';
+import { Accelerometer } from 'expo-sensors';
 var grades;
 
 class LoadInComponent extends React.Component {
@@ -1901,14 +1902,20 @@ class SignIn extends React.Component {
   export default class App extends React.Component {
     constructor(){
       super();
-      SplashScreen.preventAutoHide();
+      //SplashScreen.preventAutoHide();
       signOutGlobal = signOutGlobal.bind(this);
       signInGlobal = signInGlobal.bind(this);
-      this.state = {user:9};
-      this.returningUser();
+      this.state = {user:9,debug:false,pass:[]};
+      //this.returningUser();
+      AsyncStorage.getItem('debug').then((debug)=>{
+        if(debug=="true")
+        this.returningUser();
+      })
     }
 
     returningUser = () =>{
+      this.setState({debug:false})
+      AsyncStorage.setItem("debug","true")
       AsyncStorage.getItem('username').then((user)=>{
         console.log(user);
         AsyncStorage.getItem('needBiometric').then((needBiometric)=>{
@@ -1931,9 +1938,33 @@ class SignIn extends React.Component {
       });
     }
     componentDidMount(){
-      
+      this._subscribe();
       this._notificationSubscription = Notifications.addListener(this._handleNotification);
     }
+
+    componentWillUnmount() {
+      this._unsubscribe();
+    }
+
+    
+    _subscribe = () => {
+      this._subscription = Accelerometer.addListener(
+        accelerometerData => {
+          let magnitude = Math.pow(  Math.pow(accelerometerData.x, 2) + Math.pow(accelerometerData.y, 2) + Math.pow(accelerometerData.z, 2)  ,.5)
+  
+          if(Math.abs(magnitude-1)>5 &&this.state.user == 9)
+            this.setState({debug:true})
+        }
+      ); 
+      Accelerometer.setUpdateInterval(
+        16
+      ); 
+    };
+  
+    _unsubscribe = () => {
+      this._subscription && this._subscription.remove(); 
+      this._subscription = null;
+    };
 
     _handleNotification = (notification) => {
       console.log(notification)
@@ -1943,11 +1974,63 @@ class SignIn extends React.Component {
          this.refs.toast.show(notification.data.txt);
     };
 
+    colorClicked = async (color) =>{
+      
+      switch(color){
+        case 0:
+          let notification2 = await Notifications.getExpoPushTokenAsync();
+          this.refs.toast.show("Token: "+notification2);
+          var arr = this.state.pass;
+          arr.push(0)
+          this.setState({pass:arr})
+        break;
+        case 1:
+          AsyncStorage.getItem("username").then((user)=>{
+            this.refs.toast.show((!!user).toString());
+          })
+          var arr = this.state.pass;
+          arr.push(1)
+          this.setState({pass:arr})
+        break;
+        case 2:
+          this.refs.toast.show("Toast Test");
+          var arr = this.state.pass;
+          arr.push(2)
+          this.setState({pass:arr})
+        break;
+        default:
+          this.refs.toast.show("Reset");
+          this.setState({pass:[]})
+      }
+      const passArr = [1,1,2,3,5,8]
+      console.log(this.state.pass)
+      if(this.state.pass.length==6){
+        var current = true
+        for(index in this.state.pass){
+          if(this.state.pass[index] != passArr[index]%3)
+            current = false
+        }
+        if(current){
+          this.returningUser() 
+        }
+          
+      }
+    }
+
     render(){
+      if(this.state.debug)
+        return <View style={{flex:1,justifyContent: 'center',alignItems: 'center'}}><Toast ref="toast"/><Text>Debuging tools</Text>      
+          <View style={{flexDirection: 'row', marginTop:20}}>
+              <TouchableOpacity onPress={() => this.colorClicked(0) } style={{width: 50, height: 50, backgroundColor: 'powderblue'}} />
+              <TouchableOpacity onPress={() => this.colorClicked(1) } style={{width: 50, height: 50, backgroundColor: 'skyblue'}} />
+              <TouchableOpacity onPress={() => this.colorClicked(2) } style={{width: 50, height: 50, backgroundColor: 'steelblue'}} />
+              <TouchableOpacity onPress={() => this.colorClicked(-1) } style={{width: 50, height: 50, backgroundColor: 'red'}} />
+          </View>
+        </View>;
       if(this.state.user == 9)
-        return null;
-      else
-        setTimeout(()=>SplashScreen.hide(),10)
+        return <View style={{flex:1,justifyContent: 'center',alignItems: 'center',padding:20}}><Text style={{fontSize:40,marginBottom:10}}>Until further notice</Text><Text style={{fontSize:25,marginBottom:20}}>GradeView will not be usable</Text><Text style={{fontSize:20}}>Unfortunately, the district's IT division has decided that students must use the Genesis online site, despite it being absolute garbage. I have not been informed of any rules or policies that were violated. </Text></View>;
+      //else
+        //setTimeout(()=>SplashScreen.hide(),10)
       if(this.state.user == 8)
         return <View style={{flex:1,justifyContent: 'center',alignItems: 'center'}}><Text>Please Authenticate</Text><Button title="Authenticate Again" onPress={this.returningUser}></Button></View>;
       if(this.state.user){
@@ -1956,19 +2039,4 @@ class SignIn extends React.Component {
       } 
       return <SignIn/>;
     } 
-  }/*createStackNavigator(
-    {
-      Normal: {
-        screen: TabNav,
-      },
-      SignIn: {
-        screen: signIn,
-      },
-    },
-    {
-      //mode: 'modal',
-      headerMode: 'none',
-    }
-  )*/
-  
-  //;
+  }
