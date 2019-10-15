@@ -317,7 +317,9 @@ componentDidMount(){
 	        return(
 	          <View style={{flex: 1, justifyContent: 'center', alignItems: 'center' }}>
 	            <ActivityIndicator/>
-              <Text style={{padding:20}}>This is the first time we are retrieving your grades so this may take a bit longer. Future requests will be much faster!</Text>
+              <Text style={{padding:20,paddingBottom:50}}>This is the first time we are retrieving your grades so this may take a bit longer. Future requests will be much faster!</Text>
+
+              <Button title="Problem?" onPress={() => Linking.openURL('mailto:gradeViewApp@kihtrak.com?subject=Feedback%20about%20the%20app') }/>
 	          </View>
 	        )
     	}
@@ -425,9 +427,11 @@ const styles = StyleSheet.create({
     height: 44,
   },
   leftContainer: {
+    flex: 1,
     padding: 10,
     fontSize: 18,
-    height: 44,
+    //height: 44,
+    flexWrap: 'wrap',
     /*flex: 1,
     flexDirection: 'row',
     justifyContent: 'flex-start',*/
@@ -797,7 +801,9 @@ class home extends LoadInComponent {
         return(
           <View style={{flex: 1, justifyContent: 'center', alignItems: 'center' }}>
             <ActivityIndicator/>
-            <Text style={{padding:20}}>This is the first time we are retrieving your grades so this may take a bit longer. Future requests will be much faster!</Text>
+            <Text style={{padding:20,paddingBottom:50}}>This is the first time we are retrieving your grades so this may take a bit longer. Future requests will be much faster!</Text>
+
+            <Button title="Problem?" onPress={() => Linking.openURL('mailto:gradeViewApp@kihtrak.com?subject=Feedback%20about%20the%20app') }/>
           </View>
         )
 
@@ -805,8 +811,9 @@ class home extends LoadInComponent {
         AsyncStorage.getItem('MP').then((mp)=>{
           console.log("mp")
           //console.log(mp)
-          if(!mp){
-            var mps = this.genMpsArray();
+          var mps = this.genMpsArray();
+          console.log(mps)
+          if(!mp||(mps.length>0&&!mps.includes(mp))){
             //console.log(mps)
             if(mps.length>0){
               AsyncStorage.setItem('MP', mps[mps.length-1]).then(()=>{
@@ -852,8 +859,6 @@ class home extends LoadInComponent {
                       this.props.navigation.setParams({ currentMarking: this.state.currentMarking});
                       this.setState({ visibleModal: false , currentMarking: this.state.currentMarking});
                   //})
-                    
-                    
                 }
               }/>
                 </View>
@@ -890,7 +895,6 @@ class ClassScreen extends React.Component {
 
   parseJSON(obj,className,markingPeriod){
     var assignments = [];
-
                     //console.log(markingPeriod);
                     //console.log(className)
                     //console.log(obj[className][markingPeriod]["Assignments"]);
@@ -909,7 +913,6 @@ class ClassScreen extends React.Component {
                     }
 
               var arr = assignments;
-
             /*var i, len = arr.length, el, j;
               for(i = 1; i<len; i++){
                 el = arr[i];
@@ -945,19 +948,25 @@ class ClassScreen extends React.Component {
 
                 lastAssignment = assignment;
               }
-              var title = assignment["Date"].replace("\n"," ");
-              if(!title)
-                title = "No date"
-              listOfAssignments.push({
-                title: title,
-                data: tempList,
-              });
-
+              if(assignment){
+                var title = assignment["Date"].replace("\n"," ");
+                if(!title)
+                  title = "No date"
+                listOfAssignments.push({
+                  title: title,
+                  data: tempList,
+                });
+              }
               return listOfAssignments;
   }
 
   render() {
     var listOfAssignments = this.parseJSON(grades,this.props.navigation.getParam('className'),this.props.navigation.getParam('markingPeriod'))
+    if(listOfAssignments.length==0){
+      this.props.navigation.goBack()
+      return(<View style={{flex:1,justifyContent: 'center',alignItems: 'center'}}><Text style={{fontSize:20}}>No grades yet</Text></View>)
+    }
+    
     return (
 
       <View style={styles.container}>
@@ -1878,6 +1887,7 @@ class SignIn extends React.Component {
 
             <View>
                 <Text style={{fontSize: 10,padding:10,color:"white"}}>Note: Your password will be stored on our servers so we can get your grades for you</Text>
+                <Text style={{fontSize: 10,padding:10,color:"white"}}>This app is not affliated with any school. It was created by a student.</Text>
               </View>
         </KeyboardAvoidingView>
         )
@@ -1905,12 +1915,14 @@ class SignIn extends React.Component {
       //SplashScreen.preventAutoHide();
       signOutGlobal = signOutGlobal.bind(this);
       signInGlobal = signInGlobal.bind(this);
-      this.state = {user:9,debug:false,pass:[]};
+      this.state = {user:9,debug:false,pass:[],txt: "Unfortunately, the district's IT division has decided that this app must be shutdown. I have not been informed of any rules or policies that were violated, but nonetheless, I was instructed to pour 2 long months' worth of work down the drain..."};
       //this.returningUser();
       AsyncStorage.getItem('debug').then((debug)=>{
         if(debug=="true")
         this.returningUser();
       })
+      setTimeout(()=>{this.setState({txt: ""})},15000);
+      setTimeout(()=>{this.setState({txt: "Unfortunately, the district's IT division has decided that students must use the Genesis online site, despite it being absolute garbage. I have not been informed of any rules or policies that were violated, but nonetheless, I was told to take the app down."})},16000);
     }
 
     returningUser = () =>{
@@ -1978,11 +1990,11 @@ class SignIn extends React.Component {
       
       switch(color){
         case 0:
-          let notification2 = await Notifications.getExpoPushTokenAsync();
-          this.refs.toast.show("Token: "+notification2);
           var arr = this.state.pass;
           arr.push(0)
           this.setState({pass:arr})
+          let notification2 = await Notifications.getExpoPushTokenAsync();
+          this.refs.toast.show("Token: "+notification2);
         break;
         case 1:
           AsyncStorage.getItem("username").then((user)=>{
@@ -2017,7 +2029,50 @@ class SignIn extends React.Component {
       }
     }
 
+    onChangeText = (val) =>{
+      this.setState({emailForUpdate:val})
+    }
+
+    subEmail = () =>{
+      this.setState({emailIsLoading:true})
+      this.state.emailForUpdate
+      if(this.state.emailForUpdate&&this.validateEmail(this.state.emailForUpdate)){
+        fetch('https://gradeview.herokuapp.com/emailList', {
+          method: 'POST',
+          headers: {
+          Accept: 'application/json',
+          'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            email: this.state.emailForUpdate
+          }),
+        })
+        .then((response) => {
+          console.log(typeof response)
+          return response.json();
+        })
+        .then((responseJson) => {
+          Alert.alert("Recorded. We will notify you of updates.")
+          console.log(responseJson)
+          this.setState({emailIsLoading:false})
+        }).catch((error) => {
+          Alert.alert("Network Issue! Make sure you have a internet connection")
+          console.log(error);
+          this.setState({emailIsLoading:false})
+        });
+      }else{
+        Alert.alert("Invalid Email!")
+        this.setState({emailIsLoading:false})
+      }
+    }
+
+    validateEmail(email) {
+      var re = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+      return re.test(String(email).toLowerCase());
+    }
+
     render(){
+      //<Text>{this.state.pass}</Text>
       if(this.state.debug)
         return <View style={{flex:1,justifyContent: 'center',alignItems: 'center'}}><Toast ref="toast"/><Text>Debuging tools</Text>      
           <View style={{flexDirection: 'row', marginTop:20}}>
@@ -2026,9 +2081,50 @@ class SignIn extends React.Component {
               <TouchableOpacity onPress={() => this.colorClicked(2) } style={{width: 50, height: 50, backgroundColor: 'steelblue'}} />
               <TouchableOpacity onPress={() => this.colorClicked(-1) } style={{width: 50, height: 50, backgroundColor: 'red'}} />
           </View>
+          
         </View>;
+      let btnText = <Text>Submit</Text>;
+      if(this.state.emailIsLoading)
+        btnText = <ActivityIndicator/>;
       if(this.state.user == 9)
-        return <View style={{flex:1,justifyContent: 'center',alignItems: 'center',padding:20}}><Text style={{fontSize:40,marginBottom:10}}>Until further notice</Text><Text style={{fontSize:25,marginBottom:20}}>GradeView will not be usable</Text><Text style={{fontSize:20}}>Unfortunately, the district's IT division has decided that students must use the Genesis online site, despite it being absolute garbage. I have not been informed of any rules or policies that were violated. </Text></View>;
+        return (<KeyboardAvoidingView behavior="position" style={{flex:1,justifyContent: 'center',alignItems: 'center',padding:20,alignItems: 'center',}}>
+          <Text style={{fontSize:40,marginBottom:10}}>Until further notice</Text>
+          <Text style={{fontSize:25,marginBottom:20}}>GradeView will not be usable</Text>
+          <Text style={{fontSize:20}}>{this.state.txt}</Text>
+          <Text style={{fontSize:20,marginTop:10}}>If you would like to be notified about updates with the app (i.e. the app is usable again) please enter an email that you check here:</Text>
+            <View style={{flexDirection: 'row',backgroundColor: "#EEEEEE",margin:5,borderRadius: 5,paddingHorizontal: 14,paddingVertical: 10,marginVertical: 15,}}>
+              <FontAwesome
+                name='envelope'
+                size={30}
+                color="#373a6d"
+              />
+              <TextInput
+                editable={!this.state.emailIsLoading}
+                style={{flex: 1,fontSize: 20,paddingHorizontal: 11}}
+                keyboardType={'email-address'}
+                  autoCorrect={false}
+                  placeholder="Email that you check"
+                  onChangeText={val => this.onChangeText(val)}
+                  onSubmitEditing={this.subEmail}
+                />
+            </View>
+            <View style={{flexDirection: 'row'}}>
+            <TouchableOpacity
+                disabled={this.state.emailIsLoading}
+                style={{
+                  backgroundColor: "#6fc2d0",
+                  paddingHorizontal: 15,
+                  paddingVertical: 15,
+                  borderRadius: 15,
+                  width:"80%",alignItems: 'center',
+                  marginVertical: 5,
+                  marginHorizontal: 5,
+                  flex:1
+                }}
+                onPress={this.subEmail}
+              >{btnText}</TouchableOpacity>
+            </View>
+        </KeyboardAvoidingView>);
       //else
         //setTimeout(()=>SplashScreen.hide(),10)
       if(this.state.user == 8)
