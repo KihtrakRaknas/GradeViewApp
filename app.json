@@ -8,7 +8,7 @@
       "ios",
       "android"
     ],
-    "version": "2.4.0",
+    "version": "2.5.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "splash": {
@@ -32,7 +32,7 @@
     },
     "android": {
       "package": "com.kihtrak.REGEN",
-      "versionCode": 5
+      "versionCode": 6
     },
     "description": "App client for the gradebook that South Brunswick High School uses"
   }
