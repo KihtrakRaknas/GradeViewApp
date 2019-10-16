@@ -3,7 +3,7 @@
     "name": "GradeView",
     "slug": "Regen",
     "privacy": "public",
-    "sdkVersion": "32.0.0",
+    "sdkVersion": "35.0.0",
     "platforms": [
       "ios",
       "android"
@@ -32,7 +32,7 @@
     },
     "android": {
       "package": "com.kihtrak.REGEN",
-      "versionCode":5
+      "versionCode": 5
     },
     "description": "App client for the gradebook that South Brunswick High School uses"
   }

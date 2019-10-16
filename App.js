@@ -1912,17 +1912,17 @@ class SignIn extends React.Component {
   export default class App extends React.Component {
     constructor(){
       super();
-      //SplashScreen.preventAutoHide();
+      SplashScreen.preventAutoHide();
       signOutGlobal = signOutGlobal.bind(this);
       signInGlobal = signInGlobal.bind(this);
-      this.state = {user:9,debug:false,pass:[],txt: "Unfortunately, the district's IT division has decided that this app must be shutdown. I have not been informed of any rules or policies that were violated, but nonetheless, I was instructed to pour 2 long months' worth of work down the drain..."};
-      //this.returningUser();
-      AsyncStorage.getItem('debug').then((debug)=>{
+      this.state = {user:null,debug:false,pass:[],txt: "Unfortunately, the district's IT division has decided that this app must be shutdown. I have not been informed of any rules or policies that were violated, but nonetheless, I was instructed to pour 2 long months' worth of work down the drain..."};
+      this.returningUser();
+      /*AsyncStorage.getItem('debug').then((debug)=>{
         if(debug=="true")
         this.returningUser();
       })
       setTimeout(()=>{this.setState({txt: ""})},15000);
-      setTimeout(()=>{this.setState({txt: "Unfortunately, the district's IT division has decided that students must use the Genesis online site, despite it being absolute garbage. I have not been informed of any rules or policies that were violated, but nonetheless, I was told to take the app down."})},16000);
+      setTimeout(()=>{this.setState({txt: "Unfortunately, the district's IT division has decided that students must use the Genesis online site, despite it being absolute garbage. I have not been informed of any rules or policies that were violated, but nonetheless, I was told to take the app down."})},16000);*/
     }
 
     returningUser = () =>{
@@ -2125,8 +2125,8 @@ class SignIn extends React.Component {
               >{btnText}</TouchableOpacity>
             </View>
         </KeyboardAvoidingView>);
-      //else
-        //setTimeout(()=>SplashScreen.hide(),10)
+      else
+        setTimeout(()=>SplashScreen.hide(),10)
       if(this.state.user == 8)
         return <View style={{flex:1,justifyContent: 'center',alignItems: 'center'}}><Text>Please Authenticate</Text><Button title="Authenticate Again" onPress={this.returningUser}></Button></View>;
       if(this.state.user){
