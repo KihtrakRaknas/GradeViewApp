@@ -8,10 +8,11 @@ import DropdownMenu from 'react-native-dropdown-menu';
 import Modal from 'react-native-modal';
 //import gradeList from './gradeList.js'
 require('create-react-class');
-import { Permissions, Notifications } from 'expo';
+import { Notifications } from 'expo';
+import * as Permissions from 'expo-permissions'
 import {Linking, Platform} from 'react-native';
 import Toast, {DURATION} from 'react-native-easy-toast';
-import { LocalAuthentication } from 'expo';
+import * as LocalAuthentication from 'expo-local-authentication';
 import { SearchBar, ListItem } from 'react-native-elements';
 import {SplashScreen } from 'expo';
 import Fuse from 'fuse.js';
