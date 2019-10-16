@@ -820,6 +820,7 @@ class home extends LoadInComponent {
                 
                 this.props.navigation.setParams({ currentMarking: mps[mps.length-1]});
                 this.setState({currentMarking: mps[mps.length-1]});
+                console.log("RESET")
                 //console.log(mps[mps.length-1])  
               })
             }
