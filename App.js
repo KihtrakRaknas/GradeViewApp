@@ -1,9 +1,9 @@
 import React from 'react';
-import { AppRegistry, SectionList, StyleSheet, Text, View ,ActivityIndicator, Alert, Button, TouchableOpacity,TextInput ,KeyboardAvoidingView , ScrollView, Picker,StatusBar,RefreshControl, Switch, FlatList, AppState} from 'react-native';
+import { AppRegistry, SectionList, StyleSheet, Text, View ,ActivityIndicator, Alert, Button, TouchableOpacity,TextInput ,KeyboardAvoidingView , ScrollView, Picker,StatusBar,RefreshControl, Switch, FlatList, AppState, Image, LayoutAnimation, UIManager} from 'react-native';
 import { Ionicons ,FontAwesome  } from '@expo/vector-icons';
 import { createBottomTabNavigator, createAppContainer, TabBarBottom, createStackNavigator} from 'react-navigation';
 import { Icon, Input ,ButtonGroup } from 'react-native-elements'
-import {AsyncStorage} from 'react-native';
+import {AsyncStorage, Dimensions} from 'react-native';
 import DropdownMenu from 'react-native-dropdown-menu';
 import Modal from 'react-native-modal';
 //import gradeList from './gradeList.js'
@@ -17,7 +17,20 @@ import { SearchBar, ListItem } from 'react-native-elements';
 import {SplashScreen } from 'expo';
 import Fuse from 'fuse.js';
 import { Accelerometer } from 'expo-sensors';
+import ColorPalette from 'react-native-color-palette'
+import {LineChart} from "react-native-chart-kit";
+import { BarCodeScanner } from 'expo-barcode-scanner';
+const categories = ['Homework','Quizzes','Tests','Classwork','Essays','Labs','Oral Assessments','Participation',"Performance Assessments","Pre Test Assessments 1","Pre Test Assessments 2","Post Test Assessment 1","Post Test Assessment 2","Projects","Research and Inquiry","Socratic Seminar","Summer Assignment","Technique"]
+const colorsToPickFrom = ['#000000', '#FFFFFF', '#C0392B', '#ffe6ab', '#ff8000', '#ffe0de', '#8E44AD', '#2980B9', '#ff1100', '#ffff00', '#00ff40', '#bfff00', '#e0ffd9', '#e6feff', '#00ffff', '#0000ff', '#d7d9f5']
+const defaultColors = {"Homework":"#e6feff","Quizzes":"#ffe6ab","Performance Assessments":"#ffe0de","Tests":"#ffe0de","Classwork":"#e6feff","Essays":"#e6feff","Labs":"#e6feff","Oral Assessments":"#ffe6ab","Participation":"#e0ffd9","Pre Test Assessments 1":"#e0ffd9","Pre Test Assessments 2":"#e0ffd9","Post Test Assessment 1":"#ffe0de","Post Test Assessment 2":"#ffe0de","Projects":"#d7d9f5","Research and Inquiry":"#d7d9f5","Socratic Seminar":"#d7d9f5","Summer Assignment":"#ffff00","Technique":"#e6feff"}
+
 var grades;
+
+if (Platform.OS === 'android') {
+  if (UIManager.setLayoutAnimationEnabledExperimental) {
+    UIManager.setLayoutAnimationEnabledExperimental(true);
+  }
+}
 
 class LoadInComponent extends React.Component {
   parseJSON(obj){
@@ -29,8 +42,12 @@ class LoadInComponent extends React.Component {
                   if(markingPeriod!=null && markingPeriod != "teacher" && markingPeriod != "title"){
                     //console.log(markingPeriod);
                     //console.log(className)
+                    var teacher = obj[className]['teacher']
                     //console.log(obj[className][markingPeriod]["Assignments"]);
                     for(var assignment of obj[className][markingPeriod]["Assignments"]){
+                      assignment['teacher'] = teacher;
+                      assignment['className'] = className;
+
                       var year = "19";
                       if(assignment["Date"].includes("\n")){
                         if(parseInt((assignment["Date"].split("\n")[1]).split("/")[0])>6)
@@ -171,7 +188,14 @@ class LoadInComponent extends React.Component {
       });
     }
 
-  getGrade = async () => {
+    getGrade = async () => {
+      return this.getGradeWithoutErrorCatching().catch((error) =>{
+				//console.error(error);
+			});
+    }
+
+
+  getGradeWithoutErrorCatching = async () => {
   this.props.navigation.setParams({loading: true});
 	console.log("TEST")
 		return fetch('https://gradeview.herokuapp.com/', {
@@ -198,7 +222,6 @@ class LoadInComponent extends React.Component {
       grades = responseJson;
       console.log("GRADES UPDATED")
           AsyncStorage.setItem('grades', JSON.stringify(responseJson));
-          this.props.navigation.setParams({ loading: false })
           parsedJSON = this.parseJSON(responseJson)
 					this.setState({
 						isLoading: false,
@@ -211,11 +234,8 @@ class LoadInComponent extends React.Component {
       this.runGetGrades()
 
     }
-
+    this.props.navigation.setParams({ loading: false })
 			})
-			.catch((error) =>{
-				console.error(error);
-			});
 }
 
 _retrieveData = async () => {
@@ -257,6 +277,57 @@ runGetGrades(){
 }
 }
 
+class ListOfAssignmentsView extends React.Component{
+  constructor(props){
+    super(props);
+    this.state = {}
+    updateBackgroundColorsGlobal = updateBackgroundColorsGlobal.bind(this);
+    AsyncStorage.getItem('backgroundColors').then((backgroundColors)=>{
+      if(JSON.parse(backgroundColors))
+        this.setState({backgroundColors:JSON.parse(backgroundColors)})
+    })
+  }
+
+  getBackgroundColor = (cat) =>{
+    if(this.state.backgroundColors)
+      if(this.state.backgroundColors[cat])
+        return this.state.backgroundColors[cat]
+    if(defaultColors[cat])
+      return defaultColors[cat]
+    return "#FFFFFF"
+  }
+
+  render(){
+    return(
+        <SectionList
+          ItemSeparatorComponent={({item}) => <View style={{flex: 1, justifyContent: 'center', alignItems: 'center' }}><View style={{height: 0.5, width: '96%', backgroundColor: '#C8C8C8', }}/></View>}
+          sections={this.props.listOfAssignments}
+          renderItem={({item}) => <TouchableOpacity onPress={()=>this.props.navigation.navigate('Assignment',{assignmentData: item})} style={{flexDirection: 'row', justifyContent: 'space-between', backgroundColor:this.getBackgroundColor(item["Category"])}}>
+              <Text style={{
+                    flex: 1,
+                    padding: 10,
+                    fontSize: 18,
+                    flexWrap: 'wrap',
+                    color:pickTextColorBasedOnBgColorAdvanced(this.getBackgroundColor(item["Category"]))
+              }} flex left>{item["Comment"]?<Text style={{textDecorationLine:'underline'}}>{item["Name"]}</Text>:item["Name"]}</Text>
+              <Text style={{
+                    padding: 10,
+                    fontSize: 18,
+                    height: 44,
+                    fontStyle:"italic",
+                    color:pickTextColorBasedOnBgColorAdvanced(this.getBackgroundColor(item["Category"]))
+              }} flex>
+                <Text style={{color:this.getBackgroundColor(item["Category"])!='#ff1100'?"red":"white",fontSize:15}}>{item["Weighting"]?item["Weighting"]:""}</Text>
+                {item["Weighting"]&&item["Weighting"].includes("x")?" - ":""}{item["Grade"]}
+              </Text>
+            </TouchableOpacity>}
+          renderSectionHeader={({section}) =>     <View style={styles.sectionHeaderContainer}><Text style={styles.sectionHeaderText}>{section.title}</Text></View>}
+          keyExtractor={(item, index) => index}
+        />
+    )
+  }
+}
+
  class gradeList extends LoadInComponent {
   static navigationOptions = ({ navigation }) => {
     var icon =       <Icon
@@ -279,8 +350,14 @@ runGetGrades(){
       }
   };
 
+  getGradeAndReportError = () =>{
+    return this.getGradeWithoutErrorCatching().catch((error) =>{
+      Alert.alert("Network Issue!\n Make sure you have a internet connection")
+    });
+  }
+
 componentDidMount(){
-  this.props.navigation.setParams({ refresh: this.getGrade.bind(this),});
+  this.props.navigation.setParams({ refresh: this.getGradeAndReportError.bind(this),});
 }
 
 /*
@@ -331,17 +408,7 @@ componentDidMount(){
     return (
 
       <View style={styles.container}>
-        <SectionList
-          ItemSeparatorComponent={({item}) => <View style={{flex: 1, justifyContent: 'center', alignItems: 'center' }}><View style={{height: 0.5, width: '96%', backgroundColor: '#C8C8C8', }}/></View>}
-          sections={listOfAssignments}
-          renderItem={({item}) => <View style={{flexDirection: 'row',
-          justifyContent: 'space-between'}}>
-            <Text style={styles.leftContainer} flex left>{item["Name"]}</Text>
-            <Text style={styles.rightContainer} flex>{item["Grade"]}</Text>
-            </View>}
-          renderSectionHeader={({section}) =>     <View style={styles.sectionHeaderContainer}><Text style={styles.sectionHeaderText}>{section.title}</Text></View>}
-          keyExtractor={(item, index) => index}
-        />
+        <ListOfAssignmentsView navigation={this.props.navigation} listOfAssignments={listOfAssignments}/>
       </View>
     );
   }
@@ -467,10 +534,30 @@ class settings extends React.Component {
     Notifications.getExpoPushTokenAsync().then((token)=>{
       this.setState({pushToken:token})
     })
-    AsyncStorage.getItem('username').then((user)=>{
-      if(user)
-        this.state.id = user;
-    });
+    AsyncStorage.getItem('IDbarcode').then((IDbarcode)=>{
+      if(IDbarcode){
+        this.setState({idBar: IDbarcode})
+      }else{
+        AsyncStorage.getItem('username').then((user)=>{
+          if(user){
+            this.state.id = user;
+            fetch('https://gradeview.herokuapp.com/id?id='+user.substring(0,user.indexOf("@")), {
+              method: 'GET',
+              headers: {
+                Accept: 'text/html',
+                'Content-Type': 'text/html',
+              },
+            })
+            .then((response) => {
+              return response.text();
+            }).then((responseTxt) => {
+              this.setState({idBar: responseTxt})
+              AsyncStorage.setItem('IDbarcode',responseTxt)
+            })
+          }
+        });
+      }
+    })
   }
   static navigationOptions = ({ navigation }) => {
     return {
@@ -522,9 +609,18 @@ class settings extends React.Component {
         bottomDivider={i!=list.length-1}
         chevron
       />
-    ))
-    
+    ))  
   }
+ <View style={{
+    justifyContent: 'center',
+    alignItems: 'center',
+  }}>
+    <Image
+      resizeMode={'contain'}
+      style={{width: '80%', height: 100, marginTop: 50}}
+      source={{uri:this.state.idBar}}
+    />
+  </View>
   {debug}
 </ScrollView>
       )
@@ -639,8 +735,9 @@ class home extends LoadInComponent {
   constructor(props){
     super(props);
     console.log("GERNERATING")  
-    this.state ={ isLoading: false, email:"", password:"", num: 0, currentMarking: "Select MP", style:"Percent"}
+    this.state ={ isLoading: false, email:"", password:"", num: 0, currentMarking: "Select MP", style:"Percent", firstMPSRender:true}
 
+    this.firstMPSRender = false;
     console.log("GERNERATING DONE")
     
     updateAvgDisplayGlobal = updateAvgDisplayGlobal.bind(this)
@@ -651,6 +748,16 @@ class home extends LoadInComponent {
     })
 
     this.props.navigation.setParams({ click: this.click, genMpsArray: this.genMpsArray, genMpSelector: this.genMpSelector, updateMarkingPeriodSelectionAndriod: this.updateMarkingPeriodSelectionAndriod});
+    
+
+      AsyncStorage.getItem('MPS').then((oldMps)=>{
+        console.log("oldMps - constructor")
+        oldMps = JSON.parse(oldMps);
+        oldMps = oldMps?oldMps:[];
+        console.log("old: "+JSON.stringify(oldMps))
+          this.setState({oldMps})
+        console.log("mps str"+JSON.stringify(mps))
+      })
   }
 
   componentDidMount = () => {
@@ -658,21 +765,15 @@ class home extends LoadInComponent {
   }
 
   static navigationOptions = ({ navigation }) => {
-    console.log("TEXT: "+navigation.getParam('currentMarking','Select a MP'))
-    console.log(navigation.getParam('currentMarking','Select a MP'))
     var text = navigation.getParam('currentMarking','Select a MP');
     //var genMpsArray = navigation.getParam('genMpsArray',()=>{})();
 
-    console.log(typeof text)
     if(typeof text != "string"){
       text = "Select a MP"
     }
-    console.log("TEXTt: "+text)
 
     var androidEl =  <Text>Select a MP</Text>;
-    console.log('test')
     //console.log(this.state.currentMarking)
-    console.log('te3st')
     if(text != "Select a MP"){
       androidEl =  <Picker 
         selectedValue={text}
@@ -684,7 +785,6 @@ class home extends LoadInComponent {
         {navigation.getParam("genMpSelector",<Text>Select a MP</Text>,)()}
       </Picker>
     }
-    console.log('te4st')
     const headerEl = Platform.select({
       ios: 
         <View>
@@ -696,7 +796,6 @@ class home extends LoadInComponent {
       android: androidEl   
 
     });
-    console.log("header done")
       return {
         title: 'Home',
         headerStyle: styles.navigationHeader,
@@ -792,9 +891,13 @@ class home extends LoadInComponent {
   }
 
   refresh = () =>{
-    this.getGrade().then(()=>{
+    this.setState({refreshing: true});
+    this.getGradeWithoutErrorCatching().then(()=>{
       this.setState({refreshing: false});
-    })
+    }).catch((error) =>{
+      this.setState({refreshing: false});
+      Alert.alert("Network Issue!\n Make sure you have a internet connection")
+    });
   }
 
   render() {
@@ -808,28 +911,44 @@ class home extends LoadInComponent {
           </View>
         )
 
-        if(this.state.currentMarking == "Select MP")
+        var mps = this.genMpsArray();
+      if(this.state.oldMps&&mps&&this.state.oldMps.length<mps.length){
+        this.setState({oldMps:mps})
+        if(mps.length>0){
+          AsyncStorage.setItem('MP', mps[mps.length-1]).then(()=>{
+            
+            this.props.navigation.setParams({ currentMarking: mps[mps.length-1]});
+            this.setState({currentMarking: mps[mps.length-1]});
+            console.log("RESET")
+            //console.log(mps[mps.length-1])  
+          })
+          AsyncStorage.setItem('MPS',JSON.stringify(mps))
+        }
+        
+      }
+
+      console.log("render - "+ this.state.currentMarking)
+      if(this.state.currentMarking == "Select MP")
         AsyncStorage.getItem('MP').then((mp)=>{
           console.log("mp")
           //console.log(mp)
-          var mps = this.genMpsArray();
-          console.log(mps)
+          console.log("new"+mps)
           if(!mp||(mps.length>0&&!mps.includes(mp))){
-            //console.log(mps)
-            if(mps.length>0){
-              AsyncStorage.setItem('MP', mps[mps.length-1]).then(()=>{
-                
-                this.props.navigation.setParams({ currentMarking: mps[mps.length-1]});
-                this.setState({currentMarking: mps[mps.length-1]});
-                console.log("RESET")
-                //console.log(mps[mps.length-1])  
-              })
-            }
-          }else{
-            this.props.navigation.setParams({ currentMarking: mp});
-            this.setState({currentMarking: mp});
-          }
-        });
+                console.log("ENFORCED NEW2")
+                if(mps.length>0){
+                  AsyncStorage.setItem('MP', mps[mps.length-1]).then(()=>{
+                    
+                    this.props.navigation.setParams({ currentMarking: mps[mps.length-1]});
+                    this.setState({currentMarking: mps[mps.length-1]});
+                    console.log("RESET")
+                    //console.log(mps[mps.length-1])  
+                  })
+                }
+              }else{
+                this.props.navigation.setParams({ currentMarking: mp});
+                this.setState({currentMarking: mp});
+              }
+          });
       return(
           <ScrollView style={{flex: 1, flexDirection: 'column'}}         refreshControl={
             <RefreshControl
@@ -851,15 +970,18 @@ class home extends LoadInComponent {
                   <Picker
                     selectedValue={this.state.currentMarking}
                     style={{height: 200, width: 100}}
-                    onValueChange={(itemValue, itemIndex) =>
+                    onValueChange={(itemValue, itemIndex) =>{
+                      AsyncStorage.setItem('MP', itemValue).then(()=>{})
+                      this.props.navigation.setParams({ currentMarking: itemValue});
                       this.setState({currentMarking: itemValue})
+                    }
                     }>
                     {this.genMpSelector()}
                   </Picker>
                   <Button title="Close" onPress={() => {
-                    AsyncStorage.setItem('MP', this.state.currentMarking)//.then(()=>{
-                      this.props.navigation.setParams({ currentMarking: this.state.currentMarking});
-                      this.setState({ visibleModal: false , currentMarking: this.state.currentMarking});
+                      //AsyncStorage.setItem('MP', this.state.currentMarking)
+                      //this.props.navigation.setParams({ currentMarking: this.state.currentMarking});
+                      this.setState({ visibleModal: false /*, currentMarking: this.state.currentMarking*/});
                   //})
                 }
               }/>
@@ -875,6 +997,101 @@ class home extends LoadInComponent {
       )
   }
 
+}
+ 
+class AssignmentScreen extends React.Component {
+  constructor(props){
+    super(props);
+  }
+  
+  static navigationOptions = ({ navigation }) => {
+    /*return {
+      title: navigation.getParam('className',"Class Name"),
+    }*/
+    return {
+      headerStyle: styles.navigationHeader,
+      title: "Assignment Details"//navigation.getParam('assignmentData',{Name:""})["Name"],
+    }
+  };
+
+  render(){
+    assignment = this.props.navigation.getParam('assignmentData',{})
+    var year = new Date().getFullYear();
+    if(parseInt((assignment["Date"].split("\n")[1]).split("/")[0])>6)
+        year = year--;
+
+    var options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+    
+    var date = new Date(assignment["Date"]+"/"+year);
+
+    date = date.toLocaleDateString(undefined, options)
+
+    console.log(assignment["Comment"])
+
+    var comment = assignment["Comment"];
+
+    if(comment&&comment.length>=2)
+      if(comment.substring(0,1) == '"' && comment.substring(comment.length-1,comment.length) == '"'){
+        comment = comment.substring(1,comment.length-1)
+      }
+
+    return (
+      <ScrollView style={{flex:1,padding:15}}>
+        <Text adjustsFontSizeToFit numberOfLines={2} style={{fontWeight:"bold", textShadowColor:"grey", textShadowOffset: { width: 0.5, height: 0.5 }, textShadowRadius: 5, fontSize:50, paddingBottom:10}}>{assignment["Name"]?assignment["Name"]:null}</Text>
+        <Text style={{fontSize:25, paddingBottom:40}}>{date?date:null}</Text>
+        <Text adjustsFontSizeToFit numberOfLines={Platform.OS === 'ios'?1:null} style={{fontSize:25, paddingBottom:10}}>{assignment['className']?assignment['className']:null}</Text>
+        <Text style={{fontSize:20, paddingBottom:40}}>{assignment["teacher"]?assignment["teacher"]:null}</Text>
+        <Text adjustsFontSizeToFit numberOfLines={1} style={{fontWeight:"bold", textShadowColor:"#ff8246", fontSize:Platform.OS === 'ios'?75:50,textAlign:"right"}}><Text style={{width:"50%"}}>{assignment["Grade"]?assignment["Grade"]:null}</Text> <Text style={{color:"red", width:"50%"}}>{assignment["Weighting"]?assignment["Weighting"]:null}</Text></Text>
+        <Text style={{paddingTop:20, fontSize:20, textAlign:"right"}}>{assignment["Category"]?""+assignment["Category"]:null}</Text>
+        <View style={{marginTop:50,borderRadius:10,backgroundColor:"lightgrey", minHeight:100,padding:5,marginBottom:20}}>
+          <Text style={{ fontSize:20}}>{comment?comment:"No Teacher Comment"}</Text>
+        </View>
+        <LineChart
+          style={{marginBottom:20}}
+          data={{
+            labels: ["F","D-","D","D+","C-","C","C+","B-","B","B+","A-","A","A+"],
+            datasets: [
+              {
+                data: [
+                  Math.random() * 100,
+                  Math.random() * 100,
+                  Math.random() * 100,
+                  Math.random() * 100,
+                  Math.random() * 100,
+                  Math.random() * 100
+                ]
+              }
+            ]
+          }}
+          width={Dimensions.get("window").width-40 } // from react-native
+          height={220}
+          //yAxisLabel={"$"}
+          //yAxisSuffix={"k"}
+          chartConfig={{
+            backgroundColor: "#e26a00",
+            backgroundGradientFrom: "#fb8c00",
+            backgroundGradientTo: "#ffa726",
+            decimalPlaces: 2, // optional, defaults to 2dp
+            color: (opacity = 1) => `rgba(255, 255, 255, ${opacity})`,
+            labelColor: (opacity = 1) => `rgba(255, 255, 255, ${opacity})`,
+            style: {
+              borderRadius: 16
+            },
+            propsForDots: {
+              r: "6",
+              strokeWidth: "2",
+              stroke: "#ffa726"
+            }
+          }}
+          bezier
+          style={{
+            marginVertical: 8,
+            borderRadius: 16
+          }}
+        />
+      </ScrollView>
+    )
+  }
 }
 
 class ClassScreen extends React.Component {
@@ -897,10 +1114,14 @@ class ClassScreen extends React.Component {
 
   parseJSON(obj,className,markingPeriod){
     var assignments = [];
+    var teacher = obj[className]['teacher']
                     //console.log(markingPeriod);
                     //console.log(className)
                     //console.log(obj[className][markingPeriod]["Assignments"]);
                     for(var assignment of obj[className][markingPeriod]["Assignments"]){
+                      assignment['teacher'] = teacher;
+                      assignment['className'] = className;
+
                       var year = "19";
                       if(assignment["Date"].includes("\n")){
                         if(parseInt((assignment["Date"].split("\n")[1]).split("/")[0])>6)
@@ -959,6 +1180,8 @@ class ClassScreen extends React.Component {
                   data: tempList,
                 });
               }
+
+              //console.log(listOfAssignments)
               return listOfAssignments;
   }
 
@@ -972,17 +1195,7 @@ class ClassScreen extends React.Component {
     return (
 
       <View style={styles.container}>
-        <SectionList
-          ItemSeparatorComponent={({item}) => <View style={{flex: 1, justifyContent: 'center', alignItems: 'center' }}><View style={{height: 0.5, width: '96%', backgroundColor: '#C8C8C8', }}/></View>}
-          sections={listOfAssignments}
-          renderItem={({item}) => <View style={{flexDirection: 'row',
-          justifyContent: 'space-between'}}>
-            <Text style={styles.leftContainer} flex left>{item["Name"]}</Text>
-            <Text style={styles.rightContainer} flex>{item["Grade"]}</Text>
-            </View>}
-          renderSectionHeader={({section}) =>     <View style={styles.sectionHeaderContainer}><Text style={styles.sectionHeaderText}>{section.title}</Text></View>}
-          keyExtractor={(item, index) => index}
-        />
+        <ListOfAssignmentsView navigation={this.props.navigation} listOfAssignments={listOfAssignments}/>
       </View>
     );
 
@@ -1028,6 +1241,11 @@ class Contacts extends React.Component {
     return {
       title: 'Global Lookup',
       headerStyle: styles.navigationHeader,
+      headerRight: (
+        <View paddingRight={10}>
+          {<Icon onPress={()=>navigation.navigate('ScannedList')} name={"menu"} size={25} type={"MaterialIcons"}/>}
+        </View>
+      ),
     }
   }
 
@@ -1104,6 +1322,178 @@ class Contacts extends React.Component {
 
 }
 
+class ScannedListScreen extends React.Component {
+
+  constructor(props){
+    super(props);
+    this.state ={ contacts: [], baseContacts:[], search: '', result:null}
+
+  }
+
+  componentWillMount = () =>{
+    this.getContacts()
+    this.focusListener = this.props.navigation.addListener('didFocus', () => {
+      AsyncStorage.getItem('scannedContacts').then((contacts)=>{
+        if(contacts&&JSON.parse(contacts)){
+          let newContacts = JSON.parse(contacts)
+          this.setState({contacts:newContacts});
+          AsyncStorage.getItem('contacts').then((baseContacts)=>{
+            console.log("Started Getting")
+            let newBContacts = [];
+            if(baseContacts&&JSON.parse(baseContacts)){
+              newBContacts = JSON.parse(baseContacts)
+              this.setState({baseContacts:newBContacts});
+            }
+            console.log("looping")
+            for(personIndex in newContacts){
+              for(contact of newBContacts){
+                if(newContacts[personIndex]["email"] == contact["email"])
+                  newContacts[personIndex] = contact
+              }
+            }
+            console.log("done")
+            this.setState({contacts:newContacts});
+          })
+        }
+      })
+    });
+  }
+
+  componentWillUnmount() {
+    // Remove the event listener
+    this.focusListener.remove();
+  }
+
+  static navigationOptions = ({ navigation }) => {
+    return {
+      title: 'Scanned IDs',
+      headerStyle: styles.navigationHeader,
+      headerRight: (
+        <View paddingRight={10}>
+          {<Icon onPress={()=>navigation.navigate('Camera')} name={"camera-alt"} size={25} type={"MaterialIcons"}/>}
+        </View>
+      ),
+    }
+  }
+
+  getContacts = () =>{
+    return fetch('https://raw.githubusercontent.com/KihtrakRaknas/DirectoryScraper/master/output.json', {
+      method: 'GET',
+      headers: {
+        Accept: 'application/json',
+        'Content-Type': 'application/json',
+        },
+      })
+      .then((response) => {
+        console.log(typeof response)
+        return response.json();
+      })
+      .then((responseJson) => {
+        fuse = new Fuse(responseJson, options);
+        AsyncStorage.setItem('contacts',JSON.stringify(responseJson))
+        this.setState({baseContacts:responseJson});
+        return responseJson
+      })
+  }
+
+
+  render() {
+    let list = <View style={{flex:1,justifyContent: 'center',alignItems: 'center'}}><Text style={{fontSize:20}}>Contacts are not current available, connect to the internet and try again</Text></View>
+    if(Object.keys(this.state.contacts).length>0){
+      arr = this.state.contacts;
+      if(this.state.result)//Object.keys(this.state.result).length>0
+        arr = this.state.result;
+      
+      list = <FlatList
+        data={arr}
+        ListEmptyComponent={<View style={{flex:1,justifyContent: 'center',alignItems: 'center'}}><Text style={{fontSize:20}}>No results</Text></View>}
+        keyExtractor={item => item.email}
+        //ListHeaderComponent={          }
+        ItemSeparatorComponent={({item}) => <View style={{flex: 1, justifyContent: 'center', alignItems: 'center' }}><View style={{height: 0.5, width: '96%', backgroundColor: '#C8C8C8', }}/></View>}
+        renderItem={({item}) => <NameIDItem item={item}/>}
+        ListFooterComponent={this.state.contacts.length>0?<Button title="Clear" onPress={()=>{
+          AsyncStorage.setItem('scannedContacts',"[]");
+          this.setState({contacts:[]});
+       }}/>:null}
+      />
+    }
+      return(
+        //<View style={{flex:1,justifyContent: 'center',alignItems: 'center'}}>
+        <View>
+          {list}
+        </View>
+      )
+  }
+
+}
+
+class CameraScreen extends React.Component {
+  state = {
+    hasCameraPermission: null,
+    scanned: false,
+  };
+
+  async componentDidMount() {
+    this.getPermissionsAsync();
+    this.focusListener = this.props.navigation.addListener('didFocus', () => {
+      this.setState({ scanned: false })
+      // The screen is focused
+      // Call any action
+    });
+  }
+
+  getPermissionsAsync = async () => {
+    const { status } = await Permissions.askAsync(Permissions.CAMERA);
+    this.setState({ hasCameraPermission: status === 'granted' });
+  };
+
+  render() {
+    const { hasCameraPermission, scanned } = this.state;
+
+    if (hasCameraPermission === null) {
+      return <Text>Requesting for camera permission</Text>;
+    }
+    if (hasCameraPermission === false) {
+      return <Text>No access to camera</Text>;
+    }
+    return (
+      <View
+        style={{
+          flex: 1,
+          flexDirection: 'column',
+          justifyContent: 'flex-end',
+        }}>
+        <BarCodeScanner
+          onBarCodeScanned={scanned ? undefined : this.handleBarCodeScanned}
+          style={StyleSheet.absoluteFillObject}
+        />
+
+        {scanned && (
+          <Button title={'Tap to Scan Again'} onPress={() => this.setState({ scanned: false })} />
+        )}
+      </View>
+    );
+  }
+
+  handleBarCodeScanned = ({ type, data }) => {
+    this.setState({ scanned: true });
+    AsyncStorage.getItem('scannedContacts').then((contacts)=>{
+      let newC = [];
+      if(contacts&&JSON.parse(contacts))
+        newC = JSON.parse(contacts);
+      newC.push({email:data+"@sbstudents.org"})
+      AsyncStorage.setItem('scannedContacts',JSON.stringify(newC)).then((contacts)=>{
+        
+        this.props.navigation.navigate('ScannedList')
+      });
+    });
+  };
+  componentWillUnmount() {
+    // Remove the event listener
+    this.focusListener.remove();
+  }
+}
+
 
 class NameIDItem extends React.Component {
   constructor(props){
@@ -1115,9 +1505,13 @@ class NameIDItem extends React.Component {
     if (email.split("@")[1] == "sbstudents.org")
       email = email.split("@")[0]
     let image = this.props.item.image;
-    if(image.split("=").length<2)
-      image = image.replace('/s36-p-k-rw-no','')
-    image = image.split("=")[0]
+    if(image){
+      if(image.split("=").length<2)
+        image = image.replace('/s36-p-k-rw-no','')
+      image = image.split("=")[0]
+    }else{
+      image = null;
+    }
     return (
         <ListItem
           leftAvatar={{ source: { uri: image } }}
@@ -1218,7 +1612,7 @@ class GPA extends React.Component {
         return 0.0
         break;
       default:
-        console.log("Unrecognised Letter Grade")
+        console.log("Unrecognised Letter Grade - " + letter.substring(0,2).trim())
         return "error"
     }
   }
@@ -1252,7 +1646,7 @@ class GPA extends React.Component {
 
   getNewFGs = async () => {
     this.props.navigation.setParams({loading: true});
-    console.log("TEST")
+    console.log("TEST - new FG starting")
       return fetch('https://gradeview.herokuapp.com/newGrades', {
       method: 'POST',
       headers: {
@@ -1272,8 +1666,56 @@ class GPA extends React.Component {
     })
     .then((responseJson) => {
       console.log("new")
+      if(grades&&responseJson){
+        responseJson.map((classObj)=>{
+          if(grades[classObj['Name']]){
+            for(mpsName in grades[classObj['Name']]){
+              if(mpsName.includes("MP") && grades[classObj['Name']][mpsName]['avg']){
+                var percent = grades[classObj['Name']][mpsName]['avg']
+                percent = percent.substring(0,percent.length-1)
+                if(!classObj[mpsName])
+                  classObj[mpsName] = this.gradeToLetter(percent);
+              }
+            }
+          }
+          return classObj;
+        })
+      }
+      console.log("TEST - new FG ending")
+      console.log(responseJson)
       return responseJson
     });
+  }
+
+  gradeToLetter = (percent) =>{
+    if(!Number(percent))
+      return "? "
+    else if(percent>=97)
+      return "A+"
+    else if(percent>=93)
+      return "A "
+    else if(percent>=90)
+      return "A-"
+    else if(percent>=87)
+      return "B+"
+    else if(percent>=83)
+      return "B "
+    else if(percent>=80)
+      return "B-"
+    else if(percent>=77)
+      return "C+"
+    else if(percent>=73)
+      return "C "
+    else if(percent>=70)
+      return "C-"
+    else if(percent>=67)
+      return "D+"
+    else if(percent>=63)
+      return "D"
+    else if(percent>=60)
+      return "D-"
+    else 
+      return "F "
   }
 
   componentDidMount = () =>{
@@ -1503,7 +1945,13 @@ class GPA extends React.Component {
 class Options extends React.Component {
   constructor(props){
     super(props);
-    this.state ={selectedIndex:0}
+    this.state ={selectedIndex:0, token:"null"}
+
+    Notifications.getExpoPushTokenAsync().then((token)=>{
+      if(token.includes("ExponentPushToken"))
+      token = token.substring(17)
+      this.setState({token})
+    })
 
     AsyncStorage.getItem('needBiometric').then((needBiometric)=>{
       var needBiometricR = false;
@@ -1533,13 +1981,18 @@ class Options extends React.Component {
     
     AsyncStorage.getItem('username').then((user)=>{
       AsyncStorage.getItem('password').then((pass)=>{
-        AsyncStorage.clear().then(()=>{
-          AsyncStorage.setItem('oldUsername',user).then(()=>{
-            AsyncStorage.setItem('oldPassword',pass).then(()=>{
-              signOutGlobal();
+        AsyncStorage.getItem('backgroundColors').then((backgroundColors)=>{
+          AsyncStorage.clear().then(()=>{
+            AsyncStorage.setItem('oldUsername',user).then(()=>{
+              AsyncStorage.setItem('oldPassword',pass).then(()=>{
+                backgroundColors = backgroundColors?backgroundColors:JSON.stringify({})
+                AsyncStorage.setItem('oldBackgroundColors',backgroundColors).then(()=>{
+                  signOutGlobal();
+                });
+              });
             });
-          });
-        })
+          })
+        });
       });
     });
   }
@@ -1564,6 +2017,14 @@ return(
    value:this.state.needBiometric,
    disabled: this.state.needBiometric == null
   }}
+/>
+<ListItem  
+  leftIcon={{ name: "color-lens" , type: 'MaterialIcons' }}
+  chevron
+  title="Assignment Styling"
+  subtitle={"Color-code different assignment types"}
+  onPress={()=>this.props.navigation.navigate('ColorPick')}
+  bottomDivider={true}
 />
 <ListItem  
   leftIcon={{ name: "eye" , type: 'font-awesome' }}
@@ -1594,6 +2055,11 @@ return(
   topDivider={true}
   onPress = {this.signOut}
 />
+<ListItem  
+  title="Debug info"
+  subtitle={this.state.token}
+  topDivider={true}
+/>
 </ScrollView>
     /*
     
@@ -1620,16 +2086,105 @@ return(
 
 }
 
+class ColorPickScreen extends React.Component {
+  constructor(props){
+    super(props);
+    this.state ={ selectedColor:'#C0392B', selectedCategory:null}
+    AsyncStorage.getItem('backgroundColors').then((backgroundColors)=>{
+      if(JSON.parse(backgroundColors))
+        backgroundColors = JSON.parse(backgroundColors)
+      else
+        backgroundColors = {}
+      this.setState({backgroundColors})
+    })
+  }
+  static navigationOptions = ({ navigation }) => {
+    return {
+      title: 'Assignment Styling',
+      headerStyle: styles.navigationHeader,
+    }
+  }
+
+  setColor = (color,item) =>{
+    var newBackgroundColors = this.state.backgroundColors
+    newBackgroundColors[item] = color
+    this.setState({backgroundColors:newBackgroundColors})
+    AsyncStorage.getItem('backgroundColors').then((backgroundColors)=>{
+      if(JSON.parse(backgroundColors))
+        backgroundColors = JSON.parse(backgroundColors)
+      else
+        backgroundColors = {}
+      backgroundColors[item] = color;
+      AsyncStorage.setItem('backgroundColors',JSON.stringify(backgroundColors)).then(()=>{
+        updateBackgroundColorsGlobal(backgroundColors)
+      })
+    })
+  }
+
+  render(){
+    var items = [];
+    categories.forEach((item)=>{
+      items.push(<ListItem
+        title={item}
+        onPress={()=>{
+          AsyncStorage.getItem('backgroundColors').then((backgroundColors)=>{
+            console.log(backgroundColors)
+          })
+          LayoutAnimation.configureNext(LayoutAnimation.Presets.linear);
+          this.setState({selectedCategory:item})
+        }}
+        rightElement={<View style={{
+          width: 50,
+          height: 50,
+          borderRadius: 50/2,
+          borderWidth: this.state.backgroundColors&&this.state.backgroundColors[item]=='#FFFFFF'?1:defaultColors[item]=='#FFFFFF'?1:0,
+          backgroundColor: this.state.backgroundColors&&this.state.backgroundColors[item]?this.state.backgroundColors[item]:defaultColors[item]?defaultColors[item]:'#FFFFFF'
+        }}></View>}
+        bottomDivider={true}
+      />)
+        items.push(
+          <View style={{backgroundColor:"#F0F0F0"}}>{this.state.selectedCategory == item && <ColorPalette
+            onChange={color =>{
+              this.setColor(color,item)
+            } }
+            value={this.state.backgroundColors[item]?this.state.backgroundColors[item]:defaultColors[item]?defaultColors[item]:'#FFFFFF'}
+            colors={colorsToPickFrom}
+            title={""}
+            icon={
+              <Text style={{color: pickTextColorBasedOnBgColorAdvanced(this.state.backgroundColors[item]?this.state.backgroundColors[item]:defaultColors[item]?defaultColors[item]:'#FFFFFF')}}>✓</Text>
+            }
+          />}</View>)
+          return item;
+        })
+    return(
+      <ScrollView >
+        {items}
+        <ListItem
+          title="Reset"
+          onPress={()=>{
+            this.setState({backgroundColors:defaultColors})
+            AsyncStorage.setItem('backgroundColors',JSON.stringify(defaultColors)).then(()=>{
+              updateBackgroundColorsGlobal(defaultColors)
+            })
+          }}
+          subtitle="Reset the assignment stylings back to thier default colors"
+        />
+      </ScrollView>
+    )
+  }
+}
 
 
 
 const HomeStack = createStackNavigator({
   Home: { screen: home},
   Class:{ screen: ClassScreen},
+  Assignment: {screen: AssignmentScreen}
 });
 
 const AssignmentsStack = createStackNavigator({
   Assignments: { screen: gradeList },
+  Assignment: {screen: AssignmentScreen}
 });
 
 const SettingsStack = createStackNavigator({
@@ -1637,6 +2192,9 @@ const SettingsStack = createStackNavigator({
   Options: {screen: Options},
   Contacts: {screen: Contacts},
   GPA: {screen: GPA},
+  ColorPick: {screen: ColorPickScreen},
+  ScannedList: {screen: ScannedListScreen},
+  Camera: {screen: CameraScreen}
 });
 
 const TabNav = createBottomTabNavigator(
@@ -1723,6 +2281,11 @@ class SignIn extends React.Component {
       AsyncStorage.getItem('oldUsername').then((user)=>{
         AsyncStorage.getItem('oldPassword').then((pass)=>{
           this.verifyWithParams(user,pass)
+          AsyncStorage.getItem('oldBackgroundColors').then((backgroundColor)=>{
+            if(backgroundColor)
+              AsyncStorage.setItem('backgroundColors',backgroundColor)
+            //updateBackgroundColorsGlobal(JSON.parse(backgroundColor))
+          })
         })
       })
     }
@@ -1888,7 +2451,7 @@ class SignIn extends React.Component {
             {cancelBtn}
 
             <View>
-                <Text style={{fontSize: 10,padding:10,color:"white"}}>Note: Your password will be stored on our servers so we can get your grades for you</Text>
+                <Text style={{fontSize: 10,padding:10,color:"white"}}>Note: Your password will be encrypted and stored on our servers so we can get your grades for you</Text>
                 <Text style={{fontSize: 10,padding:10,color:"white"}}>This app is not affliated with any school. It was created by a student.</Text>
               </View>
         </KeyboardAvoidingView>
@@ -1907,7 +2470,26 @@ class SignIn extends React.Component {
     });
   }
 
+  function updateBackgroundColorsGlobal(backgroundColors){
+        this.setState({backgroundColors})
+  }
 
+
+  function pickTextColorBasedOnBgColorAdvanced(bgColor){
+    var color = (bgColor.charAt(0) === '#') ? bgColor.substring(1, 7) : bgColor;
+    var r = parseInt(color.substring(0, 2), 16); // hexToR
+    var g = parseInt(color.substring(2, 4), 16); // hexToG
+    var b = parseInt(color.substring(4, 6), 16); // hexToB
+    var uicolors = [r / 255, g / 255, b / 255];
+    var c = uicolors.map((col) => {
+      if (col <= 0.03928) {
+        return col / 12.92;
+      }
+      return Math.pow((col + 0.055) / 1.055, 2.4);
+    });
+    var L = (0.2126 * c[0]) + (0.7152 * c[1]) + (0.0722 * c[2]);
+    return (L > 0.179) ? '#000000' : '#FFFFFF';
+  }
 
  
   const AppContainer = createAppContainer(TabNav)
@@ -1917,7 +2499,7 @@ class SignIn extends React.Component {
       SplashScreen.preventAutoHide();
       signOutGlobal = signOutGlobal.bind(this);
       signInGlobal = signInGlobal.bind(this);
-      this.state = {user:null,debug:false,pass:[],txt: "Unfortunately, the district's IT division has decided that this app must be shutdown. I have not been informed of any rules or policies that were violated, but nonetheless, I was instructed to pour 2 long months' worth of work down the drain..."};
+      this.state = {user:8,debug:false,pass:[],txt: "Unfortunately, the district's IT division has decided that this app must be shutdown. I have not been informed of any rules or policies that were violated, but nonetheless, I was instructed to pour 2 long months' worth of work down the drain..."};
       this.returningUser();
       /*AsyncStorage.getItem('debug').then((debug)=>{
         if(debug=="true")
