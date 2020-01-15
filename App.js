@@ -18,7 +18,7 @@ import {SplashScreen } from 'expo';
 import Fuse from 'fuse.js';
 import { Accelerometer } from 'expo-sensors';
 import ColorPalette from 'react-native-color-palette'
-import {LineChart} from "react-native-chart-kit";
+//import {LineChart} from "react-native-chart-kit";
 import { BarCodeScanner } from 'expo-barcode-scanner';
 const categories = ['Homework','Quizzes','Tests','Classwork','Essays','Labs','Oral Assessments','Participation',"Performance Assessments","Pre Test Assessments 1","Pre Test Assessments 2","Post Test Assessment 1","Post Test Assessment 2","Projects","Research and Inquiry","Socratic Seminar","Summer Assignment","Technique"]
 const colorsToPickFrom = ['#000000', '#FFFFFF', '#C0392B', '#ffe6ab', '#ff8000', '#ffe0de', '#8E44AD', '#2980B9', '#ff1100', '#ffff00', '#00ff40', '#bfff00', '#e0ffd9', '#e6feff', '#00ffff', '#0000ff', '#d7d9f5']
@@ -317,7 +317,7 @@ class ListOfAssignmentsView extends React.Component{
                     fontStyle:"italic",
                     color:pickTextColorBasedOnBgColorAdvanced(this.getBackgroundColor(item["Category"]))
               }} flex>
-                <Text style={{color:this.getBackgroundColor(item["Category"])!='#ff1100'?"red":"white",fontSize:15}}>{item["Weighting"]?item["Weighting"]:""}</Text>
+                <Text style={{color:this.getBackgroundColor(item["Category"])!='#ff1100'?"red":"white",fontSize:15}}>{item["Weighting"]?item["Weighting"] == "RecentlyUpdated"?"Recent ":item["Weighting"]:""}</Text>
                 {item["Weighting"]&&item["Weighting"].includes("x")?" - ":""}{item["Grade"]}
               </Text>
             </TouchableOpacity>}
@@ -1041,12 +1041,12 @@ class AssignmentScreen extends React.Component {
         <Text style={{fontSize:25, paddingBottom:40}}>{date?date:null}</Text>
         <Text adjustsFontSizeToFit numberOfLines={Platform.OS === 'ios'?1:null} style={{fontSize:25, paddingBottom:10}}>{assignment['className']?assignment['className']:null}</Text>
         <Text style={{fontSize:20, paddingBottom:40}}>{assignment["teacher"]?assignment["teacher"]:null}</Text>
-        <Text adjustsFontSizeToFit numberOfLines={1} style={{fontWeight:"bold", textShadowColor:"#ff8246", fontSize:Platform.OS === 'ios'?75:50,textAlign:"right"}}><Text style={{width:"50%"}}>{assignment["Grade"]?assignment["Grade"]:null}</Text> <Text style={{color:"red", width:"50%"}}>{assignment["Weighting"]?assignment["Weighting"]:null}</Text></Text>
+        <Text adjustsFontSizeToFit numberOfLines={1} style={{fontWeight:"bold", textShadowColor:"#ff8246", fontSize:Platform.OS === 'ios'?75:50,textAlign:"right"}}><Text style={{width:"50%"}}>{assignment["Grade"]?assignment["Grade"]:null}</Text> <Text style={{color:"red", width:"50%"}}>{assignment["Weighting"]&&assignment["Weighting"].includes("x")?assignment["Weighting"]:null}</Text></Text>
         <Text style={{paddingTop:20, fontSize:20, textAlign:"right"}}>{assignment["Category"]?""+assignment["Category"]:null}</Text>
         <View style={{marginTop:50,borderRadius:10,backgroundColor:"lightgrey", minHeight:100,padding:5,marginBottom:20}}>
           <Text style={{ fontSize:20}}>{comment?comment:"No Teacher Comment"}</Text>
         </View>
-        <LineChart
+        {/*<LineChart
           style={{marginBottom:20}}
           data={{
             labels: ["F","D-","D","D+","C-","C","C+","B-","B","B+","A-","A","A+"],
@@ -1088,7 +1088,7 @@ class AssignmentScreen extends React.Component {
             marginVertical: 8,
             borderRadius: 16
           }}
-        />
+        />*/}
       </ScrollView>
     )
   }
@@ -1627,7 +1627,7 @@ class GPA extends React.Component {
       'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        username: await AsyncStorage.getItem('username'),//"10012734@sbstudents.org",//10012734 //
+        username: await AsyncStorage.getItem('username'),//"10012734@sbstudents.org",//10012734 //This was left here on purpose. Stop pretending like you "hacked the app"
         password: await AsyncStorage.getItem('password'),//"Sled%2#9",//Sled%2#9 //
       }),
     })

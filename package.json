@@ -19,7 +19,6 @@
     "prop-types": "^15.7.2",
     "react": "16.8.3",
     "react-native": "https://github.com/expo/react-native/archive/sdk-35.0.0.tar.gz",
-    "react-native-chart-kit": "^3.13.0",
     "react-native-color-palette": "^2.2.0",
     "react-native-dropdown-menu": "^2.0.0",
     "react-native-easy-toast": "^1.2.0",
@@ -33,7 +32,8 @@
     "uninstall-all-modules": "^1.0.5"
   },
   "devDependencies": {
-    "babel-preset-expo": "^7.0.0"
+    "babel-preset-expo": "^7.0.0",
+    "metro-react-native-babel-preset": "^0.57.0"
   },
   "private": true
 }
