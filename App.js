@@ -20,6 +20,8 @@ import { Accelerometer } from 'expo-sensors';
 import ColorPalette from 'react-native-color-palette'
 //import {LineChart} from "react-native-chart-kit";
 import { BarCodeScanner } from 'expo-barcode-scanner';
+import TouchableScale from 'react-native-touchable-scale';
+import { LinearGradient } from 'expo-linear-gradient';
 const categories = ['Homework','Quizzes','Tests','Classwork','Essays','Labs','Oral Assessments','Participation',"Performance Assessments","Pre Test Assessments 1","Pre Test Assessments 2","Post Test Assessment 1","Post Test Assessment 2","Projects","Research and Inquiry","Socratic Seminar","Summer Assignment","Technique"]
 const colorsToPickFrom = ['#000000', '#FFFFFF', '#C0392B', '#ffe6ab', '#ff8000', '#ffe0de', '#8E44AD', '#2980B9', '#ff1100', '#ffff00', '#00ff40', '#bfff00', '#e0ffd9', '#e6feff', '#00ffff', '#0000ff', '#d7d9f5']
 const defaultColors = {"Homework":"#e6feff","Quizzes":"#ffe6ab","Performance Assessments":"#ffe0de","Tests":"#ffe0de","Classwork":"#e6feff","Essays":"#e6feff","Labs":"#e6feff","Oral Assessments":"#ffe6ab","Participation":"#e0ffd9","Pre Test Assessments 1":"#e0ffd9","Pre Test Assessments 2":"#e0ffd9","Post Test Assessment 1":"#ffe0de","Post Test Assessment 2":"#ffe0de","Projects":"#d7d9f5","Research and Inquiry":"#d7d9f5","Socratic Seminar":"#d7d9f5","Summer Assignment":"#ffff00","Technique":"#e6feff"}
@@ -297,12 +299,47 @@ class ListOfAssignmentsView extends React.Component{
     return "#FFFFFF"
   }
 
+  LightenDarkenColor = (col, amt) => {
+  
+    var usePound = false;
+  
+    if (col[0] == "#") {
+        col = col.slice(1);
+        usePound = true;
+    }
+ 
+    var num = parseInt(col,16);
+ 
+    var r = (num >> 16) + amt;
+ 
+    if (r > 255) r = 255;
+    else if  (r < 0) r = 0;
+ 
+    var b = ((num >> 8) & 0x00FF) + amt;
+ 
+    if (b > 255) b = 255;
+    else if  (b < 0) b = 0;
+ 
+    var g = (num & 0x0000FF) + amt;
+ 
+    if (g > 255) g = 255;
+    else if (g < 0) g = 0;
+ 
+    return (usePound?"#":"") + String("000000" + (g | (b << 8) | (r << 16)).toString(16)).slice(-6);
+}
+
   render(){
     return(
         <SectionList
           ItemSeparatorComponent={({item}) => <View style={{flex: 1, justifyContent: 'center', alignItems: 'center' }}><View style={{height: 0.5, width: '96%', backgroundColor: '#C8C8C8', }}/></View>}
           sections={this.props.listOfAssignments}
-          renderItem={({item}) => <TouchableOpacity onPress={()=>this.props.navigation.navigate('Assignment',{assignmentData: item})} style={{flexDirection: 'row', justifyContent: 'space-between', backgroundColor:this.getBackgroundColor(item["Category"])}}>
+          renderItem={({item}) => <TouchableOpacity onPress={()=>this.props.navigation.navigate('Assignment',{assignmentData: item})} style={{flexDirection: 'row', justifyContent: 'space-between', /*backgroundColor:this.getBackgroundColor(item["Category"])*/}}>
+            <LinearGradient 
+              style={{flexDirection: 'row', justifyContent: 'space-between', width:'100%'}} 
+              colors={[this.getBackgroundColor(item["Category"]), this.LightenDarkenColor(this.getBackgroundColor(item["Category"]),100)]}
+              start = {[0, 0]}
+              end = {[.7, 1]}
+            >
               <Text style={{
                     flex: 1,
                     padding: 10,
@@ -318,10 +355,15 @@ class ListOfAssignmentsView extends React.Component{
                     color:pickTextColorBasedOnBgColorAdvanced(this.getBackgroundColor(item["Category"]))
               }} flex>
                 <Text style={{color:this.getBackgroundColor(item["Category"])!='#ff1100'?"red":"white",fontSize:15}}>{item["Weighting"]?item["Weighting"] == "RecentlyUpdated"?"Recent ":item["Weighting"]:""}</Text>
-                {item["Weighting"]&&item["Weighting"].includes("x")?" - ":""}{item["Grade"]}
+                {item["Weighting"]&&item["Weighting"].includes("x")?" - ":""}<Text style={{fontWeight: 'bold'}}>{item["Grade"]}</Text>
               </Text>
-            </TouchableOpacity>}
-          renderSectionHeader={({section}) =>     <View style={styles.sectionHeaderContainer}><Text style={styles.sectionHeaderText}>{section.title}</Text></View>}
+            </LinearGradient>
+          </TouchableOpacity>}
+          renderSectionHeader={({section}) =>
+            <View style={styles.sectionHeaderContainer}>
+              <Text style={styles.sectionHeaderText}>{section.title}</Text>
+            </View>
+          }
           keyExtractor={(item, index) => index}
         />
     )
@@ -482,12 +524,14 @@ const styles = StyleSheet.create({
   sectionHeaderContainer: {
     backgroundColor: '#beeef7',
     paddingVertical: 8,
-    paddingHorizontal: 15,
+    paddingHorizontal: 25,
     borderWidth: StyleSheet.hairlineWidth,
     borderColor: '#ededed',
   },
   sectionHeaderText: {
     fontSize: 14,
+    fontWeight:'bold',
+    //textAlign:'center'
   },
   item: {
     padding: 10,
@@ -706,21 +750,56 @@ class ClassBtn extends React.Component {
 
   render () {
     avg = this.props.avg
-    if(this.props.style == "Letter")
+    avgFrac = 0;
+    if(Number(avg.substring(0,avg.length-1)))
+      avgFrac = Number(avg.substring(0,avg.length-1))/100
+    if(avgFrac<.4)
+      avgFrac = .4
+    fontWeightAvg = 'normal';
+    if(this.props.style == "Letter"){
       avg = this.gradeToLetter(avg.substring(0,avg.length-1))
+      fontWeightAvg = 'bold'
+    }
     if(this.props.style == "Hieroglyphic")
       avg = this.gradeToEmoji(avg.substring(0,avg.length-1))
+
+    colorz = ['#373a6d', '#6fc2d0']//['#F44336', '#FF9800']//
+    titleColor = pickTextColorBasedOnBgColorAdvanced(colorz[0])
+    avgColor = titleColor//pickTextColorBasedOnBgColorAdvanced(colorz[1])
     return (
-      <TouchableOpacity onPress={() => this.classClicked(this.props.title)} style={{flex: 1, flexDirection: 'row',justifyContent: 'space-between', padding:10,paddingVertical:10}}>
+      /*<TouchableOpacity style={{flex: 1, flexDirection: 'row',justifyContent: 'space-between', padding:10,paddingVertical:10}}>
         <View style={{flex: 7, }}>
-          <Text style={{fontSize:20, }}>{this.props.title}</Text>
-          <Text style={{fontSize:15}}>{this.props.teach}</Text>
+          <Text style={{fontSize:20, }}></Text>
+          <Text style={{fontSize:15}}></Text>
         </View>
 
         <View style={{flex: 2,}}>
           <Text style={{fontSize:30,textAlign:'right'}}>{avg}</Text>
         </View>
-      </TouchableOpacity>
+      </TouchableOpacity>*/
+      <ListItem
+        onPress={() => this.classClicked(this.props.title)}
+        Component={TouchableScale}
+        friction={10} //
+        tension={100} // These props are passed to the parent component (here TouchableScale)
+        activeScale={0.8} //
+        linearGradientProps={{
+          colors: colorz,
+          start: [avgFrac-.6, .8],
+          end: [avgFrac, 1]
+        }}
+        title={this.props.title}
+        titleStyle={{ color: titleColor, fontWeight: 'bold' }}
+        subtitleStyle={{ color: titleColor }}
+        subtitle={this.props.teach}
+        chevron={{ color: avgColor }}
+        rightElement = {<Text style={{fontSize:30,textAlign:'right',color:avgColor, fontWeight: fontWeightAvg}}>{avg}</Text>}
+        containerStyle = {{ marginLeft: 5,
+          marginRight: 5, 
+          marginTop: 10, 
+          borderRadius: 10, // adds the rounded corners
+          backgroundColor: '#fff' }}
+      />
     );
   }
 }
@@ -858,7 +937,8 @@ class home extends LoadInComponent {
       teach = grades[classN]["teacher"]
       // console.log(classN);
       if(count!=0){
-        table.push(<View key={count} style={{flex: 1, justifyContent: 'center', alignItems: 'center' }}><View style={{height: 0.5, width: '90%', backgroundColor: '#C8C8C8', }}/></View>);
+        //Adds the seperator
+        //table.push(<View key={count} style={{flex: 1, justifyContent: 'center', alignItems: 'center' }}><View style={{height: 0.5, width: '90%', backgroundColor: '#C8C8C8', }}/></View>);
         count++;
       }
       // console.log("avg")
@@ -1627,7 +1707,7 @@ class GPA extends React.Component {
       'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        username: await AsyncStorage.getItem('username'),//"10012734@sbstudents.org",//10012734 //This was left here on purpose. Stop pretending like you "hacked the app"
+        username: await AsyncStorage.getItem('username'),//"10012734@sbstudents.org",//10012734 //This was left here on purpose. Stop pretending like you "hacked the app"//
         password: await AsyncStorage.getItem('password'),//"Sled%2#9",//Sled%2#9 //
       }),
     })
