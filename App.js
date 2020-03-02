@@ -26,6 +26,8 @@ const categories = ['Homework','Quizzes','Tests','Classwork','Essays','Labs','Or
 const colorsToPickFrom = ['#000000', '#FFFFFF', '#C0392B', '#ffe6ab', '#ff8000', '#ffe0de', '#8E44AD', '#2980B9', '#ff1100', '#ffff00', '#00ff40', '#bfff00', '#e0ffd9', '#e6feff', '#00ffff', '#0000ff', '#d7d9f5']
 const defaultColors = {"Homework":"#e6feff","Quizzes":"#ffe6ab","Performance Assessments":"#ffe0de","Tests":"#ffe0de","Classwork":"#e6feff","Essays":"#e6feff","Labs":"#e6feff","Oral Assessments":"#ffe6ab","Participation":"#e0ffd9","Pre Test Assessments 1":"#e0ffd9","Pre Test Assessments 2":"#e0ffd9","Post Test Assessment 1":"#ffe0de","Post Test Assessment 2":"#ffe0de","Projects":"#d7d9f5","Research and Inquiry":"#d7d9f5","Socratic Seminar":"#d7d9f5","Summer Assignment":"#ffff00","Technique":"#e6feff"}
 
+//Theme colors: top: '#6fc2d0' bottom: backgroundColor: '#373a6d'
+
 var grades;
 
 if (Platform.OS === 'android') {
@@ -1116,60 +1118,28 @@ class AssignmentScreen extends React.Component {
       }
 
     return (
-      <ScrollView style={{flex:1,padding:15}}>
-        <Text adjustsFontSizeToFit numberOfLines={2} style={{fontWeight:"bold", textShadowColor:"grey", textShadowOffset: { width: 0.5, height: 0.5 }, textShadowRadius: 5, fontSize:50, paddingBottom:10}}>{assignment["Name"]?assignment["Name"]:null}</Text>
-        <Text style={{fontSize:25, paddingBottom:40}}>{date?date:null}</Text>
-        <Text adjustsFontSizeToFit numberOfLines={Platform.OS === 'ios'?1:null} style={{fontSize:25, paddingBottom:10}}>{assignment['className']?assignment['className']:null}</Text>
-        <Text style={{fontSize:20, paddingBottom:40}}>{assignment["teacher"]?assignment["teacher"]:null}</Text>
-        <Text adjustsFontSizeToFit numberOfLines={1} style={{fontWeight:"bold", textShadowColor:"#ff8246", fontSize:Platform.OS === 'ios'?75:50,textAlign:"right"}}><Text style={{width:"50%"}}>{assignment["Grade"]?assignment["Grade"]:null}</Text> <Text style={{color:"red", width:"50%"}}>{assignment["Weighting"]&&assignment["Weighting"].includes("x")?assignment["Weighting"]:null}</Text></Text>
-        <Text style={{paddingTop:20, fontSize:20, textAlign:"right"}}>{assignment["Category"]?""+assignment["Category"]:null}</Text>
-        <View style={{marginTop:50,borderRadius:10,backgroundColor:"lightgrey", minHeight:100,padding:5,marginBottom:20}}>
-          <Text style={{ fontSize:20}}>{comment?comment:"No Teacher Comment"}</Text>
+      <View style={{flex:1}}>
+        <View style={{  
+          borderBottomWidth: 2,
+          borderColor: '#373a6d',
+          padding:15,
+          paddingBottom:15,
+          backgroundColor:'#f2feff'
+        }}>
+          <Text adjustsFontSizeToFit numberOfLines={2} style={{fontWeight:"bold", textShadowColor:"lightblue", textShadowOffset: { width: 0.2, height: 0.2 }, textShadowRadius: 2, fontSize:50, paddingBottom:10,}}>{assignment["Name"]?assignment["Name"]:null}</Text>
+          <Text style={{fontSize:25}}>{date?date:null}</Text>
         </View>
-        {/*<LineChart
-          style={{marginBottom:20}}
-          data={{
-            labels: ["F","D-","D","D+","C-","C","C+","B-","B","B+","A-","A","A+"],
-            datasets: [
-              {
-                data: [
-                  Math.random() * 100,
-                  Math.random() * 100,
-                  Math.random() * 100,
-                  Math.random() * 100,
-                  Math.random() * 100,
-                  Math.random() * 100
-                ]
-              }
-            ]
-          }}
-          width={Dimensions.get("window").width-40 } // from react-native
-          height={220}
-          //yAxisLabel={"$"}
-          //yAxisSuffix={"k"}
-          chartConfig={{
-            backgroundColor: "#e26a00",
-            backgroundGradientFrom: "#fb8c00",
-            backgroundGradientTo: "#ffa726",
-            decimalPlaces: 2, // optional, defaults to 2dp
-            color: (opacity = 1) => `rgba(255, 255, 255, ${opacity})`,
-            labelColor: (opacity = 1) => `rgba(255, 255, 255, ${opacity})`,
-            style: {
-              borderRadius: 16
-            },
-            propsForDots: {
-              r: "6",
-              strokeWidth: "2",
-              stroke: "#ffa726"
-            }
-          }}
-          bezier
-          style={{
-            marginVertical: 8,
-            borderRadius: 16
-          }}
-        />*/}
-      </ScrollView>
+        <ScrollView style={{flex:1,padding:15, paddingTop:25}}>
+          <Text adjustsFontSizeToFit numberOfLines={Platform.OS === 'ios'?1:null} style={{fontSize:25, paddingBottom:10}}>{assignment['className']?assignment['className']:null}</Text>
+          <Text style={{fontSize:20, paddingBottom:40}}>{assignment["teacher"]?assignment["teacher"]:null}</Text>
+          <Text adjustsFontSizeToFit numberOfLines={1} style={{fontWeight:"bold", textShadowColor:"#ff8246", fontSize:Platform.OS === 'ios'?75:50,textAlign:"right"}}><Text style={{width:"50%"}}>{assignment["Grade"]?assignment["Grade"]:null}</Text> <Text style={{color:"red", width:"50%"}}>{assignment["Weighting"]&&assignment["Weighting"].includes("x")?assignment["Weighting"]:null}</Text></Text>
+          <Text style={{paddingTop:10, fontSize:30, textAlign:"right"}}>{assignment["Grade"].split("/").length==2?Number(assignment["Grade"].split("/")[0])/Number(assignment["Grade"].split("/")[1])*100+"%":null}</Text>
+          <Text style={{paddingTop:20, fontSize:20, textAlign:"right"}}>{assignment["Category"]?""+assignment["Category"]:null}</Text>
+          <View style={{marginTop:50,borderRadius:10,backgroundColor:"#f7f7f7", minHeight:100,padding:5,marginBottom:30}}>
+            <Text style={{ fontSize:20}}>{comment?comment:"No Teacher Comment"}</Text>
+          </View>
+        </ScrollView>
+      </View>
     )
   }
 }
