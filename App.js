@@ -1126,14 +1126,14 @@ class AssignmentScreen extends React.Component {
           paddingBottom:15,
           backgroundColor:'#f2feff'
         }}>
-          <Text adjustsFontSizeToFit numberOfLines={2} style={{fontWeight:"bold", textShadowColor:"lightblue", textShadowOffset: { width: 0.2, height: 0.2 }, textShadowRadius: 2, fontSize:50, paddingBottom:10,}}>{assignment["Name"]?assignment["Name"]:null}</Text>
+          <Text adjustsFontSizeToFit numberOfLines={2} style={{fontWeight:"bold", textShadowColor:"lightblue", textShadowOffset: { width: 1, height: 1 }, textShadowRadius: 10, fontSize:50, paddingBottom:10,}}>{assignment["Name"]?assignment["Name"]:null}</Text>
           <Text style={{fontSize:25}}>{date?date:null}</Text>
         </View>
         <ScrollView style={{flex:1,padding:15, paddingTop:25}}>
           <Text adjustsFontSizeToFit numberOfLines={Platform.OS === 'ios'?1:null} style={{fontSize:25, paddingBottom:10}}>{assignment['className']?assignment['className']:null}</Text>
           <Text style={{fontSize:20, paddingBottom:40}}>{assignment["teacher"]?assignment["teacher"]:null}</Text>
           <Text adjustsFontSizeToFit numberOfLines={1} style={{fontWeight:"bold", textShadowColor:"#ff8246", fontSize:Platform.OS === 'ios'?75:50,textAlign:"right"}}><Text style={{width:"50%"}}>{assignment["Grade"]?assignment["Grade"]:null}</Text> <Text style={{color:"red", width:"50%"}}>{assignment["Weighting"]&&assignment["Weighting"].includes("x")?assignment["Weighting"]:null}</Text></Text>
-          <Text style={{paddingTop:10, fontSize:30, textAlign:"right"}}>{assignment["Grade"].split("/").length==2?Number(assignment["Grade"].split("/")[0])/Number(assignment["Grade"].split("/")[1])*100+"%":null}</Text>
+          <Text style={{paddingTop:10, fontSize:30, textAlign:"right"}}>{assignment["Grade"].split("/").length==2?(Number(assignment["Grade"].split("/")[0])/Number(assignment["Grade"].split("/")[1])*100).toFixed(1)+"%":null}</Text>
           <Text style={{paddingTop:20, fontSize:20, textAlign:"right"}}>{assignment["Category"]?""+assignment["Category"]:null}</Text>
           <View style={{marginTop:50,borderRadius:10,backgroundColor:"#f7f7f7", minHeight:100,padding:5,marginBottom:30}}>
             <Text style={{ fontSize:20}}>{comment?comment:"No Teacher Comment"}</Text>
