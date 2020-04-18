@@ -22,6 +22,12 @@ import ColorPalette from 'react-native-color-palette'
 import { BarCodeScanner } from 'expo-barcode-scanner';
 import TouchableScale from 'react-native-touchable-scale';
 import { LinearGradient } from 'expo-linear-gradient';
+import {
+  AdMobBanner,
+} from 'expo-ads-admob';
+import * as FacebookAds from 'expo-ads-facebook';
+//import {FacebookAds} from 'expo';
+
 const categories = ['Homework','Quizzes','Tests','Classwork','Essays','Labs','Oral Assessments','Participation',"Performance Assessments","Pre Test Assessments 1","Pre Test Assessments 2","Post Test Assessment 1","Post Test Assessment 2","Projects","Research and Inquiry","Socratic Seminar","Summer Assignment","Technique"]
 const colorsToPickFrom = ['#000000', '#FFFFFF', '#C0392B', '#ffe6ab', '#ff8000', '#ffe0de', '#8E44AD', '#2980B9', '#ff1100', '#ffff00', '#00ff40', '#bfff00', '#e0ffd9', '#e6feff', '#00ffff', '#0000ff', '#d7d9f5']
 const defaultColors = {"Homework":"#e6feff","Quizzes":"#ffe6ab","Performance Assessments":"#ffe0de","Tests":"#ffe0de","Classwork":"#e6feff","Essays":"#e6feff","Labs":"#e6feff","Oral Assessments":"#ffe6ab","Participation":"#e0ffd9","Pre Test Assessments 1":"#e0ffd9","Pre Test Assessments 2":"#e0ffd9","Post Test Assessment 1":"#ffe0de","Post Test Assessment 2":"#ffe0de","Projects":"#d7d9f5","Research and Inquiry":"#d7d9f5","Socratic Seminar":"#d7d9f5","Summer Assignment":"#ffff00","Technique":"#e6feff"}
@@ -29,6 +35,11 @@ const defaultColors = {"Homework":"#e6feff","Quizzes":"#ffe6ab","Performance Ass
 //Theme colors: top: '#6fc2d0' bottom: backgroundColor: '#373a6d'
 
 var grades;
+
+const adsManager = new FacebookAds.NativeAdsManager(Platform.OS === 'ios'?"618501142264378_618513918929767":"618501142264378_618581928922966", 1);
+const { AdTriggerView, AdMediaView , AdIconView, AdOptionsView} = FacebookAds;
+
+adsManager.setMediaCachePolicy('all');
 
 if (Platform.OS === 'android') {
   if (UIManager.setLayoutAnimationEnabledExperimental) {
@@ -576,10 +587,7 @@ class settings extends React.Component {
 
   constructor(props){
     super(props);
-    this.state ={ isLoading: false, email:"", password:"", pushToken:"No Token", id: "loading", }
-    Notifications.getExpoPushTokenAsync().then((token)=>{
-      this.setState({pushToken:token})
-    })
+    this.state ={ isLoading: false, email:"", password:"", id: "loading", lunchBalance:null, lunchBalanceButtonPressed:false}
     AsyncStorage.getItem('IDbarcode').then((IDbarcode)=>{
       if(IDbarcode){
         this.setState({idBar: IDbarcode})
@@ -604,7 +612,9 @@ class settings extends React.Component {
         });
       }
     })
+    
   }
+
   static navigationOptions = ({ navigation }) => {
     return {
       title: 'More',
@@ -612,6 +622,57 @@ class settings extends React.Component {
     }
   }
 
+  getLunchMoney = async () => {
+    this.setState({lunchBalanceButtonPressed:true})
+    return fetch('https://gradeview.herokuapp.com/money', {
+      method: 'POST',
+      headers: {
+      Accept: 'application/json',
+      'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        username: await AsyncStorage.getItem('username'),//"10012734@sbstudents.org",//10012734 //This was left here on purpose. Stop pretending like you "hacked the app"//
+        password: await AsyncStorage.getItem('password'),//"Sled%2#9",//Sled%2#9 //
+      }),
+    })
+    .then((response) => {
+    //console.log(response);
+    //response.json()
+    console.log(typeof response)
+      return response.json();
+    })
+    .then((responseJson) => {
+      console.log(responseJson)
+        if(responseJson && responseJson["money"])
+          return this.setState({lunchBalance: responseJson["money"]})
+    }).catch((err)=>{
+      Alert.alert('Could not connect to server. Check your internet connection.')
+      return this.setState({lunchBalanceButtonPressed:false})
+    })
+  }
+
+  componentDidMount() {
+    const { navigation } = this.props;
+    /*this.focusListener = navigation.addListener("didFocus", () => {
+      AsyncStorage.getItem('noAds').then((noAd)=>{
+        if(noAd !== "true"){
+          //'ca-app-pub-3940256099942544/1033173712'
+          AdMobInterstitial.setAdUnitID(Platform.OS === 'ios'?"ca-app-pub-8985838748167691/4846725042":"ca-app-pub-8985838748167691/5663669617"); 
+          AdMobInterstitial.setTestDeviceID('EMULATOR');
+          AdMobInterstitial.getIsReadyAsync().then((ready)=>{
+            console.log('ready: ' + ready)
+            if(!ready)
+              AdMobInterstitial.requestAdAsync({ servePersonalizedAds: true})
+          })
+        }
+      })
+    });*/
+  }
+
+  componentWillUnmount() {
+    // Remove the event listener
+    //this.focusListener.remove();
+  }
   
   render() {
           const list = [
@@ -620,7 +681,42 @@ class settings extends React.Component {
               iconName: 'calculator',
               iconType: 'material-community',
               subtitle: 'View your Grade Point Average',
-              action: () => this.props.navigation.navigate('GPA'),
+              action: () => {
+                AsyncStorage.getItem('noAds').then((noAd)=>{
+                  if(noAd !== "true"){
+                    console.log("SHOW FACEBOOK AD")
+                    /*FacebookAds.InterstitialAdManager.showAd(Platform.OS === 'ios'?"618501142264378_618574792257013":"618501142264378_623008151813677").then(didClick => {
+                      console.log("SHOWN")
+                      //this.props.navigation.navigate('GPA')
+                    })
+                    .catch(error => {
+                      console.log("err", error)
+                      //this.props.navigation.navigate('GPA')
+                    });*/
+                    this.props.navigation.navigate('GPA')
+                    /*
+                    AdMobInterstitial.getIsReadyAsync().then((ready)=>{
+                      console.log('ready: ' + ready)
+                      if(ready)
+                        AdMobInterstitial.showAdAsync();
+                      else{
+                        console.log("SHOW FACEBOOK AD")
+                        FacebookAds.InterstitialAdManager.showAd(Platform.OS === 'ios'?"618501142264378_618574792257013":"618501142264378_623008151813677")
+                        .then(didClick => {
+                          this.props.navigation.navigate('GPA')
+                        })
+                        .catch(error => {
+                          this.props.navigation.navigate('GPA')
+                        });
+                        //AdMobInterstitial.requestAdAsync({ servePersonalizedAds: true}).then(()=>AdMobInterstitial.showAdAsync())
+                      }
+                    }) 
+                    */
+                  }else{
+                    this.props.navigation.navigate('GPA')
+                  }
+                })
+              },
               bottomMargin:5,
             },
             {
@@ -629,7 +725,7 @@ class settings extends React.Component {
               iconType: 'material-community',
               subtitle: 'Search for anyone based on name or ID number',
               action: () => this.props.navigation.navigate('Contacts'),
-              bottomMargin:40,
+              bottomMargin:5,
             },
             {
               name: 'Options',
@@ -637,10 +733,9 @@ class settings extends React.Component {
               iconType: 'Octicons',
               subtitle: 'View configuration options',
               action: () => this.props.navigation.navigate('Options'),
-              bottomMargin:80,
+              bottomMargin:150,
             },
           ]
-          const debug =  null// <View style={{flex: 1, flexDirection: 'column', padding:15}}><Text style={{fontSize:20}}>Debugging info:</Text><Text>{this.state.id}</Text><Text style={{marginBottom:20}}>{this.state.pushToken}</Text></View>
       return(
 <ScrollView>
   {
@@ -661,13 +756,23 @@ class settings extends React.Component {
     justifyContent: 'center',
     alignItems: 'center',
   }}>
+    <View>
+      {this.state.lunchBalance||this.state.lunchBalanceButtonPressed?
+        <View style={{
+          flexDirection: 'row',
+        }}>
+          <Text style={{fontSize:20}}>Lunch balance: </Text>
+          {this.state.lunchBalance?<Text style={{fontSize:20}}>{this.state.lunchBalance}</Text>:<ActivityIndicator/>}
+        </View>
+        :<Button title="Show Lunch Balance" onPress={this.getLunchMoney}/>
+      }
+    </View>
     <Image
       resizeMode={'contain'}
-      style={{width: '80%', height: 100, marginTop: 50}}
+      style={{width: '80%', height: 100, marginTop: 10}}
       source={{uri:this.state.idBar}}
     />
   </View>
-  {debug}
 </ScrollView>
       )
   }
@@ -760,6 +865,8 @@ class ClassBtn extends React.Component {
     fontWeightAvg = 'normal';
     if(this.props.style == "Letter"){
       avg = this.gradeToLetter(avg.substring(0,avg.length-1))
+      if(!this.props.showAPlus && avg=="A+")
+        avg="A"
       fontWeightAvg = 'bold'
     }
     if(this.props.style == "Hieroglyphic")
@@ -811,21 +918,41 @@ function updateAvgDisplayGlobal(style){
   this.setState({style:style})
 }
 
+function updateShowAGlobal(val){
+  AsyncStorage.setItem('showA',val.toString())
+  this.setState({showA:val})
+}
+
 class home extends LoadInComponent {
 
   constructor(props){
     super(props);
     console.log("GERNERATING")  
-    this.state ={ isLoading: false, email:"", password:"", num: 0, currentMarking: "Select MP", style:"Percent", firstMPSRender:true}
+    this.state ={ isLoading: false, email:"", password:"", num: 0, currentMarking: "Select MP", style:"Percent", firstMPSRender:true, showAd:false, showA:true}
 
     this.firstMPSRender = false;
     console.log("GERNERATING DONE")
     
     updateAvgDisplayGlobal = updateAvgDisplayGlobal.bind(this)
+    updateShowAGlobal = updateShowAGlobal.bind(this)
 
     AsyncStorage.getItem("avgDisplayStyle").then((style)=>{
       if(style)
         this.setState({style:style})
+    })
+
+    AsyncStorage.getItem('showA').then((showA)=>{
+      if(showA == "false")
+        this.setState({showA:false})
+      else
+        this.setState({showA:true})
+    })
+
+    AsyncStorage.getItem('noAds').then((noAd)=>{
+      if(noAd !== "true"){
+        this.setState({showAd:true, adStyle:/*Math.random()<.5?"facebook":*/"google"})
+        LayoutAnimation.configureNext(LayoutAnimation.Presets.linear);
+      }
     })
 
     this.props.navigation.setParams({ click: this.click, genMpsArray: this.genMpsArray, genMpSelector: this.genMpSelector, updateMarkingPeriodSelectionAndriod: this.updateMarkingPeriodSelectionAndriod});
@@ -837,7 +964,7 @@ class home extends LoadInComponent {
         oldMps = oldMps?oldMps:[];
         console.log("old: "+JSON.stringify(oldMps))
           this.setState({oldMps})
-        console.log("mps str"+JSON.stringify(mps))
+        //console.log("mps str"+JSON.stringify(mps))
       })
   }
 
@@ -946,7 +1073,7 @@ class home extends LoadInComponent {
       // console.log("avg")
       // console.log(avg)
       if(classN!="Status"&&avg){
-        table.push(<ClassBtn key={classN+count} title={classN} teach = {teach} avg={avg} onPress={this.classClicked} style={this.state.style}></ClassBtn>)
+        table.push(<ClassBtn key={classN+count} title={classN} showAPlus={this.state.showA} teach = {teach} avg={avg} onPress={this.classClicked} style={this.state.style}></ClassBtn>)
         count++;
       }
     }
@@ -983,6 +1110,7 @@ class home extends LoadInComponent {
   }
 
   render() {
+    console.log("HOME UPDATED")
       if(this.state.isLoading)
         return(
           <View style={{flex: 1, justifyContent: 'center', alignItems: 'center' }}>
@@ -1031,6 +1159,7 @@ class home extends LoadInComponent {
                 this.setState({currentMarking: mp});
               }
           });
+      let CustomAd = FacebookAds.withNativeAd(AdComponent)
       return(
           <ScrollView style={{flex: 1, flexDirection: 'column'}}         refreshControl={
             <RefreshControl
@@ -1071,8 +1200,19 @@ class home extends LoadInComponent {
           </Modal>
 
           {this.genTable()}
-
-
+          {/*"ca-app-pub-3940256099942544/6300978111"*/}
+          {this.state.showAd?this.state.adStyle == "google"? <AdMobBanner
+            style={{marginTop:10}}
+            bannerSize="smartBannerPortrait"
+            adUnitID={Platform.OS === 'ios'?"ca-app-pub-8985838748167691/6884417794":"ca-app-pub-8985838748167691/7707857953"} // Test ID, Replace with your-admob-unit-id
+            //testDeviceID="7BE32C8C-101D-45EE-AFFD-81B6BF27CEC2"
+            servePersonalizedAds // true or false
+            onDidFailToReceiveAdWithError={(err)=>{
+              console.log(err)
+              LayoutAnimation.configureNext(LayoutAnimation.Presets.linear);
+              //this.setState({adStyle:"facebook"})
+            }} />:
+            <CustomAd adsManager={adsManager}/>:null}
           </ScrollView>
         
 
@@ -1080,6 +1220,67 @@ class home extends LoadInComponent {
   }
 
 }
+
+class AdComponent extends React.Component {
+  render() {
+    let colorz = ['#6fc2d0', '#373a6d']
+    return (
+      <View>
+          <LinearGradient style={{marginTop:10,marginLeft: 5,
+            marginRight: 5, 
+            borderRadius: 10, // adds the rounded corners
+            backgroundColor: '#000000' ,
+            padding: 0,
+            marginBottom:10
+          }}
+            
+              colors={colorz}
+              start ={[0, 0]}
+              end= {[.75, 0]}
+            >
+                <View style={{
+                  flex: 1,
+                  flexDirection: 'row',
+                  justifyContent: 'space-between',
+                  marginLeft: 14,
+                  marginRight: 10, 
+                  paddingTop:5,
+                  paddingBottom:3,
+                }}>
+                <Text style={{color:"white"}}>Sponsored Content:</Text> 
+                <AdOptionsView iconColor="#FFFFFF" style={{backgroundColor:"#373a6d"}}/>
+            </View>
+              <AdMediaView />
+              <AdTriggerView>
+              <ListItem
+                containerStyle ={{
+                  paddingTop:0
+                }}
+
+                linearGradientProps={{
+                  colors: colorz,
+                  start: [0, 0],
+                  end: [.75, 0]
+                }}
+                title={this.props.nativeAd.advertiserName}
+                titleStyle={{ color: "white", fontWeight: 'bold' }}
+                subtitleStyle={{ color: "white" }}
+                subtitle={this.props.nativeAd.bodyText}
+                rightElement = {
+                <View style={{justifyContent: 'center', alignItems: 'center',}}>
+                  <AdIconView style={{width: 50, height: 50}}/>
+
+                    <Text style={{fontSize:20,textAlign:'right',color:"lightblue", marginTop:2}}>{this.props.nativeAd.callToActionText}</Text>
+                  
+                </View>}
+              />   
+              </AdTriggerView>
+            </LinearGradient>
+      </View>
+    );
+  }
+}
+
  
 class AssignmentScreen extends React.Component {
   constructor(props){
@@ -1302,7 +1503,31 @@ class Contacts extends React.Component {
   updateSearch = async => {
     if(this.state.contacts&&this.state.search){
       this.setState({searchLoading:true})
-      let result = fuse.search(this.state.search)
+      //let result = fuse.search(this.state.search)
+      var search = this.state.search.toLowerCase();
+      let result = this.state.contacts.filter(item => {
+        return item.name.toLowerCase().includes(search) || item.email.toLowerCase().includes(search)
+      })
+      console.log("search updated")
+      if(search == "")
+        result = null
+      this.setState({result: result,searchLoading:false});
+    }
+  };
+
+  updateSearchWVal = async search => {
+    if(this.state.contacts&&search){
+
+      this.setState({searchLoading:true})
+      //let result = fuse.search(this.state.search)
+      let result = this.state.contacts.filter(item => {
+        return item.name.toLowerCase().includes(search) || item.email.toLowerCase().includes(search)
+      })
+      result=result.slice(0,20)
+      
+      console.log("search updated")
+      if(search == "")
+        result = null
       this.setState({result: result,searchLoading:false});
     }
   };
@@ -1311,7 +1536,8 @@ class Contacts extends React.Component {
     if(!search)
       this.setState({ results: null});
     if(this.state.contacts){
-      this.setState({ search: search});
+      this.setState({ search: search})
+      this.updateSearchWVal(search.toLowerCase())
     }
   };
 
@@ -1363,7 +1589,10 @@ class Contacts extends React.Component {
             value={this.state.search}
             lightTheme
             showLoading = {this.state.searchLoading}
-            onClear = {()=>{this.setState({search:null,result:null});console.log("kill")}}
+            onClear = {()=>{
+              this.setState({search:null,result:null});
+              console.log("kill")
+            }}
           />
           {list}
         </View>
@@ -1995,11 +2224,11 @@ class GPA extends React.Component {
 class Options extends React.Component {
   constructor(props){
     super(props);
-    this.state ={selectedIndex:0, token:"null"}
+    this.state = {selectedIndex:0, token:"null", showCodeInput:false, showA:true}
 
     Notifications.getExpoPushTokenAsync().then((token)=>{
       if(token.includes("ExponentPushToken"))
-      token = token.substring(17)
+        token = token.substring(17)
       this.setState({token})
     })
 
@@ -2018,6 +2247,15 @@ class Options extends React.Component {
         this.setState({selectedIndex:displayOptions.indexOf(avgDisplayStyle)});
       }
     });
+
+    AsyncStorage.getItem('showA').then((showA)=>{
+      if(showA == "false"){
+        this.setState({showA:false});
+      }else{
+        this.setState({showA:true});
+      }
+    });
+    
   }
 
   static navigationOptions = ({ navigation }) => {
@@ -2047,6 +2285,56 @@ class Options extends React.Component {
     });
   }
 
+  sendTestNotification = ()=>{
+    Notifications.getExpoPushTokenAsync().then((token)=>{
+      fetch('https://gradeview.herokuapp.com/testNotification?token='+token, {
+        method: 'GET',
+        headers: {
+          Accept: 'text/html',
+          'Content-Type': 'text/html',
+        },
+      })
+      .then((response) => {
+        return response.text();
+      }).then((responseTxt) => {
+        if(responseTxt == "attempted")
+          Alert.alert("You will get a test notification in 30 seconds. Please close the app and wait for the notification. If you don't recieve a notification, please send feedback and try reinstalling the app.")
+        else
+          Alert.alert("Something went wrong in the server")
+      }).catch((err)=>{
+        console.log(err)
+          Alert.alert("There was an error in communicating with the server")
+      })
+    })
+  }
+
+  submitCode = () => {
+    this.setState({showCodeInput:false, code:""})
+    LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
+    if(this.state.code){
+      if(this.state.code.toLowerCase() == "ads"){
+        AsyncStorage.setItem('noAds',"false")
+      }else{
+        fetch('https://gradeview.herokuapp.com/checkCode?code='+this.state.code, {
+                  method: 'GET',
+                  headers: {
+                    Accept: 'text/html',
+                    'Content-Type': 'text/html',
+                  },
+                })
+                .then((response) => {
+                  return response.text();
+                }).then((responseTxt) => {
+                  console.log("res"+responseTxt)
+                  if(responseTxt == "true")
+                    AsyncStorage.setItem('noAds',"true").then(()=>Alert.alert('No Ads Unlocked'))
+                  else
+                    Alert.alert('Invalid Code')
+                }).catch((err)=>Alert.alert('Error Checking Code'))
+      }
+    }
+  }
+
   render() {
     var switchEl = <Text>Not Available</Text>
     //if()
@@ -2055,61 +2343,94 @@ class Options extends React.Component {
           //updateAvgDisplayGlobal
           const displayOptions = ['Percent', 'Letter', 'Hieroglyphic']
 return(
-<ScrollView>
-<ListItem  
-  leftIcon={{ name: "fingerprint" , type: 'material-community' }}
-  title="Secure Biometrics"
-  subtitle={"Secure your grades with by requiring biometrics on app load"}
-  style={{marginBottom:5}}
-  bottomDivider={true}
-  switch = {{
-    onValueChange:()=>{ var val = !this.state.needBiometric; AsyncStorage.setItem('needBiometric',val.toString()).then((result)=>{this.setState({needBiometric: val});})},
-   value:this.state.needBiometric,
-   disabled: this.state.needBiometric == null
-  }}
-/>
-<ListItem  
-  leftIcon={{ name: "color-lens" , type: 'MaterialIcons' }}
-  chevron
-  title="Assignment Styling"
-  subtitle={"Color-code different assignment types"}
-  onPress={()=>this.props.navigation.navigate('ColorPick')}
-  bottomDivider={true}
-/>
-<ListItem  
-  leftIcon={{ name: "eye" , type: 'font-awesome' }}
-  title="Display mode"
-  subtitle={"How your marking period grade will be displayed on the home screen"}
-/>
-
-<ButtonGroup
-    onPress={(selectedIndex)=>{this.setState({selectedIndex:selectedIndex});updateAvgDisplayGlobal(displayOptions[selectedIndex])}}
-    selectedIndex={this.state.selectedIndex}
-    buttons={displayOptions}
-    //containerStyle={{height: 100}}
+  <ScrollView>
+    <KeyboardAvoidingView behavior="position">
+  <ListItem  
+    leftIcon={{ name: "fingerprint" , type: 'material-community' }}
+    title="Secure Biometrics"
+    subtitle={"Secure your grades with by requiring biometrics on app load"}
+    style={{marginBottom:5}}
+    bottomDivider={true}
+    switch = {{
+      onValueChange:()=>{ var val = !this.state.needBiometric; AsyncStorage.setItem('needBiometric',val.toString()).then((result)=>{this.setState({needBiometric: val});})},
+    value:this.state.needBiometric,
+    disabled: this.state.needBiometric == null
+    }}
+  />
+  <ListItem  
+    leftIcon={{ name: "color-lens" , type: 'MaterialIcons' }}
+    chevron
+    title="Assignment Styling"
+    subtitle={"Set the colors for different assignment types"}
+    onPress={()=>this.props.navigation.navigate('ColorPick')}
+    bottomDivider={true}
+  />
+  {displayOptions[this.state.selectedIndex]=="Letter" && <ListItem  
+    leftIcon={{ name: "plus" , type: 'feather' }}
+    title="Show A+"
+    subtitle={"SBHS does not use the grade A+"}
+    style={{marginBottom:5}}
+    bottomDivider={true}
+    switch = {{
+      onValueChange:()=>{ var val = !this.state.showA; this.setState({showA: val});updateShowAGlobal(val);},
+      value:this.state.showA,
+    }}
+  />}
+  <ListItem  
+    leftIcon={{ name: "eye" , type: 'font-awesome' }}
+    title="Display mode"
+    subtitle={"How your marking period grade will be displayed on the home screen"}
   />
 
-<ListItem  
-  leftIcon={{ name: "feedback" , type: 'MaterialIcons' }}
-  title="Provide Feedback"
-  subtitle={"Any kind of feedbacks is appricated!"}
-  style={{marginTop:60,marginBottom:5}}
-  topDivider={true}
-  onPress={() => Linking.openURL('mailto:gradeViewApp@kihtrak.com?subject=Feedback%20about%20the%20app') }
-/>
-<ListItem  
-  leftIcon={{ name: "log-out" , type: 'entypo' }}
-  title="Switch User"
-  subtitle={"Sign into a different account"}
-  style={{marginBottom:20}}
-  topDivider={true}
-  onPress = {this.signOut}
-/>
-<ListItem  
-  title="Debug info"
-  subtitle={this.state.token}
-  topDivider={true}
-/>
+  <ButtonGroup
+      onPress={(selectedIndex)=>{this.setState({selectedIndex:selectedIndex});updateAvgDisplayGlobal(displayOptions[selectedIndex]);LayoutAnimation.configureNext(LayoutAnimation.Presets.spring);}}
+      selectedIndex={this.state.selectedIndex}
+      buttons={displayOptions}
+      //containerStyle={{height: 100}}
+    />
+
+  <ListItem  
+    leftIcon={{ name: "user-secret" , type: 'font-awesome' }}
+    title="Enter Code"
+    subtitle={"If you have gotten a secret code from the developer. Enter it here!"}
+    style={{marginTop:60,marginBottom:5}}
+    topDivider={true}
+    onPress={() => {this.setState({showCodeInput:true}); LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);} }
+  />
+  {this.state.showCodeInput && <Input       
+                onChangeText={text => this.setState({code:text})}
+                value={this.state.code}
+                onSubmitEditing={this.submitCode}
+                placeholder="Enter Code Here"
+                returnKeyType="send"
+  />}
+  <ListItem  
+    leftIcon={{ name: "feedback" , type: 'MaterialIcons' }}
+    title="Provide Feedback"
+    subtitle={"Any kind of feedback is appreciated!"}
+    topDivider={true}
+    onPress={() => Linking.openURL('mailto:gradeViewApp@kihtrak.com?subject=Feedback%20about%20the%20app') }
+  />
+  <ListItem  
+    leftIcon={{ name: "log-out" , type: 'entypo' }}
+    title="Switch User"
+    subtitle={"Sign into a different account"}
+    style={{marginBottom:20}}
+    topDivider={true}
+    onPress = {this.signOut}
+  />
+  <ListItem  
+    title="Debug info"
+    subtitle={this.state.token}
+    topDivider={true}
+  />
+  <ListItem  
+    title="Send a test notification"
+    subtitle={'Some people were worried they were not getting notifications. \nPressing this button will send you a notification 30 seconds after pressing it.'}
+    onPress={this.sendTestNotification}
+    topDivider={true}
+  />
+  </KeyboardAvoidingView>
 </ScrollView>
     /*
     
@@ -2288,7 +2609,7 @@ const TabNav = createBottomTabNavigator(
       inactiveTintColor: 'white',
       style: styles.tabNav,
     },
-    animationEnabled: false,
+    animationEnabled: true,
     swipeEnabled: false,
   }
 )
@@ -2560,7 +2881,7 @@ class SignIn extends React.Component {
     }
 
     returningUser = () =>{
-      this.setState({debug:false})
+      //this.setState({debug:false})
       AsyncStorage.setItem("debug","true")
       AsyncStorage.getItem('username').then((user)=>{
         console.log(user);

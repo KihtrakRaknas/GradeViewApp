@@ -1,0 +1,10 @@
+ios:
+      "config":{
+        "googleMobileAdsAppId": "ca-app-pub-8985838748167691~8580642842"
+      }
+
+android:
+      "config":{
+        "googleMobileAdsAppId": "ca-app-pub-8985838748167691~8887764609"
+      }
+npm install -g expo-cli
