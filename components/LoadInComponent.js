@@ -2,6 +2,8 @@ import React from 'react';
 import { AsyncStorage, AppState } from 'react-native';
 import * as Permissions from 'expo-permissions'
 import { Notifications } from 'expo';
+import '../globals/signInGlobals'
+
 export default class LoadInComponent extends React.Component {
     constructor(props) {
         super(props);
@@ -16,7 +18,7 @@ export default class LoadInComponent extends React.Component {
             console.log("TEST")
             console.log(user);
             if (user == null) {
-                signOutGlobal();
+                global.signOutGlobal();
             } else {
                 this._retrieveData()
                 this.getGrade()

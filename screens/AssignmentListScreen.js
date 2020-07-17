@@ -1,6 +1,6 @@
 import React from 'react';
 import { Icon} from 'react-native-elements'
-import { Text, View, ActivityIndicator, Alert, Button } from 'react-native'
+import { Text, View, ActivityIndicator, Alert, Button, Linking } from 'react-native'
 import LoadInComponent from '../components/LoadInComponent'
 import ListOfAssignmentsView from '../components/ListOfAssignmentsView'
 import { navigationHeader, container } from '../globals/styles'

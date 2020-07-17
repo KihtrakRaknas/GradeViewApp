@@ -1,5 +1,3 @@
-export const defaultColors = { "Homework": "#e6feff", "Quizzes": "#ffe6ab", "Performance Assessments": "#ffe0de", "Tests": "#ffe0de", "Classwork": "#e6feff", "Essays": "#e6feff", "Labs": "#e6feff", "Oral Assessments": "#ffe6ab", "Participation": "#e0ffd9", "Pre Test Assessments 1": "#e0ffd9", "Pre Test Assessments 2": "#e0ffd9", "Post Test Assessment 1": "#ffe0de", "Post Test Assessment 2": "#ffe0de", "Projects": "#d7d9f5", "Research and Inquiry": "#d7d9f5", "Socratic Seminar": "#d7d9f5", "Summer Assignment": "#ffff00", "Technique": "#e6feff" }
-
 global.updateBackgroundColorsGlobal = function (backgroundColors) {
     this.setState({ backgroundColors })
 }

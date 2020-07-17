@@ -8,9 +8,11 @@
       "ios",
       "android"
     ],
-    "version": "3.0.0",
+    "version": "3.1.2",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
+    "facebookAppId": "618501142264378",
+    "facebookDisplayName": "GradeView",
     "splash": {
       "image": "./assets/newSplash.png",
       "resizeMode": "cover",
@@ -28,11 +30,17 @@
         "NSNotificationDescription": "This app uses notifications to notify you of changes in your grades",
         "NSFaceIDUsageDescription": "Face ID is used when you enable biometric security"
       },
-      "bundleIdentifier": "com.kihtrak.REGEN"
+      "bundleIdentifier": "com.kihtrak.REGEN",
+      "config": {
+        "googleMobileAdsAppId": "ca-app-pub-8985838748167691~8580642842"
+      }
     },
     "android": {
       "package": "com.kihtrak.REGEN",
-      "versionCode": 10
+      "versionCode": 12,
+      "config": {
+        "googleMobileAdsAppId": "ca-app-pub-8985838748167691~8887764609"
+      }
     },
     "description": "App client for the gradebook that South Brunswick High School uses"
   }

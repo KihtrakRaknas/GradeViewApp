@@ -1,7 +1,8 @@
 import React from 'react';
 import { SectionList, Text, View, TouchableOpacity, AsyncStorage, StyleSheet } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
-import {  defaultColors, pickTextColorBasedOnBgColorAdvanced } from '../globals/assignmentColorGlobals.js'
+import {  pickTextColorBasedOnBgColorAdvanced } from '../globals/assignmentColorGlobals.js'
+import { defaultColors } from '../globals/constants'
 
 const styles = StyleSheet.create({
     sectionHeaderContainer: {
