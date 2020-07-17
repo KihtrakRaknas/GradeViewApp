@@ -1,12 +1,8 @@
 import React from 'react';
-import { AppRegistry, SectionList, StyleSheet, Text, View, ActivityIndicator, Alert, Button, TouchableOpacity, TextInput, KeyboardAvoidingView, ScrollView, Picker, StatusBar, RefreshControl, Switch, FlatList, AppState, Image, LayoutAnimation, UIManager } from 'react-native';
-import { Ionicons, FontAwesome } from '@expo/vector-icons';
+import { Text, View, Button, StatusBar, UIManager } from 'react-native';
 import { createBottomTabNavigator, createAppContainer, TabBarBottom, createStackNavigator } from 'react-navigation';
-import { Icon, Input, ButtonGroup } from 'react-native-elements'
-import { AsyncStorage, Dimensions } from 'react-native';
-import DropdownMenu from 'react-native-dropdown-menu';
-import Modal from 'react-native-modal';
-//import gradeList from './gradeList.js'
+import { Icon } from 'react-native-elements'
+import { AsyncStorage } from 'react-native';
 require('create-react-class');
 import { Notifications } from 'expo';
 
@@ -14,8 +10,7 @@ import { Platform } from 'react-native';
 import Toast, { DURATION } from 'react-native-easy-toast';
 import * as LocalAuthentication from 'expo-local-authentication';
 import { SplashScreen } from 'expo';
-import { Accelerometer } from 'expo-sensors';
-//import {LineChart} from "react-native-chart-kit";
+//import { Accelerometer } from 'expo-sensors';
 
 //SCREENS
 import HomeScreen from './screens/HomeScreen'
@@ -33,11 +28,6 @@ import SignInScreen from './screens/SignInScreen'
 
 
 import './globals/signInGlobals'
-
-import * as FacebookAds from 'expo-ads-facebook';
-import { pickTextColorBasedOnBgColorAdvanced } from './globals/assignmentColorGlobals.js'
-import { defaultColors, categories, colorsToPickFrom } from './globals/constants'
-import { prepareAssignmentsObjectForSectionList, getAssignmentsFromClassAndMP } from './helperFunctions/convertingGradesObjectForSectionList'
 
 const HomeStack = createStackNavigator({
   Home: { screen: HomeScreen },
