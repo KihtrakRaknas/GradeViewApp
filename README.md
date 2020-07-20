@@ -14,6 +14,6 @@ npm start
 ## Other repos:
 - [GradeView](https://github.com/KihtrakRaknas/GradeView) - Server side code to handle API reqests
 - [gradeview-auto-scraper](https://github.com/KihtrakRaknas/gradeview-auto-scraper) - Server side code to keep active GradeView accounts up-to-date
-- [DirectoryScraper](https://github.com/KihtrakRaknas/DirectoryScraper/blob/master/README.md) - The code responsible for the *Global Name Lookup* section of the app
+- [DirectoryScraper](https://github.com/KihtrakRaknas/DirectoryScraper/) - The code responsible for the *Global Name Lookup* section of the app
 - [GradeViewWebsite](https://github.com/KihtrakRaknas/GradeViewWebsite) - The simple download page for the app
 - [GradeViewFirebase](https://github.com/KihtrakRaknas/GradeViewFirebase) - The Google Cloud Function code for sending notifications about changes in grades and more
