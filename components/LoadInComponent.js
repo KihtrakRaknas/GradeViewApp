@@ -95,7 +95,7 @@ export default class LoadInComponent extends React.Component {
                 return response.json();
             })
             .then((responseJson) => {
-                if (responseJson["Status"] == "Completed") {
+                if (responseJson && responseJson["Status"] != "loading...") {
                     global.grades = responseJson;
                     console.log("GRADES UPDATED")
                     AsyncStorage.setItem('grades', JSON.stringify(responseJson));

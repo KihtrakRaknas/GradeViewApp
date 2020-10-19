@@ -302,6 +302,8 @@ export default class HomeScreen extends LoadInComponent {
                 //this.setState({adStyle:"facebook"})
               }} />:
               <CustomAd adsManager={this.adsManager}/>:null}
+              <Text style={{fontSize:1}}>Why are there ads?</Text>
+              <Text style={{fontSize:1}}>Running this app costs money. Ads help offset the cost of keeping this online</Text>
             </ScrollView>
           
   
