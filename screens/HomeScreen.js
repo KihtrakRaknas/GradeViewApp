@@ -289,6 +289,8 @@ export default class HomeScreen extends LoadInComponent {
             </Modal>
   
             {this.genTable()}
+            {this.state.showAd?<><Text style={{fontSize:5,textAlign:"center",marginTop:5}}>Why are there ads?</Text>
+            <Text style={{fontSize:5,textAlign:"center", paddingBottom:0, marginBottom:0}}>Running this app costs money. Ads help offset the cost of keeping the app online.</Text></>:null}
             {/*"ca-app-pub-3940256099942544/6300978111"*/}
             {this.state.showAd?this.state.adStyle == "google"? <AdMobBanner
               style={{marginTop:10}}
@@ -301,9 +303,7 @@ export default class HomeScreen extends LoadInComponent {
                 LayoutAnimation.configureNext(LayoutAnimation.Presets.linear);
                 //this.setState({adStyle:"facebook"})
               }} />:
-              <CustomAd adsManager={this.adsManager}/>:null}
-              <Text style={{fontSize:1}}>Why are there ads?</Text>
-              <Text style={{fontSize:1}}>Running this app costs money. Ads help offset the cost of keeping this online</Text>
+              <CustomAd adsManager={this.adsManager}/>:null}ext>
             </ScrollView>
           
   
