@@ -2,6 +2,9 @@ import React from 'react';
 import { Text, AsyncStorage, ScrollView, LayoutAnimation, View } from 'react-native';
 import ColorPalette from 'react-native-color-palette'
 import { ListItem } from 'react-native-elements';
+import { navigationHeader } from '../globals/styles'
+import { categories, colorsToPickFrom, defaultColors } from '../globals/constants';
+import { pickTextColorBasedOnBgColorAdvanced } from '../globals/assignmentColorGlobals.js'
 
 export default class ColorPickScreen extends React.Component {
     constructor(props) {
@@ -18,7 +21,7 @@ export default class ColorPickScreen extends React.Component {
     static navigationOptions = ({ navigation }) => {
         return {
             title: 'Assignment Styling',
-            headerStyle: styles.navigationHeader,
+            headerStyle: navigationHeader,
         }
     }
 

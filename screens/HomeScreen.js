@@ -303,7 +303,7 @@ export default class HomeScreen extends LoadInComponent {
                 LayoutAnimation.configureNext(LayoutAnimation.Presets.linear);
                 //this.setState({adStyle:"facebook"})
               }} />:
-              <CustomAd adsManager={this.adsManager}/>:null}ext>
+              <CustomAd adsManager={this.adsManager}/>:null}
             </ScrollView>
           
   

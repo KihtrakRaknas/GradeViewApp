@@ -114,7 +114,6 @@ export default class SignInScreen extends React.Component {
   
       return (
         <KeyboardAvoidingView behavior="padding" style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: "#373a6d" }}>
-  
           <View style={{ flexDirection: 'row', backgroundColor: "#FFFFFF", margin: 20, borderRadius: 5, paddingHorizontal: 14, paddingVertical: 10, marginVertical: 15, }}>
             <FontAwesome
               name='id-badge'
