@@ -1,14 +1,33 @@
 import React from 'react';
-import { Text, AsyncStorage, Alert, Button, View, ActivityIndicator, KeyboardAvoidingView, TouchableOpacity, TextInput } from 'react-native';
+import { Text, AsyncStorage, Alert, Button, View, ActivityIndicator, LayoutAnimation, TouchableOpacity, TextInput } from 'react-native';
+import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view'
 import { FontAwesome } from '@expo/vector-icons';
 import '../globals/signInGlobals'
-import { Icon } from 'react-native-elements'
+import { Icon, ListItem } from 'react-native-elements'
+import { ScrollView } from 'react-native-gesture-handler';
+import TouchableScale from 'react-native-touchable-scale'; 
+import { SafeAreaView } from 'react-navigation';
 
 export default class SignInScreen extends React.Component {
 
+    schools=[
+      {
+        name:"South Brunswick High School",
+        ending:"@sbstudents.org",
+        acronym: "SBHS",
+        numericUsername: true
+      },
+      {
+        name:"Middlesex County Vocational and Technical Schools",
+        ending:"@mcvts.net",
+        acronym: "MCVTS",
+        numericUsername: false
+      }
+    ]
+
     constructor(props) {
       super(props);
-      this.state = { isLoading: false, email: "", password: "", }
+      this.state = { isLoading: false, email: "", password: "", school: null}
   
     }
   
@@ -19,7 +38,9 @@ export default class SignInScreen extends React.Component {
     componentWillMount = () => {
       AsyncStorage.getItem('oldUsername').then((user) => {
         if (user) {
-          this.setState({ OldAccount: true })
+          const ending = user.substring(user.indexOf("@"))
+          const school = this.schools.find(school=>school.ending == ending)
+          this.setState({ OldAccount: ending, school: school})
         } else {
           this.setState({ OldAccount: false })
         }
@@ -33,7 +54,7 @@ export default class SignInScreen extends React.Component {
         Alert.alert("Enter an ID number and password");
         return 0;
       }
-      email = email + "@sbstudents.org";
+      email = email + this.state.school.ending;
       this.verifyWithParams(email, pass)
     }
   
@@ -104,8 +125,57 @@ export default class SignInScreen extends React.Component {
     }
   
     render() {
+      if(this.state.school)
+        return this.textFeildPage()
+      return this.showSchools()
+    }
+
+    showSchools = () =>{
+      let buttons = this.schools.map(schoolInfo=><ListItem
+        Component={TouchableScale}
+        friction={90}
+        tension={100}
+        activeScale={0.95}
+        linearGradientProps={{
+          colors: ['#6fc2d0', '#373a6d'],
+          start: { x: 1, y: 0 },
+          end: { x: 0, y: 0 },
+        }}
+        title={schoolInfo.name}
+        titleStyle={{ color: 'white', fontWeight: 'bold' }}
+        key={schoolInfo.ending}
+        containerStyle = {{ 
+          marginLeft: 15,
+          marginRight: 15, 
+          marginTop: 20, 
+          borderRadius: 10, // adds the rounded corners
+          backgroundColor: '#fff' 
+        }}
+        chevron
+        subtitleStyle={{color:"white"}}
+        subtitle={`Your account ends in ${schoolInfo.ending}`}
+        onPress={()=>{
+          LayoutAnimation.configureNext({
+            duration: 100,
+            create:{
+              type:"linear",
+              property:"scaleY"
+            },
+          });
+          this.setState({school:schoolInfo})
+        }}
+      />)
+      return(<SafeAreaView style={{ flex: 1, backgroundColor: "#373a6d"}}>
+        <ScrollView style={{flex: 1, flexDirection: 'column'}} contentContainerStyle={{ flexGrow: 1, justifyContent: 'center' }}>
+          <Text style={{fontSize:40, textAlign:"center", color:"white", marginBottom:20, fontWeight:"bold", textDecorationLine: 'underline'}}>Select a school</Text>
+          {buttons}
+        </ScrollView>
+      </SafeAreaView>)
+    }
+
+    textFeildPage = () =>{
       var cancelBtn = null;
-      if (this.state.OldAccount)
+      if (this.state.OldAccount && this.state.OldAccount == this.state.school.ending)
         cancelBtn = <Button title="Cancel (Go back to your account)" color="#ff5c5c" onPress={this.verifyUsingOldCredentials} />
       var btnText = <Text style={{ fontSize: 30, fontWeight: '400', color: "#fff", }}>Sign In</Text>
       if (this.state.isLoading) {
@@ -113,64 +183,77 @@ export default class SignInScreen extends React.Component {
       }
   
       return (
-        <KeyboardAvoidingView behavior="padding" style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: "#373a6d" }}>
-          <View style={{ flexDirection: 'row', backgroundColor: "#FFFFFF", margin: 20, borderRadius: 5, paddingHorizontal: 14, paddingVertical: 10, marginVertical: 15, }}>
-            <FontAwesome
-              name='id-badge'
-              size={30}
-              color="#373a6d"
-            />
-            <TextInput
-              editable={!this.state.isLoading}
-              style={{ flex: 1, fontSize: 20, paddingHorizontal: 11 }}
-              keyboardType={'number-pad'}
-              autoCorrect={false}
-              placeholder="ID number"
-              onChangeText={val => this.onChangeText('email', val)}
-            />
-  
-          </View>
-          <View style={{ flexDirection: 'row', backgroundColor: "#FFFFFF", margin: 20, borderRadius: 5, paddingHorizontal: 10, paddingVertical: 10, marginVertical: 15, }}>
-            <Icon
-              name='lock'
-              type='FontAwesome5'
-              size={30}
-              color="#373a6d"
-            />
-            <TextInput
-              editable={!this.state.isLoading}
-              style={{ flex: 1, fontSize: 20, paddingHorizontal: 8 }}
-              autoCorrect={false}
-              secureTextEntry
-              placeholder="Password"
-              onChangeText={val => this.onChangeText('password', val)}
-              onSubmitEditing={this.verify}
-            />
-  
-          </View>
-          <TouchableOpacity
-            disabled={this.state.isLoading}
-            style={{
-              backgroundColor: "#6fc2d0",
-              paddingHorizontal: 15,
-              paddingVertical: 15,
-              borderRadius: 15,
-              width: "80%", alignItems: 'center',
-              marginVertical: 30,
-            }}
-            onPress={this.verify}
-  
-          >
-            {btnText}
-          </TouchableOpacity>
-  
-          {cancelBtn}
-  
-          <View>
-            <Text style={{ fontSize: 10, padding: 10, color: "white" }}>Note: Your password will be encrypted and stored on our servers so we can get your grades for you</Text>
-            <Text style={{ fontSize: 10, padding: 10, color: "white" }}>This app is not affiliated with any school. It was created by a student.</Text>
-          </View>
-        </KeyboardAvoidingView>
+        <SafeAreaView style={{ flex: 1, backgroundColor: "#373a6d", justifyContent: 'center', alignItems: 'center',}}>
+          <KeyboardAwareScrollView style={{ backgroundColor: "#373a6d" }} contentContainerStyle={{flexGrow: 1, justifyContent: 'center', alignItems: 'center',}} resetScrollToCoords={{ x: 0, y: 0 }} scrollEnabled={true}>
+            <Text style={{fontSize:30, textAlign:"center", color:"white", fontWeight:"bold"}}>{this.state.school.acronym} Sign In</Text>
+            <Button title="Select a different school" onPress={()=>{
+              LayoutAnimation.configureNext({
+                duration: 100,
+                delete:{
+                  type:"linear",
+                  property:"scaleY"
+                },
+              });
+              this.setState({school:null})
+            }}/>
+            <View style={{ flexDirection: 'row', backgroundColor: "#FFFFFF", margin: 20, borderRadius: 5, paddingHorizontal: 14, paddingVertical: 10, marginVertical: 15, }}>
+              <FontAwesome
+                name='id-badge'
+                size={30}
+                color="#373a6d"
+              />
+              <TextInput
+                editable={!this.state.isLoading}
+                style={{ flex: 1, fontSize: 20, paddingHorizontal: 11 }}
+                keyboardType={this.state.school.numericUsername?'number-pad':'default'}
+                autoCorrect={false}
+                placeholder={this.state.school.numericUsername?'ID number':'Username'}
+                onChangeText={val => this.onChangeText('email', val)}
+              />
+    
+            </View>
+            <View style={{ flexDirection: 'row', backgroundColor: "#FFFFFF", margin: 20, borderRadius: 5, paddingHorizontal: 10, paddingVertical: 10, marginVertical: 15, }}>
+              <Icon
+                name='lock'
+                type='FontAwesome5'
+                size={30}
+                color="#373a6d"
+              />
+              <TextInput
+                editable={!this.state.isLoading}
+                style={{ flex: 1, fontSize: 20, paddingHorizontal: 8 }}
+                autoCorrect={false}
+                secureTextEntry
+                placeholder="Password"
+                onChangeText={val => this.onChangeText('password', val)}
+                onSubmitEditing={this.verify}
+              />
+    
+            </View>
+            <TouchableOpacity
+              disabled={this.state.isLoading}
+              style={{
+                backgroundColor: "#6fc2d0",
+                paddingHorizontal: 15,
+                paddingVertical: 15,
+                borderRadius: 15,
+                width: "80%", alignItems: 'center',
+                marginVertical: 30,
+              }}
+              onPress={this.verify}
+    
+            >
+              {btnText}
+            </TouchableOpacity>
+    
+            {cancelBtn}
+    
+            <View>
+              <Text style={{ fontSize: 10, padding: 10, color: "white" }}>Note: Your password will be encrypted and stored on our servers so we can get your grades for you</Text>
+              <Text style={{ fontSize: 10, padding: 10, color: "white" }}>This app is not affiliated with any school. It was created by a student.</Text>
+            </View>
+          </KeyboardAwareScrollView>
+        </SafeAreaView>
       )
     }
   
