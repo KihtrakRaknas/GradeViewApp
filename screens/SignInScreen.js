@@ -12,16 +12,18 @@ export default class SignInScreen extends React.Component {
 
     schools=[
       {
-        name:"South Brunswick High School",
-        ending:"@sbstudents.org",
-        acronym: "SBHS",
-        numericUsername: true
+        name:"South Brunswick School District",
+        ending:"sbstudents.org",
+        acronym: "SB",
+        numericUsername: true,
+        applyEnding:true,
       },
       {
         name:"Middlesex County Vocational and Technical Schools",
-        ending:"@mcvts.net",
+        ending:"mcvts.net",
         acronym: "MCVTS",
-        numericUsername: false
+        numericUsername: false,
+        applyEnding:false,
       }
     ]
 
@@ -36,9 +38,8 @@ export default class SignInScreen extends React.Component {
     }
   
     componentWillMount = () => {
-      AsyncStorage.getItem('oldUsername').then((user) => {
-        if (user) {
-          const ending = user.substring(user.indexOf("@"))
+      AsyncStorage.getItem('oldSchool').then((ending) => {
+        if (ending) {
           const school = this.schools.find(school=>school.ending == ending)
           this.setState({ OldAccount: ending, school: school})
         } else {
@@ -50,32 +51,39 @@ export default class SignInScreen extends React.Component {
     verify = () => {
       var email = this.state.email;
       var pass = this.state.password;
+      var schoolEnding = this.state.school.ending
       if (!(email && pass)) {
         Alert.alert("Enter an ID number and password");
         return 0;
       }
-      email = email + this.state.school.ending;
-      this.verifyWithParams(email, pass)
+      email = email + (this.state.school.applyEnding?"@"+schoolEnding:"");
+      if(email.includes("@") && !email.includes(schoolEnding))
+        Alert.alert("You used an unsupported email ending. Please make sure you are using either your school email or school username.");
+      else
+        this.verifyWithParams(email, pass, schoolEnding)
     }
   
     verifyUsingOldCredentials = () => {
       AsyncStorage.getItem('oldUsername').then((user) => {
         AsyncStorage.getItem('oldPassword').then((pass) => {
-          this.verifyWithParams(user, pass)
-          AsyncStorage.getItem('oldBackgroundColors').then((backgroundColor) => {
-            if (backgroundColor)
-              AsyncStorage.setItem('backgroundColors', backgroundColor)
-            //updateBackgroundColorsGlobal(JSON.parse(backgroundColor))
+          AsyncStorage.getItem('oldSchool').then((school) => {
+            this.verifyWithParams(user, pass, school)
+            AsyncStorage.getItem('oldBackgroundColors').then((backgroundColor) => {
+              if (backgroundColor)
+                AsyncStorage.setItem('backgroundColors', backgroundColor)
+              //updateBackgroundColorsGlobal(JSON.parse(backgroundColor))
+            })
           })
         })
       })
     }
   
-    verifyWithParams = (email, pass) => {
+    verifyWithParams = (email, pass, schoolEnding) => {
       if (!(email && pass)) {
         Alert.alert("Enter an ID number and password");
         return 0;
       }
+
       //email = email+"@sbstudents.org"; Done in verify function
       this.setState({
         isLoading: true,
@@ -90,6 +98,7 @@ export default class SignInScreen extends React.Component {
         body: JSON.stringify({
           username: email,//10012734 //await AsyncStorage.getItem('username')
           password: pass,//Sled%2#9 //await AsyncStorage.getItem('password')
+          school: schoolEnding
         }),
       })
         .then((response) => {
@@ -101,10 +110,11 @@ export default class SignInScreen extends React.Component {
           if (responseJson['valid'] == true) {
             AsyncStorage.setItem('username', email).then(() => {
               AsyncStorage.setItem('password', pass).then(() => {
-                global.signInGlobal();
+                AsyncStorage.setItem('school', schoolEnding).then(() => {
+                  global.signInGlobal();
+                }); 
               });
             });
-  
           } else {
             Alert.alert("Invalid username - password combination!");
           }
@@ -207,7 +217,7 @@ export default class SignInScreen extends React.Component {
                 style={{ flex: 1, fontSize: 20, paddingHorizontal: 11 }}
                 keyboardType={this.state.school.numericUsername?'number-pad':'default'}
                 autoCorrect={false}
-                placeholder={this.state.school.numericUsername?'ID number':'Username'}
+                placeholder={this.state.school.numericUsername?'ID number':'Username/Email'}
                 onChangeText={val => this.onChangeText('email', val)}
               />
     

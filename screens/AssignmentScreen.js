@@ -31,12 +31,13 @@ export default class AssignmentScreen extends React.Component {
       console.log(assignment["Comment"])
   
       var comment = assignment["Comment"];
+      var subtitle = assignment["Subtitle"];
   
       if(comment&&comment.length>=2)
         if(comment.substring(0,1) == '"' && comment.substring(comment.length-1,comment.length) == '"'){
           comment = comment.substring(1,comment.length-1)
         }
-  
+      console.log(assignment["Name"])
       return (
         <View style={{flex:1}}>
           <View style={{  
@@ -56,6 +57,7 @@ export default class AssignmentScreen extends React.Component {
             <Text style={{paddingTop:10, fontSize:30, textAlign:"right"}}>{assignment["Grade"].split("/").length==2?(Number(assignment["Grade"].split("/")[0])/Number(assignment["Grade"].split("/")[1])*100).toFixed(1)+"%":null}</Text>
             <Text style={{paddingTop:20, fontSize:20, textAlign:"right"}}>{assignment["Category"]?""+assignment["Category"]:null}</Text>
             <View style={{marginTop:50,borderRadius:10,backgroundColor:"#f7f7f7", minHeight:100,padding:5,marginBottom:30}}>
+              {subtitle?<Text style={{ fontSize:20, marginBottom:20}}>{subtitle}</Text>:null}
               <Text style={{ fontSize:20}}>{comment?comment:"No Teacher Comment"}</Text>
             </View>
           </ScrollView>

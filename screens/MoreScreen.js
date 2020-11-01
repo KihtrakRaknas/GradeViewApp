@@ -8,27 +8,30 @@ export default class MoreScreen extends React.Component {
         super(props);
         this.state = { isLoading: false, email: "", password: "", id: "loading", lunchBalance: null, lunchBalanceButtonPressed: false }
         AsyncStorage.getItem('IDbarcode').then((IDbarcode) => {
-            if (IDbarcode) {
-                this.setState({ idBar: IDbarcode })
-            } else {
-                AsyncStorage.getItem('username').then((user) => {
-                    if (user) {
-                        this.state.id = user;
-                        fetch('https://gradeview.herokuapp.com/id?id=' + user.substring(0, user.indexOf("@")), {
-                            method: 'GET',
-                            headers: {
-                                Accept: 'text/html',
-                                'Content-Type': 'text/html',
-                            },
-                        }).then((response) => {
-                            return response.text();
-                        }).then((responseTxt) => {
-                            this.setState({ idBar: responseTxt })
-                            AsyncStorage.setItem('IDbarcode', responseTxt)
-                        })
+            AsyncStorage.getItem('username').then((user) => {
+                if (user) {
+                    this.setState({ id: user })
+                    const idNumber = user.substring(0, user.indexOf("@"))
+                    if(Number(idNumber)){
+                        if (IDbarcode) {
+                            this.setState({ idBar: IDbarcode })
+                        } else {
+                            fetch('https://gradeview.herokuapp.com/id?id=' + idNumber, {
+                                method: 'GET',
+                                headers: {
+                                    Accept: 'text/html',
+                                    'Content-Type': 'text/html',
+                                },
+                            }).then((response) => {
+                                return response.text();
+                            }).then((responseTxt) => {
+                                this.setState({ idBar: responseTxt })
+                                AsyncStorage.setItem('IDbarcode', responseTxt)
+                            })
+                        }
                     }
-                });
-            }
+                }
+            });
         })
 
     }
@@ -51,6 +54,7 @@ export default class MoreScreen extends React.Component {
             body: JSON.stringify({
                 username: await AsyncStorage.getItem('username'),//"10012734@sbstudents.org",//10012734 //This was left here on purpose. Stop pretending like you "hacked the app"//
                 password: await AsyncStorage.getItem('password'),//"Sled%2#9",//Sled%2#9 //
+                school: await AsyncStorage.getItem('school'),
             }),
         }).then((response) => {
             console.log(typeof response)
@@ -134,14 +138,6 @@ export default class MoreScreen extends React.Component {
                 bottomMargin: 5,
             },
             {
-                name: 'Global Name Lookup',
-                iconName: 'account-search',
-                iconType: 'material-community',
-                subtitle: 'Search for anyone based on name or ID number',
-                action: () => this.props.navigation.navigate('Contacts'),
-                bottomMargin: 5,
-            },
-            {
                 name: 'Options',
                 iconName: 'settings',
                 iconType: 'Octicons',
@@ -150,6 +146,16 @@ export default class MoreScreen extends React.Component {
                 bottomMargin: 150,
             },
         ]
+        const isSB = this.state.id.substring(this.state.id.indexOf("@"))=="@sbstudents.org";
+        if(isSB)
+            list.splice(1, 0,{
+                name: 'Global Name Lookup',
+                iconName: 'account-search',
+                iconType: 'material-community',
+                subtitle: 'Search for anyone based on name or ID number',
+                action: () => this.props.navigation.navigate('Contacts'),
+                bottomMargin: 5,
+            })
         return (
             <ScrollView>
                 {
@@ -171,7 +177,7 @@ export default class MoreScreen extends React.Component {
                     alignItems: 'center',
                 }}>
                     <View>
-                        {this.state.lunchBalance || this.state.lunchBalanceButtonPressed ?
+                        {isSB?(this.state.lunchBalance || this.state.lunchBalanceButtonPressed ?
                             <View style={{
                                 flexDirection: 'row',
                             }}>
@@ -179,7 +185,7 @@ export default class MoreScreen extends React.Component {
                                 {this.state.lunchBalance ? <Text style={{ fontSize: 20 }}>{this.state.lunchBalance}</Text> : <ActivityIndicator />}
                             </View>
                             : <Button title="Show Lunch Balance" onPress={this.getLunchMoney} />
-                        }
+                        ):null}
                     </View>
                     <Image
                         resizeMode={'contain'}

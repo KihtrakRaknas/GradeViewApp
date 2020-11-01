@@ -108,6 +108,7 @@ export default class GPAScreen extends React.Component {
             body: JSON.stringify({
                 username: await AsyncStorage.getItem('username'),//"10012734@sbstudents.org",//10012734 //This was left here on purpose. Stop pretending like you "hacked the app"//
                 password: await AsyncStorage.getItem('password'),//"Sled%2#9",//Sled%2#9 //
+                school: await AsyncStorage.getItem('school'),
             }),
         })
             .then((response) => {
@@ -135,6 +136,7 @@ export default class GPAScreen extends React.Component {
             body: JSON.stringify({
                 username: await AsyncStorage.getItem('username'),//"10012734@sbstudents.org",//10012734 //
                 password: await AsyncStorage.getItem('password'),//"Sled%2#9",//Sled%2#9 //
+                school: await AsyncStorage.getItem('school'),
             }),
         })
             .then((response) => {

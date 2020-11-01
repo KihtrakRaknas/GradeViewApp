@@ -51,21 +51,24 @@ export default class LoadInComponent extends React.Component {
         let token = await Notifications.getExpoPushTokenAsync();
         console.log(token)
         AsyncStorage.getItem('password').then((pass) => {
-            return fetch("https://gradeview.herokuapp.com/addToken", {
-                method: 'POST',
-                headers: {
-                    Accept: 'application/json',
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    token: {
-                        value: token,
+            AsyncStorage.getItem('school').then((school) => {
+                return fetch("https://gradeview.herokuapp.com/addToken", {
+                    method: 'POST',
+                    headers: {
+                        Accept: 'application/json',
+                        'Content-Type': 'application/json',
                     },
-                    user: {
-                        username: user,
-                        password: pass,
-                    },
-                }),
+                    body: JSON.stringify({
+                        token: {
+                            value: token,
+                        },
+                        user: {
+                            username: user,
+                            password: pass,
+                            school: school,
+                        },
+                    }),
+                })
             });
         });
     }
@@ -89,6 +92,7 @@ export default class LoadInComponent extends React.Component {
             body: JSON.stringify({
                 username: await AsyncStorage.getItem('username'),//"10012734@sbstudents.org",//10012734 //
                 password: await AsyncStorage.getItem('password'),//"Sled%2#9",//Sled%2#9 //
+                school: await AsyncStorage.getItem('school'),
             }),
         })
             .then((response) => {

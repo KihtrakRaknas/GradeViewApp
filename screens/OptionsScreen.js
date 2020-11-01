@@ -54,17 +54,21 @@ export default class OptionsScreen extends React.Component {
 
         AsyncStorage.getItem('username').then((user) => {
             AsyncStorage.getItem('password').then((pass) => {
-                AsyncStorage.getItem('backgroundColors').then((backgroundColors) => {
-                    AsyncStorage.clear().then(() => {
-                        AsyncStorage.setItem('oldUsername', user).then(() => {
-                            AsyncStorage.setItem('oldPassword', pass).then(() => {
-                                backgroundColors = backgroundColors ? backgroundColors : JSON.stringify({})
-                                AsyncStorage.setItem('oldBackgroundColors', backgroundColors).then(() => {
-                                    global.signOutGlobal();
+                AsyncStorage.getItem('school').then((school) =>{
+                    AsyncStorage.getItem('backgroundColors').then((backgroundColors) => {
+                        AsyncStorage.clear().then(() => {
+                            AsyncStorage.setItem('oldUsername', user).then(() => {
+                                AsyncStorage.setItem('oldPassword', pass).then(() => {
+                                    AsyncStorage.setItem('oldSchool', school).then(() => {
+                                        backgroundColors = backgroundColors ? backgroundColors : JSON.stringify({})
+                                        AsyncStorage.setItem('oldBackgroundColors', backgroundColors).then(() => {
+                                            global.signOutGlobal();
+                                        });
+                                    });
                                 });
                             });
-                        });
-                    })
+                        })
+                    });
                 });
             });
         });
