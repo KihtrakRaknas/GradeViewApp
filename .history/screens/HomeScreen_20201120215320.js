@@ -173,7 +173,7 @@ export default class HomeScreen extends LoadInComponent {
         // console.log(avg)
         console.log(classN)
         console.log(avg)
-        if(classN!="Status"&&avg){
+        if(classN!="Status"/*&&avg*/){
           table.push(<ClassBtn key={classN+count} title={classN} showAPlus={this.state.showA} teach = {teach} avg={avg} onPress={this.classClicked} style={this.state.style}></ClassBtn>)
           count++;
         }

@@ -51,8 +51,10 @@ export default class ClassBtn extends React.Component {
     render () {
       avg = this.props.avg
       avgFrac = 0;
-      if(Number(avg.substring(0,avg.length-1)))
+      if(Number(avg.substring(0,avg.length-1))){
+        avg=Number(avg.substring(0,avg.length-1))+avg.substring(avg.length-1)
         avgFrac = Number(avg.substring(0,avg.length-1))/100
+      }
       if(avgFrac<.4)
         avgFrac = .4
       fontWeightAvg = 'normal';
@@ -61,9 +63,9 @@ export default class ClassBtn extends React.Component {
         if(!this.props.showAPlus && avg=="A+")
           avg="A"
         fontWeightAvg = 'bold'
-      }
-      if(this.props.style == "Hieroglyphic")
+      }else if(this.props.style == "Hieroglyphic"){
         avg = this.gradeToEmoji(avg.substring(0,avg.length-1))
+      }
   
       colorz = ['#373a6d', '#6fc2d0']//['#F44336', '#FF9800']//
       titleColor = pickTextColorBasedOnBgColorAdvanced(colorz[0])

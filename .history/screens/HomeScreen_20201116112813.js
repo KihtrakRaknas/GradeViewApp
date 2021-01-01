@@ -145,6 +145,8 @@ export default class HomeScreen extends LoadInComponent {
     genTable = ()=>{
       var table = []
       var count = 0;
+      var mps = this.genMpsArray();
+      //console.log(global.grades)
       var ClassNames = [];
       if(global.grades)
         ClassNames = Object.keys(global.grades).sort()
@@ -171,13 +173,10 @@ export default class HomeScreen extends LoadInComponent {
         }
         // console.log("avg")
         // console.log(avg)
-        console.log(classN)
-        console.log(avg)
         if(classN!="Status"&&avg){
           table.push(<ClassBtn key={classN+count} title={classN} showAPlus={this.state.showA} teach = {teach} avg={avg} onPress={this.classClicked} style={this.state.style}></ClassBtn>)
           count++;
         }
-        console.log(table.length)
       }
       console.log("DONE");
       return table

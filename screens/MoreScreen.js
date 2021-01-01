@@ -1,8 +1,9 @@
 import React from 'react';
-import { View, Image, ScrollView, AsyncStorage, Button, Text, ActivityIndicator } from 'react-native'
+import { View, Image, ScrollView, AsyncStorage, Button, Text, ActivityIndicator, Alert } from 'react-native'
 import { ListItem } from 'react-native-elements';
 import { navigationHeader } from '../globals/styles'
 import * as FacebookAds from 'expo-ads-facebook';
+import { AdMobInterstitial } from 'expo-ads-admob';
 export default class MoreScreen extends React.Component {
     constructor(props) {
         super(props);
@@ -71,20 +72,25 @@ export default class MoreScreen extends React.Component {
 
     componentDidMount() {
         const { navigation } = this.props;
-        /*this.focusListener = navigation.addListener("didFocus", () => { //Prepares app to display a pop up ad
+        this.focusListener = navigation.addListener("didFocus", () => { //Prepares app to display a pop up ad
           AsyncStorage.getItem('noAds').then((noAd)=>{
             if(noAd !== "true"){
-              //'ca-app-pub-3940256099942544/1033173712'
-              AdMobInterstitial.setAdUnitID(Platform.OS === 'ios'?"ca-app-pub-8985838748167691/4846725042":"ca-app-pub-8985838748167691/5663669617"); 
-              AdMobInterstitial.setTestDeviceID('EMULATOR');
-              AdMobInterstitial.getIsReadyAsync().then((ready)=>{
-                console.log('ready: ' + ready)
-                if(!ready)
-                  AdMobInterstitial.requestAdAsync({ servePersonalizedAds: true})
-              })
+                AsyncStorage.getItem('numberOfAppLaunches').then((num)=>{
+                    if(Number(num)>20){
+                        //'ca-app-pub-3940256099942544/1033173712'
+                        AdMobInterstitial.setAdUnitID(__DEV__?"ca-app-pub-3940256099942544/4411468910":Platform.OS === 'ios'?"ca-app-pub-8985838748167691/4846725042":"ca-app-pub-8985838748167691/5663669617"); 
+                        console.log('checking ready')
+                        AdMobInterstitial.getIsReadyAsync().then((ready)=>{
+                            console.log('ready: ' + ready)
+                            if(!ready)
+                            AdMobInterstitial.requestAdAsync({ servePersonalizedAds: true})
+                        })
+                        this.showingPopUpAd = true
+                    }
+                })
             }
           })
-        });*/
+        });
     }
 
     componentWillUnmount() {
@@ -100,40 +106,46 @@ export default class MoreScreen extends React.Component {
                 iconType: 'material-community',
                 subtitle: 'View your Grade Point Average',
                 action: () => {
-                    AsyncStorage.getItem('noAds').then((noAd) => {
-                        if (noAd !== "true") {
-                            console.log("SHOW FACEBOOK AD")
-                            /*FacebookAds.InterstitialAdManager.showAd(Platform.OS === 'ios'?"618501142264378_618574792257013":"618501142264378_623008151813677").then(didClick => {
-                              console.log("SHOWN")
-                              //this.props.navigation.navigate('GPA')
+                    if (this.showingPopUpAd == true) {
+                        console.log("SHOW FACEBOOK AD")
+                        /*FacebookAds.InterstitialAdManager.showAd(Platform.OS === 'ios'?"618501142264378_618574792257013":"618501142264378_623008151813677").then(didClick => {
+                            console.log("SHOWN")
+                            //this.props.navigation.navigate('GPA')
+                        })
+                        .catch(error => {
+                            console.log("err", error)
+                            //this.props.navigation.navigate('GPA')
+                        });*/
+                        this.props.navigation.navigate('GPA')
+                        AdMobInterstitial.getIsReadyAsync().then((ready)=>{
+                            console.log('ready: ' + ready)
+                            if(ready)
+                                AdMobInterstitial.showAdAsync();
+                            else{
+                            /*console.log("SHOW FACEBOOK AD")
+                            FacebookAds.InterstitialAdManager.showAd(Platform.OS === 'ios'?"618501142264378_618574792257013":"618501142264378_623008151813677")
+                            .then(didClick => {
+                                this.props.navigation.navigate('GPA')
                             })
                             .catch(error => {
-                              console.log("err", error)
-                              //this.props.navigation.navigate('GPA')
+                                this.props.navigation.navigate('GPA')
                             });*/
-                            this.props.navigation.navigate('GPA')
-                            /*
-                            AdMobInterstitial.getIsReadyAsync().then((ready)=>{
-                              console.log('ready: ' + ready)
-                              if(ready)
-                                AdMobInterstitial.showAdAsync();
-                              else{
-                                console.log("SHOW FACEBOOK AD")
-                                FacebookAds.InterstitialAdManager.showAd(Platform.OS === 'ios'?"618501142264378_618574792257013":"618501142264378_623008151813677")
-                                .then(didClick => {
-                                  this.props.navigation.navigate('GPA')
+                            AdMobInterstitial.requestAdAsync({ servePersonalizedAds: true}).catch((e)=>{console.log(e)})
+                            }
+                            let intervalCount
+                            let interval = setInterval(()=>{
+                                intervalCount++
+                                if(intervalCount>20){
+                                    clearInterval(interval)
+                                }
+                                AdMobInterstitial.showAdAsync().then(()=>{
+                                    clearInterval(interval)
                                 })
-                                .catch(error => {
-                                  this.props.navigation.navigate('GPA')
-                                });
-                                //AdMobInterstitial.requestAdAsync({ servePersonalizedAds: true}).then(()=>AdMobInterstitial.showAdAsync())
-                              }
-                            }) 
-                            */
-                        } else {
-                            this.props.navigation.navigate('GPA')
-                        }
-                    })
+                            },1000)
+                        }) 
+                    } else {
+                        this.props.navigation.navigate('GPA')
+                    }
                 },
                 bottomMargin: 5,
             },

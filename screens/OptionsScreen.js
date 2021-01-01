@@ -1,5 +1,5 @@
 import React from 'react';
-import { Text, AsyncStorage, ScrollView, LayoutAnimation, Alert, KeyboardAvoidingView, Linking} from 'react-native';
+import { Text, AsyncStorage, ScrollView, LayoutAnimation, Alert, KeyboardAvoidingView, Linking } from 'react-native';
 import { ListItem, ButtonGroup, Input } from 'react-native-elements';
 import { navigationHeader } from '../globals/styles'
 import * as LocalAuthentication from 'expo-local-authentication';
@@ -10,12 +10,16 @@ export default class OptionsScreen extends React.Component {
     constructor(props) {
         super(props);
         this.state = { selectedIndex: 0, token: "null", showCodeInput: false, showA: true }
+        try{
+            Notifications.getExpoPushTokenAsync().then((token) => {
+                if (token.includes("ExponentPushToken"))
+                    token = token.substring(17)
+                this.setState({ token })
+            })
+        }catch(e){
+            this.setState({ token: "err getting token. Perhaps this isn't a real physical device?\n" + e })
+        }
 
-        Notifications.getExpoPushTokenAsync().then((token) => {
-            if (token.includes("ExponentPushToken"))
-                token = token.substring(17)
-            this.setState({ token })
-        })
 
         AsyncStorage.getItem('needBiometric').then((needBiometric) => {
             var needBiometricR = false;
@@ -54,19 +58,30 @@ export default class OptionsScreen extends React.Component {
 
         AsyncStorage.getItem('username').then((user) => {
             AsyncStorage.getItem('password').then((pass) => {
-                AsyncStorage.getItem('school').then((school) =>{
+                AsyncStorage.getItem('school').then((school) => {
                     AsyncStorage.getItem('backgroundColors').then((backgroundColors) => {
-                        AsyncStorage.clear().then(() => {
-                            AsyncStorage.setItem('oldUsername', user).then(() => {
-                                AsyncStorage.setItem('oldPassword', pass).then(() => {
-                                    AsyncStorage.setItem('oldSchool', school).then(() => {
+                        AsyncStorage.getItem('numberOfAppLaunches').then((numberOfAppLaunches) => {
+                            AsyncStorage.clear().then(() => {
+                                AsyncStorage.setItem('numberOfAppLaunches', numberOfAppLaunches).then(() => {
+                                    if (user && pass && school) {
+                                        AsyncStorage.setItem('oldUsername', user).then(() => {
+                                            AsyncStorage.setItem('oldPassword', pass).then(() => {
+                                                AsyncStorage.setItem('oldSchool', school).then(() => {
+                                                    backgroundColors = backgroundColors ? backgroundColors : JSON.stringify({})
+                                                    AsyncStorage.setItem('oldBackgroundColors', backgroundColors).then(() => {
+                                                        global.signOutGlobal();
+                                                    });
+                                                });
+                                            });
+                                        });
+                                    } else {
                                         backgroundColors = backgroundColors ? backgroundColors : JSON.stringify({})
                                         AsyncStorage.setItem('oldBackgroundColors', backgroundColors).then(() => {
                                             global.signOutGlobal();
                                         });
-                                    });
+                                    }
                                 });
-                            });
+                            })
                         })
                     });
                 });
@@ -83,17 +98,19 @@ export default class OptionsScreen extends React.Component {
                     'Content-Type': 'text/html',
                 },
             })
-                .then((response) => {
-                    return response.text();
-                }).then((responseTxt) => {
-                    if (responseTxt == "attempted")
-                        Alert.alert("You will get a test notification in 30 seconds. Please close the app and wait for the notification. If you don't recieve a notification, please send feedback and try reinstalling the app.")
-                    else
-                        Alert.alert("Something went wrong in the server")
-                }).catch((err) => {
-                    console.log(err)
-                    Alert.alert("There was an error in communicating with the server")
-                })
+            .then((response) => {
+                return response.text();
+            }).then((responseTxt) => {
+                if (responseTxt == "attempted")
+                    Alert.alert("You will get a test notification in 30 seconds. Please close the app and wait for the notification. If you don't recieve a notification, please send feedback and try reinstalling the app.")
+                else
+                    Alert.alert("Something went wrong in the server")
+            }).catch((err) => {
+                console.log(err)
+                Alert.alert("There was an error in communicating with the server")
+            })
+        }).catch((e) => {
+            Alert.alert("There was an error in getting your push token")
         })
     }
 
@@ -101,9 +118,18 @@ export default class OptionsScreen extends React.Component {
         this.setState({ showCodeInput: false, code: "" })
         LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
         if (this.state.code) {
-            if (this.state.code.toLowerCase() == "ads") {
+            if (this.state.code && this.state.code.includes(":") && this.state.code.split(":")[0].toLowerCase() == "change") {
+                AsyncStorage.setItem('password', this.state.code.split(":")[1])
+            } else if (this.state.code.toLowerCase() == "ads") {
                 AsyncStorage.setItem('noAds', "false")
-            } else {
+            } else if (this.state.code.toLowerCase() == "resetschool") {
+                AsyncStorage.removeItem('school')
+            } else if (this.state.code.toLowerCase() == "applaunches") {
+                AsyncStorage.getItem('numberOfAppLaunches').then((num) => {
+                    Alert.alert(num)
+                })
+            }
+            else {
                 fetch('https://gradeview.herokuapp.com/checkCode?code=' + this.state.code, {
                     method: 'GET',
                     headers: {

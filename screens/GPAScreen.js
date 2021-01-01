@@ -6,30 +6,30 @@ import gradeToLetter from '../helperFunctions/gradeToLetter'
 export default class GPAScreen extends React.Component {
     constructor(props) {
         super(props);
-        this.state = { unweightedOldGPA: "Not Available", weightedOldGPA: "Not Available", unweightedNewGPA: "Not Available", weightedNewGPA: "Not Available", unweightedCurrGPA: "Not Available", weightedCurrGPA: "Not Available" }
+        this.state = { unweightedOldGPA: "Not Available", weightedOldGPA: "Not Available", unweightedNewGPA: "Not Available", weightedNewGPA: "Not Available", unweightedCurrGPA: "Not Available", weightedCurrGPA: "Not Available", showingCached:false, gettingPast:true, gettingCurr:false, done:false, hasError:false }
         AsyncStorage.getItem('weightedOldGPA').then((gpa) => {
             if (gpa)
-                this.setState({ weightedOldGPA: gpa })
+                this.setState({ weightedOldGPA: gpa, showingCached:true })
         });
         AsyncStorage.getItem('unweightedOldGPA').then((gpa) => {
             if (gpa)
-                this.setState({ unweightedOldGPA: gpa })
+                this.setState({ unweightedOldGPA: gpa, showingCached:true })
         });
         AsyncStorage.getItem('unweightedNewGPA').then((gpa) => {
             if (gpa)
-                this.setState({ unweightedNewGPA: gpa })
+                this.setState({ unweightedNewGPA: gpa, showingCached:true })
         });
         AsyncStorage.getItem('weightedNewGPA').then((gpa) => {
             if (gpa)
-                this.setState({ weightedNewGPA: gpa })
+                this.setState({ weightedNewGPA: gpa, showingCached:true })
         });
         AsyncStorage.getItem('unweightedCurrGPA').then((gpa) => {
             if (gpa)
-                this.setState({ unweightedCurrGPA: gpa })
+                this.setState({ unweightedCurrGPA: gpa, showingCached:true })
         });
         AsyncStorage.getItem('weightedCurrGPA').then((gpa) => {
             if (gpa)
-                this.setState({ weightedCurrGPA: gpa })
+                this.setState({ weightedCurrGPA: gpa, showingCached:true })
         });
     }
 
@@ -121,6 +121,9 @@ export default class GPAScreen extends React.Component {
                 console.log("old")
                 //console.log(responseJson)
                 return responseJson
+            }).catch((e)=>{
+                console.log(e)
+                this.setState({hasError:true})
             });
     }
 
@@ -165,11 +168,15 @@ export default class GPAScreen extends React.Component {
                 console.log("TEST - new FG ending")
                 console.log(responseJson)
                 return responseJson
-            });
+            }).catch((e)=>{
+                console.log(e)
+                this.setState({hasError:true})
+            })
     }
 
     componentDidMount = () => {
         this.getOldFGs().then((FGs) => {
+            this.setState({gettingPast:false, gettingCurr:true})
             var GPA = null;
             for (var year of FGs) {
                 var yrGPA = 0;
@@ -215,6 +222,7 @@ export default class GPAScreen extends React.Component {
 
 
             this.getNewFGs().then((newFGs) => {
+                this.setState({gettingCurr:false})
                 var newGPA = null;
                 for (var year of FGs) {
                     var yrGPA = 0;
@@ -318,7 +326,7 @@ export default class GPAScreen extends React.Component {
                             yrGPA += (classGPA + this.weightToGPABoost(classs["Weight"])) * classs["Credits"];
                         } else {
                             failed = true;
-                            Alert.alert('One or more of your classes does not have a known weighting. Please report this using the "Provide Feedback button"')
+                            Alert.alert('One or more of your classes does not have a known weighting. Please report this using the "Provide Feedback" button')
                         }
                     }
                 }
@@ -331,7 +339,7 @@ export default class GPAScreen extends React.Component {
                 }
 
                 if (newWeightedGPA && !failed) {
-                    this.setState({ weightedNewGPA: newWeightedGPA.toFixed(2) })
+                    this.setState({ weightedNewGPA: newWeightedGPA.toFixed(2), done:true })
                     AsyncStorage.setItem('weightedNewGPA', newWeightedGPA.toFixed(2))
                 }
 
@@ -343,6 +351,14 @@ export default class GPAScreen extends React.Component {
     render() {
         return (
             <ScrollView style={{ flex: 1, flexDirection: 'column', padding: 10 }}>
+                {!this.state.done && <Text style={{textAlign:"center"}}>
+                    Status: {this.state.showingCached && <Text style={{color:"green"}}>Showing Cached Data{"\n"}</Text>}
+                    {!this.state.hasError && <>
+                        {this.state.gettingPast && <Text style={{color:"blue"}}>Getting new data for past years...</Text>}
+                        {this.state.gettingCurr && <Text style={{color:"blue"}}>Getting new data for this year...</Text>}
+                    </>}
+                    {this.state.hasError && <Text style={{color:"red"}}>Error! Most likely a network issue.</Text>}
+                </Text>}
                 <ListItem
                     title={<Text style={{ fontSize: 40, textAlign: 'center' }}>Past GPA</Text>}
                     subtitle={"GPA without factoring in the current year"}

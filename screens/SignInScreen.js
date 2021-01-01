@@ -1,5 +1,5 @@
 import React from 'react';
-import { Text, AsyncStorage, Alert, Button, View, ActivityIndicator, LayoutAnimation, TouchableOpacity, TextInput } from 'react-native';
+import { Text, AsyncStorage, Alert, Button, View, ActivityIndicator, LayoutAnimation, TouchableOpacity, TextInput, Linking } from 'react-native';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view'
 import { FontAwesome } from '@expo/vector-icons';
 import '../globals/signInGlobals'
@@ -57,9 +57,9 @@ export default class SignInScreen extends React.Component {
         return 0;
       }
       email = email + (this.state.school.applyEnding?"@"+schoolEnding:"");
-      if(email.includes("@") && !email.includes(schoolEnding))
-        Alert.alert("You used an unsupported email ending. Please make sure you are using either your school email or school username.");
-      else
+      /*if(email.includes("@") && !email.includes(schoolEnding))
+        Alert.alert("You used an unsupported email ending. \nPlease make sure you are using either your school email or school username.\n(Do not use parent portal login)");
+      else*/
         this.verifyWithParams(email, pass, schoolEnding)
     }
   
@@ -255,9 +255,11 @@ export default class SignInScreen extends React.Component {
             >
               {btnText}
             </TouchableOpacity>
-    
+
+            <Button title="Having trouble signing in?" onPress={() => Linking.openURL('mailto:gradeViewApp@kihtrak.com?subject=Need%20help%20with%20sign-in')} />
+
             {cancelBtn}
-    
+           
             <View>
               <Text style={{ fontSize: 10, padding: 10, color: "white" }}>Note: Your password will be encrypted and stored on our servers so we can get your grades for you</Text>
               <Text style={{ fontSize: 10, padding: 10, color: "white" }}>This app is not affiliated with any school. It was created by a student.</Text>

@@ -1,5 +1,5 @@
 import React from 'react';
-import { AsyncStorage, AppState } from 'react-native';
+import { AsyncStorage, AppState, Alert } from 'react-native';
 import * as Permissions from 'expo-permissions'
 import { Notifications } from 'expo';
 import '../globals/signInGlobals'
@@ -99,14 +99,16 @@ export default class LoadInComponent extends React.Component {
                 return response.json();
             })
             .then((responseJson) => {
-                if (responseJson && responseJson["Status"] != "loading...") {
+                if (responseJson && responseJson["Status"] == "Invalid") {
+                    Alert.alert("Error! The saved credentials did not work. If you changed your password recently, try signing out and then back into your account (with your new password).")
+                }else if (responseJson && responseJson["Status"] != "loading...") {
                     global.grades = responseJson;
                     console.log("GRADES UPDATED")
                     AsyncStorage.setItem('grades', JSON.stringify(responseJson));
                     this.setState({
                         isLoading: false,
                     });
-                } else {
+                }else {
                     this.runGetGrades()
                 }
                 this.props.navigation.setParams({ loading: false })

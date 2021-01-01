@@ -150,7 +150,7 @@ export default class HomeScreen extends LoadInComponent {
         ClassNames = Object.keys(global.grades).sort()
       for(classN of ClassNames){
         var maxMarking=this.state.currentMarking;
-        //console.log(maxMarking);
+        console.log(maxMarking);
         var avg = "";
         var teach = "";
         if(global.grades[classN][maxMarking]){
@@ -171,13 +171,10 @@ export default class HomeScreen extends LoadInComponent {
         }
         // console.log("avg")
         // console.log(avg)
-        console.log(classN)
-        console.log(avg)
         if(classN!="Status"&&avg){
           table.push(<ClassBtn key={classN+count} title={classN} showAPlus={this.state.showA} teach = {teach} avg={avg} onPress={this.classClicked} style={this.state.style}></ClassBtn>)
           count++;
         }
-        console.log(table.length)
       }
       console.log("DONE");
       return table

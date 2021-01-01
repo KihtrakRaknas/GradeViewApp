@@ -69,8 +69,7 @@ export default class ListOfAssignmentsView extends React.Component {
             <SectionList
                 ItemSeparatorComponent={({ item }) => <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}><View style={{ height: 0.5, width: '96%', backgroundColor: '#C8C8C8', }} /></View>}
                 sections={this.props.listOfAssignments}
-                renderItem={({ item }) => <TouchableOpacity onPress={() => this.props.navigation.navigate('Assignment', { assignmentData: item })} style={{ flexDirection: 'row', justifyContent: 'space-between', /*backgroundColor:this.getBackgroundColor(item["Category"])*/ }}
-                >
+                renderItem={({ item }) => <TouchableOpacity onPress={() => this.props.navigation.navigate('Assignment', { assignmentData: item })} style={{ flexDirection: 'row', justifyContent: 'space-between', /*backgroundColor:this.getBackgroundColor(item["Category"])*/ }}>
                     <LinearGradient
                         style={{ flexDirection: 'row', justifyContent: 'space-between', width: '100%' }}
                         colors={[this.getBackgroundColor(item["Category"]), this.LightenDarkenColor(this.getBackgroundColor(item["Category"]), 100)]}
@@ -83,7 +82,7 @@ export default class ListOfAssignmentsView extends React.Component {
                             fontSize: 18,
                             flexWrap: 'wrap',
                             color: pickTextColorBasedOnBgColorAdvanced(this.getBackgroundColor(item["Category"]))
-                        }} flex left>{item["Comment"] ? <Text style={{ textDecorationLine: 'underline' }}>{item["Name"]}</Text> : item["Name"]}</Text>
+                        }} flex left>{item["Comment"] || item["Subtitle"]? <Text style={{ textDecorationLine: 'underline' }}>{item["Name"]}</Text> : item["Name"]}</Text>
                         <Text style={{
                             padding: 10,
                             fontSize: 18,
@@ -102,7 +101,7 @@ export default class ListOfAssignmentsView extends React.Component {
                         <Text style={styles.sectionHeaderText}>{section.title}</Text>
                     </View>
                 }
-                keyExtractor={(item, index) => index}
+                keyExtractor={(item, index) => item + index}
             />
         )
     }
