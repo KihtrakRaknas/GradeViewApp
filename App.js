@@ -4,12 +4,12 @@ import { createBottomTabNavigator, createAppContainer, TabBarBottom, createStack
 import { Icon } from 'react-native-elements'
 import { AsyncStorage } from 'react-native';
 require('create-react-class');
-import { Notifications } from 'expo';
+import * as Notifications from 'expo-notifications'
 
 import { Platform } from 'react-native';
 import Toast, { DURATION } from 'react-native-easy-toast';
 import * as LocalAuthentication from 'expo-local-authentication';
-import { SplashScreen } from 'expo';
+import * as SplashScreen from 'expo-splash-screen'
 //import { Accelerometer } from 'expo-sensors';
 
 //SCREENS
@@ -98,12 +98,23 @@ const TabNav = createBottomTabNavigator(
   }
 )
 
+Notifications.setNotificationHandler({
+  handleNotification: async () => ({
+    shouldShowAlert: true,
+    shouldPlaySound: false,
+    shouldSetBadge: false,
+  }),
+});
 
 const AppContainer = createAppContainer(TabNav)
 export default class App extends React.Component {
   constructor() {
     super();
-    SplashScreen.preventAutoHide();
+    try {
+      SplashScreen.preventAutoHideAsync();
+    } catch (e) {
+      console.warn(e);
+    }
     global.signOutGlobal = global.signOutGlobal.bind(this);
     global.signInGlobal = global.signInGlobal.bind(this);
     this.state = { user: 8, debug: false, pass: [], txt: "Unfortunately, the district's IT division has decided that this app must be shutdown. I have not been informed of any rules or policies that were violated, but nonetheless, I was instructed to pour 2 long months' worth of work down the drain..." };
@@ -147,7 +158,7 @@ export default class App extends React.Component {
   }
   componentDidMount() {
     //this._subscribe();
-    this._notificationSubscription = Notifications.addListener(this._handleNotification);
+    this._notificationSubscription = Notifications.addNotificationReceivedListener(this._handleNotification.bind(this));
   }
 
   /*
@@ -176,11 +187,10 @@ export default class App extends React.Component {
   */
 
   _handleNotification = (notification) => {
-    console.log(notification)
-    console.log(this.refs)
-    if (notification.data.txt)
-      if (this.refs.toast)
-        this.refs.toast.show(notification.data.txt);
+    console.log(`notif callback called`)
+    console.log(`notif: ${JSON.stringify(notification, null, 2)}`)
+    if (notification&&notification.request.content.body&&this.toast)
+        this.toast.show(notification.request.content.body);
   }
 
   returningUser = () => {
@@ -351,12 +361,12 @@ export default class App extends React.Component {
       </KeyboardAvoidingView>);
     else
     */
-    setTimeout(() => SplashScreen.hide(), 10)
+    SplashScreen.hideAsync()
     if (this.state.user == 8)
       return <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}><Text>Please Authenticate</Text><Button title="Authenticate Again" onPress={this.returningUser}></Button></View>;
     if (this.state.user) {
       console.log("tab nav");
-      return <View style={{ flex: 1 }}><StatusBar barStyle="dark-content" /><Toast ref="toast" /><AppContainer /></View>;
+      return <View style={{ flex: 1 }}><StatusBar barStyle="dark-content" /><Toast ref={(toast) => this.toast = toast} /><AppContainer /></View>;
     }
     return <SignInScreen />;
   }

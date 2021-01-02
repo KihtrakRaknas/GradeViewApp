@@ -7,6 +7,7 @@ import { Icon, ListItem } from 'react-native-elements'
 import { ScrollView } from 'react-native-gesture-handler';
 import TouchableScale from 'react-native-touchable-scale'; 
 import { SafeAreaView } from 'react-navigation';
+import { LinearGradient } from 'expo-linear-gradient';
 
 export default class SignInScreen extends React.Component {
 
@@ -151,6 +152,7 @@ export default class SignInScreen extends React.Component {
           start: { x: 1, y: 0 },
           end: { x: 0, y: 0 },
         }}
+        ViewComponent={LinearGradient}
         title={schoolInfo.name}
         titleStyle={{ color: 'white', fontWeight: 'bold' }}
         key={schoolInfo.ending}

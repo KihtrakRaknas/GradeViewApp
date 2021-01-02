@@ -4,6 +4,7 @@ import { ListItem } from 'react-native-elements';
 import { pickTextColorBasedOnBgColorAdvanced } from '../globals/assignmentColorGlobals.js'
 import TouchableScale from 'react-native-touchable-scale';
 import gradeToLetter from '../helperFunctions/gradeToLetter'
+import { LinearGradient } from 'expo-linear-gradient';
 
 export default class ClassBtn extends React.Component {
     constructor(props) {
@@ -92,6 +93,7 @@ export default class ClassBtn extends React.Component {
             start: [avgFrac-.6, .8],
             end: [avgFrac, 1]
           }}
+          ViewComponent={LinearGradient}
           title={this.props.title}
           titleStyle={{ color: titleColor, fontWeight: 'bold' }}
           subtitleStyle={{ color: titleColor }}

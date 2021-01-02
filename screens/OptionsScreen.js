@@ -3,8 +3,9 @@ import { Text, AsyncStorage, ScrollView, LayoutAnimation, Alert, KeyboardAvoidin
 import { ListItem, ButtonGroup, Input } from 'react-native-elements';
 import { navigationHeader } from '../globals/styles'
 import * as LocalAuthentication from 'expo-local-authentication';
-import { Notifications } from 'expo';
+import * as Notifications from 'expo-notifications'
 import '../globals/signInGlobals'
+import {preferredBackgroundColor} from '../helperFunctions/darkModeUtil.js'
 
 export default class OptionsScreen extends React.Component {
     constructor(props) {
@@ -12,7 +13,8 @@ export default class OptionsScreen extends React.Component {
         this.state = { selectedIndex: 0, token: "null", showCodeInput: false, showA: true }
         try{
             Notifications.getExpoPushTokenAsync().then((token) => {
-                if (token.includes("ExponentPushToken"))
+                token=token.data
+                if (typeof token === 'string' &&token.includes("ExponentPushToken"))
                     token = token.substring(17)
                 this.setState({ token })
             })
@@ -91,6 +93,7 @@ export default class OptionsScreen extends React.Component {
 
     sendTestNotification = () => {
         Notifications.getExpoPushTokenAsync().then((token) => {
+            token=token.data
             fetch('https://gradeview.herokuapp.com/testNotification?token=' + token, {
                 method: 'GET',
                 headers: {
@@ -158,7 +161,7 @@ export default class OptionsScreen extends React.Component {
         //updateAvgDisplayGlobal
         const displayOptions = ['Percent', 'Letter', 'Hieroglyphic']
         return (
-            <ScrollView>
+            <ScrollView /*style={{backgroundColor:preferredBackgroundColor()}}*/>
                 <KeyboardAvoidingView behavior="position">
                     <ListItem
                         leftIcon={{ name: "fingerprint", type: 'material-community' }}

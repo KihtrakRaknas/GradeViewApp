@@ -1,7 +1,7 @@
 import React from 'react';
 import { AsyncStorage, AppState, Alert } from 'react-native';
 import * as Permissions from 'expo-permissions'
-import { Notifications } from 'expo';
+import * as Notifications from 'expo-notifications'
 import '../globals/signInGlobals'
 
 export default class LoadInComponent extends React.Component {
@@ -49,6 +49,7 @@ export default class LoadInComponent extends React.Component {
             return;
         }
         let token = await Notifications.getExpoPushTokenAsync();
+        token=token.data
         console.log(token)
         AsyncStorage.getItem('password').then((pass) => {
             AsyncStorage.getItem('school').then((school) => {

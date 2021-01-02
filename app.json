@@ -41,6 +41,7 @@
         "googleMobileAdsAppId": "ca-app-pub-8985838748167691~8887764609"
       }
     },
+    "userInterfaceStyle": "automatic",
     "description": "App client for the GradeView"
   }
 }

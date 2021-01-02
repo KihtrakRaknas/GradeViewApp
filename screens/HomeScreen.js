@@ -6,6 +6,7 @@ import ClassBtn from '../components/ClassBtn'
 import { navigationHeader } from '../globals/styles'
 import AdComponent from '../components/AdComponent'
 import '../globals/homeScreenGlobals.js'
+import {preferredBackgroundColor} from '../helperFunctions/darkModeUtil.js'
 import {
     AdMobBanner,
 } from 'expo-ads-admob';
@@ -263,7 +264,7 @@ export default class HomeScreen extends LoadInComponent {
             });
         let CustomAd = FacebookAds.withNativeAd(AdComponent)
         return(
-            <ScrollView style={{flex: 1, flexDirection: 'column'}}         refreshControl={
+            <ScrollView style={{flex: 1, flexDirection: 'column'/*, backgroundColor: preferredBackgroundColor()*/}} refreshControl={
               <RefreshControl
                 refreshing={this.state.refreshing}
                 onRefresh={this.refresh}
