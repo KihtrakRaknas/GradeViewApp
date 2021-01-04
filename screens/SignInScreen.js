@@ -8,7 +8,7 @@ import { ScrollView } from 'react-native-gesture-handler';
 import TouchableScale from 'react-native-touchable-scale'; 
 import { SafeAreaView } from 'react-navigation';
 import { LinearGradient } from 'expo-linear-gradient';
-import {decode as atob, encode as btoa} from 'base-64'
+import {decode as atob, encode as btoa} from 'base-64';
 
 export default class SignInScreen extends React.Component {
 
