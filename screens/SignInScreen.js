@@ -8,6 +8,7 @@ import { ScrollView } from 'react-native-gesture-handler';
 import TouchableScale from 'react-native-touchable-scale'; 
 import { SafeAreaView } from 'react-navigation';
 import { LinearGradient } from 'expo-linear-gradient';
+import {decode as atob, encode as btoa} from 'base-64'
 
 export default class SignInScreen extends React.Component {
 
@@ -55,6 +56,7 @@ export default class SignInScreen extends React.Component {
       const matches = pass.match(/^atob\("(\S*)"\)$/)
       if(matches){
         pass = atob(matches[1])
+        console.log(matches[1])
       }
       var schoolEnding = this.state.school.ending
       if (!(email && pass)) {
