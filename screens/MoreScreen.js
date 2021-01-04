@@ -1,9 +1,11 @@
 import React from 'react';
-import { View, Image, ScrollView, AsyncStorage, Button, Text, ActivityIndicator, Alert } from 'react-native'
+import { View, Image, ScrollView, AsyncStorage, Button, ActivityIndicator, Alert } from 'react-native'
+import { Text } from 'react-native-elements';
 import { ListItem } from 'react-native-elements';
 import { navigationHeader } from '../globals/styles'
 import * as FacebookAds from 'expo-ads-facebook';
 import { AdMobInterstitial } from 'expo-ads-admob';
+import RespectThemeBackground from '../components/RespectThemeBackground.js'
 export default class MoreScreen extends React.Component {
     constructor(props) {
         super(props);
@@ -169,43 +171,45 @@ export default class MoreScreen extends React.Component {
                 bottomMargin: 5,
             })
         return (
-            <ScrollView>
-                {
-                    list.map((l, i) => (
-                        <ListItem
-                            key={i}
-                            leftIcon={{ name: l.iconName, type: l.iconType }}
-                            title={l.name}
-                            subtitle={l.subtitle}
-                            onPress={l.action}
-                            style={{ marginBottom: l.bottomMargin }}
-                            bottomDivider={i != list.length - 1}
-                            chevron
-                        />
-                    ))
-                }
-                <View style={{
-                    justifyContent: 'center',
-                    alignItems: 'center',
-                }}>
-                    <View>
-                        {isSB?(this.state.lunchBalance || this.state.lunchBalanceButtonPressed ?
-                            <View style={{
-                                flexDirection: 'row',
-                            }}>
-                                <Text style={{ fontSize: 20 }}>Lunch balance: </Text>
-                                {this.state.lunchBalance ? <Text style={{ fontSize: 20 }}>{this.state.lunchBalance}</Text> : <ActivityIndicator />}
-                            </View>
-                            : <Button title="Show Lunch Balance" onPress={this.getLunchMoney} />
-                        ):null}
+            <RespectThemeBackground >
+                <ScrollView>
+                    {
+                        list.map((l, i) => (
+                            <ListItem
+                                key={i}
+                                leftIcon={{ name: l.iconName, type: l.iconType }}
+                                title={l.name}
+                                subtitle={l.subtitle}
+                                onPress={l.action}
+                                style={{ marginBottom: l.bottomMargin }}
+                                bottomDivider={i != list.length - 1}
+                                chevron
+                            />
+                        ))
+                    }
+                    <View style={{
+                        justifyContent: 'center',
+                        alignItems: 'center',
+                    }}>
+                        <View>
+                            {isSB?(this.state.lunchBalance || this.state.lunchBalanceButtonPressed ?
+                                <View style={{
+                                    flexDirection: 'row',
+                                }}>
+                                    <Text style={{ fontSize: 20 }}>Lunch balance: </Text>
+                                    {this.state.lunchBalance ? <Text style={{ fontSize: 20 }}>{this.state.lunchBalance}</Text> : <ActivityIndicator />}
+                                </View>
+                                : <Button title="Show Lunch Balance" onPress={this.getLunchMoney} />
+                            ):null}
+                        </View>
+                        {this.state.idBar && <Image
+                            resizeMode={'contain'}
+                            style={{ width: '80%', height: 100, marginTop: 10, backgroundColor:"white", borderRadius:3 }}
+                            source={{ uri: this.state.idBar }}
+                        />}
                     </View>
-                    <Image
-                        resizeMode={'contain'}
-                        style={{ width: '80%', height: 100, marginTop: 10 }}
-                        source={{ uri: this.state.idBar }}
-                    />
-                </View>
-            </ScrollView>
+                </ScrollView>
+            </RespectThemeBackground>
         )
     }
 }

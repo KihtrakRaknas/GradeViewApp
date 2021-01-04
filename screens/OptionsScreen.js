@@ -6,6 +6,7 @@ import * as LocalAuthentication from 'expo-local-authentication';
 import * as Notifications from 'expo-notifications'
 import '../globals/signInGlobals'
 import {preferredBackgroundColor} from '../helperFunctions/darkModeUtil.js'
+import RespectThemeBackground from '../components/RespectThemeBackground.js'
 
 export default class OptionsScreen extends React.Component {
     constructor(props) {
@@ -57,7 +58,7 @@ export default class OptionsScreen extends React.Component {
     }
 
     signOut = () => {
-
+        console.log("init sign out")
         AsyncStorage.getItem('username').then((user) => {
             AsyncStorage.getItem('password').then((pass) => {
                 AsyncStorage.getItem('school').then((school) => {
@@ -161,95 +162,97 @@ export default class OptionsScreen extends React.Component {
         //updateAvgDisplayGlobal
         const displayOptions = ['Percent', 'Letter', 'Hieroglyphic']
         return (
-            <ScrollView /*style={{backgroundColor:preferredBackgroundColor()}}*/>
-                <KeyboardAvoidingView behavior="position">
-                    <ListItem
-                        leftIcon={{ name: "fingerprint", type: 'material-community' }}
-                        title="Secure Biometrics"
-                        subtitle={"Secure your grades with by requiring biometrics on app load"}
-                        style={{ marginBottom: 5 }}
-                        bottomDivider={true}
-                        switch={{
-                            onValueChange: () => { var val = !this.state.needBiometric; AsyncStorage.setItem('needBiometric', val.toString()).then((result) => { this.setState({ needBiometric: val }); }) },
-                            value: this.state.needBiometric,
-                            disabled: this.state.needBiometric == null
-                        }}
-                    />
-                    <ListItem
-                        leftIcon={{ name: "color-lens", type: 'MaterialIcons' }}
-                        chevron
-                        title="Assignment Styling"
-                        subtitle={"Set the colors for different assignment types"}
-                        onPress={() => this.props.navigation.navigate('ColorPick')}
-                        bottomDivider={true}
-                    />
-                    {displayOptions[this.state.selectedIndex] == "Letter" && <ListItem
-                        leftIcon={{ name: "plus", type: 'feather' }}
-                        title="Show A+"
-                        subtitle={"SBHS does not use the grade A+"}
-                        style={{ marginBottom: 5 }}
-                        bottomDivider={true}
-                        switch={{
-                            onValueChange: () => { var val = !this.state.showA; this.setState({ showA: val }); updateShowAGlobal(val); },
-                            value: this.state.showA,
-                        }}
-                    />}
-                    <ListItem
-                        leftIcon={{ name: "eye", type: 'font-awesome' }}
-                        title="Display mode"
-                        subtitle={"How your marking period grade will be displayed on the home screen"}
-                    />
+            <RespectThemeBackground>
+                <ScrollView /*style={{backgroundColor:preferredBackgroundColor()}}*/>
+                    <KeyboardAvoidingView behavior="position">
+                        <ListItem
+                            leftIcon={{ name: "fingerprint", type: 'material-community' }}
+                            title="Secure Biometrics"
+                            subtitle={"Secure your grades with by requiring biometrics on app load"}
+                            style={{ marginBottom: 5 }}
+                            bottomDivider={true}
+                            switch={{
+                                onValueChange: () => { var val = !this.state.needBiometric; AsyncStorage.setItem('needBiometric', val.toString()).then((result) => { this.setState({ needBiometric: val }); }) },
+                                value: this.state.needBiometric,
+                                disabled: this.state.needBiometric == null
+                            }}
+                        />
+                        <ListItem
+                            leftIcon={{ name: "color-lens", type: 'MaterialIcons' }}
+                            chevron
+                            title="Assignment Styling"
+                            subtitle={"Set the colors for different assignment types"}
+                            onPress={() => this.props.navigation.navigate('ColorPick')}
+                            bottomDivider={true}
+                        />
+                        {displayOptions[this.state.selectedIndex] == "Letter" && <ListItem
+                            leftIcon={{ name: "plus", type: 'feather' }}
+                            title="Show A+"
+                            subtitle={"SBHS does not use the grade A+"}
+                            style={{ marginBottom: 5 }}
+                            bottomDivider={true}
+                            switch={{
+                                onValueChange: () => { var val = !this.state.showA; this.setState({ showA: val }); updateShowAGlobal(val); },
+                                value: this.state.showA,
+                            }}
+                        />}
+                        <ListItem
+                            leftIcon={{ name: "eye", type: 'font-awesome' }}
+                            title="Display mode"
+                            subtitle={"How your marking period grade will be displayed on the home screen"}
+                        />
 
-                    <ButtonGroup
-                        onPress={(selectedIndex) => { this.setState({ selectedIndex: selectedIndex }); updateAvgDisplayGlobal(displayOptions[selectedIndex]); LayoutAnimation.configureNext(LayoutAnimation.Presets.spring); }}
-                        selectedIndex={this.state.selectedIndex}
-                        buttons={displayOptions}
-                    //containerStyle={{height: 100}}
-                    />
+                        <ButtonGroup
+                            onPress={(selectedIndex) => { this.setState({ selectedIndex: selectedIndex }); updateAvgDisplayGlobal(displayOptions[selectedIndex]); LayoutAnimation.configureNext(LayoutAnimation.Presets.spring); }}
+                            selectedIndex={this.state.selectedIndex}
+                            buttons={displayOptions}
+                        //containerStyle={{height: 100}}
+                        />
 
-                    <ListItem
-                        leftIcon={{ name: "user-secret", type: 'font-awesome' }}
-                        title="Enter Code"
-                        subtitle={"If you have gotten a secret code from the developer. Enter it here!"}
-                        style={{ marginTop: 60, marginBottom: 5 }}
-                        topDivider={true}
-                        onPress={() => { this.setState({ showCodeInput: true }); LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut); }}
-                    />
-                    {this.state.showCodeInput && <Input
-                        onChangeText={text => this.setState({ code: text })}
-                        value={this.state.code}
-                        onSubmitEditing={this.submitCode}
-                        placeholder="Enter Code Here"
-                        returnKeyType="send"
-                    />}
-                    <ListItem
-                        leftIcon={{ name: "feedback", type: 'MaterialIcons' }}
-                        title="Provide Feedback"
-                        subtitle={"Any kind of feedback is appreciated!"}
-                        topDivider={true}
-                        onPress={() => Linking.openURL('mailto:gradeViewApp@kihtrak.com?subject=Feedback%20about%20the%20app')}
-                    />
-                    <ListItem
-                        leftIcon={{ name: "log-out", type: 'entypo' }}
-                        title="Switch User"
-                        subtitle={"Sign into a different account"}
-                        style={{ marginBottom: 20 }}
-                        topDivider={true}
-                        onPress={this.signOut}
-                    />
-                    <ListItem
-                        title="Debug info"
-                        subtitle={this.state.token}
-                        topDivider={true}
-                    />
-                    <ListItem
-                        title="Send a test notification"
-                        subtitle={'Some people were worried they were not getting notifications. \nPressing this button will send you a notification 30 seconds after pressing it.'}
-                        onPress={this.sendTestNotification}
-                        topDivider={true}
-                    />
-                </KeyboardAvoidingView>
-            </ScrollView>
+                        <ListItem
+                            leftIcon={{ name: "user-secret", type: 'font-awesome' }}
+                            title="Enter Code"
+                            subtitle={"If you have gotten a secret code from the developer. Enter it here!"}
+                            style={{ marginTop: 60, marginBottom: 5 }}
+                            topDivider={true}
+                            onPress={() => { this.setState({ showCodeInput: true }); LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut); }}
+                        />
+                        {this.state.showCodeInput && <Input
+                            onChangeText={text => this.setState({ code: text })}
+                            value={this.state.code}
+                            onSubmitEditing={this.submitCode}
+                            placeholder="Enter Code Here"
+                            returnKeyType="send"
+                        />}
+                        <ListItem
+                            leftIcon={{ name: "feedback", type: 'MaterialIcons' }}
+                            title="Provide Feedback"
+                            subtitle={"Any kind of feedback is appreciated!"}
+                            topDivider={true}
+                            onPress={() => Linking.openURL('mailto:gradeViewApp@kihtrak.com?subject=Feedback%20about%20the%20app')}
+                        />
+                        <ListItem
+                            leftIcon={{ name: "log-out", type: 'entypo' }}
+                            title="Switch User"
+                            subtitle={"Sign into a different account"}
+                            style={{ marginBottom: 20 }}
+                            topDivider={true}
+                            onPress={this.signOut}
+                        />
+                        <ListItem
+                            title="Debug info"
+                            subtitle={this.state.token}
+                            topDivider={true}
+                        />
+                        <ListItem
+                            title="Send a test notification"
+                            subtitle={'Some people were worried they were not getting notifications. \nPressing this button will send you a notification 30 seconds after pressing it.'}
+                            onPress={this.sendTestNotification}
+                            topDivider={true}
+                        />
+                    </KeyboardAvoidingView>
+                </ScrollView>
+            </RespectThemeBackground>
             /*
             
                   

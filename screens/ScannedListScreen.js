@@ -3,6 +3,7 @@ import { Text, View, FlatList, AsyncStorage, Button } from 'react-native';
 import { Icon } from 'react-native-elements'
 import NameIDItem from '../components/NameIDItem'
 import { navigationHeader } from '../globals/styles'
+import RespectThemeBackground from '../components/RespectThemeBackground.js'
 
 export default class ScannedListScreen extends React.Component {
     constructor(props) {
@@ -24,8 +25,8 @@ export default class ScannedListScreen extends React.Component {
                             this.setState({ baseContacts: newBContacts });
                         }
                         console.log("looping")
-                        for (personIndex in newContacts) {
-                            for (contact of newBContacts) {
+                        for (let personIndex in newContacts) {
+                            for (let contact of newBContacts) {
                                 if (newContacts[personIndex]["email"] == contact["email"])
                                     newContacts[personIndex] = contact
                             }
@@ -88,7 +89,10 @@ export default class ScannedListScreen extends React.Component {
                 keyExtractor={item => item.email}
                 //ListHeaderComponent={          }
                 ItemSeparatorComponent={({ item }) => <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}><View style={{ height: 0.5, width: '96%', backgroundColor: '#C8C8C8', }} /></View>}
-                renderItem={({ item }) => <NameIDItem item={item} />}
+                renderItem={({ item }) => {
+                    console.log(`item: ${JSON.stringify(item)}`)
+                    return(<NameIDItem item={item} />)
+                }}
                 ListFooterComponent={this.state.contacts.length > 0 ? <Button title="Clear" onPress={() => {
                     AsyncStorage.setItem('scannedContacts', "[]");
                     this.setState({ contacts: [] });
@@ -97,9 +101,11 @@ export default class ScannedListScreen extends React.Component {
         }
         return (
             //<View style={{flex:1,justifyContent: 'center',alignItems: 'center'}}>
-            <View>
-                {list}
-            </View>
+            <RespectThemeBackground>
+                <View>
+                    {list}
+                </View>
+            </RespectThemeBackground>
         )
     }
 

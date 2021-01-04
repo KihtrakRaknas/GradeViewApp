@@ -1,10 +1,12 @@
 import React from 'react';
 import { Icon} from 'react-native-elements'
-import { Text, View, ActivityIndicator, Alert, Button, Linking } from 'react-native'
+import { View, ActivityIndicator, Alert, Button, Linking } from 'react-native'
+import { Text } from 'react-native-elements';
 import LoadInComponent from '../components/LoadInComponent'
 import ListOfAssignmentsView from '../components/ListOfAssignmentsView'
 import { navigationHeader, container } from '../globals/styles'
 import { prepareAssignmentsObjectForSectionList, getAssignmentsFromClassAndMP} from '../helperFunctions/convertingGradesObjectForSectionList'
+import RespectThemeBackground from '../components/RespectThemeBackground.js'
 
 export default class AssignmentListScreen extends LoadInComponent {
     convertGradesToAssignments(obj) {
@@ -54,12 +56,12 @@ export default class AssignmentListScreen extends LoadInComponent {
     render() {
         if (this.state.isLoading) {
             return (
-                <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+                <RespectThemeBackground><View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
                     <ActivityIndicator />
                     <Text style={{ padding: 20, paddingBottom: 50 }}>This is the first time we are retrieving your grades so this may take a bit longer. Future requests will be much faster!</Text>
 
                     <Button title="Problem?" onPress={() => Linking.openURL('mailto:gradeViewApp@kihtrak.com?subject=Feedback%20about%20the%20app')} />
-                </View>
+                </View></RespectThemeBackground>
             )
         }
         var listOfAssignments = this.convertGradesToAssignments(global.grades)

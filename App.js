@@ -1,7 +1,7 @@
 import React from 'react';
-import { Text, View, Button, StatusBar, UIManager } from 'react-native';
+import { View, Button, StatusBar, UIManager, Appearance } from 'react-native';
 import { createBottomTabNavigator, createAppContainer, TabBarBottom, createStackNavigator } from 'react-navigation';
-import { Icon } from 'react-native-elements'
+import { Icon, ThemeProvider } from 'react-native-elements'
 import { AsyncStorage } from 'react-native';
 require('create-react-class');
 import * as Notifications from 'expo-notifications'
@@ -10,6 +10,8 @@ import { Platform } from 'react-native';
 import Toast, { DURATION } from 'react-native-easy-toast';
 import * as LocalAuthentication from 'expo-local-authentication';
 import * as SplashScreen from 'expo-splash-screen'
+import RespectThemeBackground from './components/RespectThemeBackground.js'
+import { Text } from 'react-native-elements';
 //import { Accelerometer } from 'expo-sensors';
 
 //SCREENS
@@ -28,6 +30,12 @@ import SignInScreen from './screens/SignInScreen'
 
 
 import './globals/signInGlobals'
+
+import { SafeAreaView } from 'react-navigation';
+if (Platform.OS === 'android') {
+  SafeAreaView.setStatusBarHeight(0);
+}
+
 
 const HomeStack = createStackNavigator({
   Home: { screen: HomeScreen },
@@ -67,12 +75,12 @@ const TabNav = createBottomTabNavigator(
           type = "FontAwesome5"
           iconName = "home"//`${focused ? 'infocirlce' : 'infocirlceo'}`;
         } else if (routeName === 'Assignments') {
-          if (focused) {
-            type = "ionicon";
-            iconName = 'ios-list-box'
-          } else {
+          // if (focused) {
+          //   type = "ionicon";
+          //   iconName = 'ios-list-box'
+          // } else {
             iconName = 'view-headline'
-          }
+          // }
 
           //iconName = `${focused ? 'ios-list-box' : 'view-headline'}`; // assignment
         } else if (routeName === 'More') {
@@ -363,10 +371,11 @@ export default class App extends React.Component {
     */
     SplashScreen.hideAsync()
     if (this.state.user == 8)
-      return <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}><Text>Please Authenticate</Text><Button title="Authenticate Again" onPress={this.returningUser}></Button></View>;
+      return <ThemeProvider useDark={Appearance.getColorScheme() === 'dark'}><RespectThemeBackground ><View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}><Text>Please Authenticate</Text><Button title="Authenticate Again" onPress={this.returningUser}></Button></View></RespectThemeBackground></ThemeProvider>;
     if (this.state.user) {
       console.log("tab nav");
-      return <View style={{ flex: 1 }}><StatusBar barStyle="dark-content" /><Toast ref={(toast) => this.toast = toast} /><AppContainer /></View>;
+      console.log(`color: ${Appearance.getColorScheme()}`)
+      return <ThemeProvider useDark={Appearance.getColorScheme() === 'dark'}><View style={{ flex: 1 }}><StatusBar hidden={false} barStyle="dark-content" backgroundColor="#6fc2d0"/><Toast ref={(toast) => this.toast = toast} /><AppContainer /></View></ThemeProvider>;
     }
     return <SignInScreen />;
   }

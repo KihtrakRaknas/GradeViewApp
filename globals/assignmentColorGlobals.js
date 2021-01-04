@@ -1,4 +1,5 @@
 global.updateBackgroundColorsGlobal = function (backgroundColors) {
+    console.log(`updateBackgroundColorsCalled: ${backgroundColors}`)
     this.setState({ backgroundColors })
 }
 

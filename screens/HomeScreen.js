@@ -1,5 +1,5 @@
 import React from 'react';
-import { Text, View, ActivityIndicator, Alert, Button, ScrollView, Picker, RefreshControl, Platform, AsyncStorage, LayoutAnimation, Linking} from 'react-native';
+import { View, ActivityIndicator, Alert, Button, ScrollView, Picker, RefreshControl, Platform, AsyncStorage, LayoutAnimation, Linking} from 'react-native';
 import LoadInComponent from '../components/LoadInComponent'
 import Modal from 'react-native-modal';
 import ClassBtn from '../components/ClassBtn'
@@ -11,6 +11,8 @@ import {
     AdMobBanner,
 } from 'expo-ads-admob';
 import * as FacebookAds from 'expo-ads-facebook';
+import RespectThemeBackground from '../components/RespectThemeBackground.js'
+import { Text } from 'react-native-elements';
 
 export default class HomeScreen extends LoadInComponent {
     constructor(props){
@@ -48,7 +50,7 @@ export default class HomeScreen extends LoadInComponent {
             console.log("App Launches: "+num)
             AsyncStorage.setItem('numberOfAppLaunches',num.toString())
             if(num>1){
-              this.setState({showAd:true, adStyle:/*Math.random()<.5?"facebook":*/"google"})
+              this.setState({showAd:true, showAdExplanation: num<10, adStyle:/*Math.random()<.5?"facebook":*/"google"})
               LayoutAnimation.configureNext(LayoutAnimation.Presets.linear);
             }
           })
@@ -216,12 +218,12 @@ export default class HomeScreen extends LoadInComponent {
       console.log("HOME UPDATED")
         if(this.state.isLoading)
           return(
-            <View style={{flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+            <RespectThemeBackground><View style={{flex: 1, justifyContent: 'center', alignItems: 'center' }}>
               <ActivityIndicator/>
               <Text style={{padding:20,paddingBottom:50}}>This is the first time we are retrieving your grades so this may take a bit longer. Future requests will be much faster!</Text>
   
               <Button title="Problem?" onPress={() => Linking.openURL('mailto:gradeViewApp@kihtrak.com?subject=Feedback%20about%20the%20app') }/>
-            </View>
+            </View></RespectThemeBackground>
           )
   
           var mps = this.genMpsArray();
@@ -264,6 +266,7 @@ export default class HomeScreen extends LoadInComponent {
             });
         let CustomAd = FacebookAds.withNativeAd(AdComponent)
         return(
+          <RespectThemeBackground>
             <ScrollView style={{flex: 1, flexDirection: 'column'/*, backgroundColor: preferredBackgroundColor()*/}} refreshControl={
               <RefreshControl
                 refreshing={this.state.refreshing}
@@ -303,7 +306,7 @@ export default class HomeScreen extends LoadInComponent {
             </Modal>
   
             {this.genTable()}
-            {this.state.showAd?<><Text style={{fontSize:5,textAlign:"center",marginTop:5}}>Why are there ads?</Text>
+            {this.state.showAdExplanation?<><Text style={{fontSize:5,textAlign:"center",marginTop:5}}>Why are there ads?</Text>
             <Text style={{fontSize:5,textAlign:"center", paddingBottom:0, marginBottom:0}}>Running this app costs money. Ads help offset the cost of keeping the app online.</Text></>:null}
             {/*"ca-app-pub-3940256099942544/6300978111"*/}
             {this.state.showAd?this.state.adStyle == "google"? <AdMobBanner
@@ -319,7 +322,7 @@ export default class HomeScreen extends LoadInComponent {
               }} />:
               <CustomAd adsManager={this.adsManager}/>:null}
             </ScrollView>
-          
+          </RespectThemeBackground>
   
         )
     }

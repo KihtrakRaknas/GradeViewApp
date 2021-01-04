@@ -3,6 +3,7 @@ import { Text, View, FlatList, AsyncStorage } from 'react-native';
 import { Icon, SearchBar } from 'react-native-elements'
 import NameIDItem from '../components/NameIDItem'
 import { navigationHeader } from '../globals/styles'
+import RespectThemeBackground from '../components/RespectThemeBackground.js'
 
 export default class ContactsScreen extends React.Component {
     constructor(props) {
@@ -108,7 +109,7 @@ export default class ContactsScreen extends React.Component {
         }
         return (
             //<View style={{flex:1,justifyContent: 'center',alignItems: 'center'}}>
-            <View>
+            <RespectThemeBackground>
                 <SearchBar
                     returnKeyType='search'
                     placeholder="Search Name/ID #"
@@ -123,7 +124,7 @@ export default class ContactsScreen extends React.Component {
                     }}
                 />
                 {list}
-            </View>
+            </RespectThemeBackground>
         )
     }
 

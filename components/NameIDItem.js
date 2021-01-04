@@ -4,12 +4,14 @@ import { ListItem } from 'react-native-elements'
 export default class NameIDItem extends React.Component {
     constructor(props) {
         super(props);
-        this.state = { name: this.props.nams, id: "" }
     }
     render() {
         let email = this.props.item.email
+        let name = this.props.item.name
         if (email.split("@")[1] == "sbstudents.org")
             email = email.split("@")[0]
+        if(!name)
+            name = email
         let image = this.props.item.image;
         if (image) {
             if (image.split("=").length < 2)
@@ -21,7 +23,7 @@ export default class NameIDItem extends React.Component {
         return (
             <ListItem
                 leftAvatar={{ source: { uri: image } }}
-                title={this.props.item.name}
+                title={name}
                 subtitle={email}
             />
         )

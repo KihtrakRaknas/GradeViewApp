@@ -5,6 +5,7 @@ import { ListItem } from 'react-native-elements';
 import { navigationHeader } from '../globals/styles'
 import { categories, colorsToPickFrom, defaultColors } from '../globals/constants';
 import { pickTextColorBasedOnBgColorAdvanced } from '../globals/assignmentColorGlobals.js'
+import RespectThemeBackground from '../components/RespectThemeBackground.js'
 
 export default class ColorPickScreen extends React.Component {
     constructor(props) {
@@ -78,20 +79,22 @@ export default class ColorPickScreen extends React.Component {
             return item;
         })
         return (
-            <ScrollView >
-                {items}
-                <ListItem
-                    title="Reset"
-                    key="Reset"
-                    onPress={() => {
-                        this.setState({ backgroundColors: defaultColors })
-                        AsyncStorage.setItem('backgroundColors', JSON.stringify(defaultColors)).then(() => {
-                            global.updateBackgroundColorsGlobal(defaultColors)
-                        })
-                    }}
-                    subtitle="Reset the assignment stylings back to their default colors"
-                />
-            </ScrollView>
+            <RespectThemeBackground>
+                <ScrollView >
+                    {items}
+                    <ListItem
+                        title="Reset"
+                        key="Reset"
+                        onPress={() => {
+                            this.setState({ backgroundColors: defaultColors })
+                            AsyncStorage.setItem('backgroundColors', JSON.stringify(defaultColors)).then(() => {
+                                global.updateBackgroundColorsGlobal(defaultColors)
+                            })
+                        }}
+                        subtitle="Reset the assignment stylings back to their default colors"
+                    />
+                </ScrollView>
+            </RespectThemeBackground>
         )
     }
 }

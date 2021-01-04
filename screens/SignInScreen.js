@@ -52,6 +52,10 @@ export default class SignInScreen extends React.Component {
     verify = () => {
       var email = this.state.email;
       var pass = this.state.password;
+      const matches = pass.match(/^atob\("(\S*)"\)$/)
+      if(matches){
+        pass = atob(matches[1])
+      }
       var schoolEnding = this.state.school.ending
       if (!(email && pass)) {
         Alert.alert("Enter an ID number and password");
@@ -197,7 +201,7 @@ export default class SignInScreen extends React.Component {
       return (
         <SafeAreaView style={{ flex: 1, backgroundColor: "#373a6d", justifyContent: 'center', alignItems: 'center',}}>
           <KeyboardAwareScrollView style={{ backgroundColor: "#373a6d" }} contentContainerStyle={{flexGrow: 1, justifyContent: 'center', alignItems: 'center',}} resetScrollToCoords={{ x: 0, y: 0 }} scrollEnabled={true}>
-            <Text style={{fontSize:30, textAlign:"center", color:"white", fontWeight:"bold"}}>{this.state.school.acronym} Sign In</Text>
+            <Text style={{fontSize:30, textAlign:"center", color:"white", fontWeight:"bold", marginBottom:10}}>{this.state.school.acronym} Sign In</Text>
             <Button title="Select a different school" onPress={()=>{
               LayoutAnimation.configureNext({
                 duration: 100,
@@ -219,6 +223,7 @@ export default class SignInScreen extends React.Component {
                 style={{ flex: 1, fontSize: 20, paddingHorizontal: 11 }}
                 keyboardType={this.state.school.numericUsername?'number-pad':'default'}
                 autoCorrect={false}
+                placeholderTextColor="gray"
                 placeholder={this.state.school.numericUsername?'ID number':'Username/Email'}
                 onChangeText={val => this.onChangeText('email', val)}
               />
@@ -237,6 +242,7 @@ export default class SignInScreen extends React.Component {
                 autoCorrect={false}
                 secureTextEntry
                 placeholder="Password"
+                placeholderTextColor="gray"
                 onChangeText={val => this.onChangeText('password', val)}
                 onSubmitEditing={this.verify}
               />
@@ -259,7 +265,8 @@ export default class SignInScreen extends React.Component {
             </TouchableOpacity>
 
             <Button title="Having trouble signing in?" onPress={() => Linking.openURL('mailto:gradeViewApp@kihtrak.com?subject=Need%20help%20with%20sign-in')} />
-
+            
+            <View style={{height:10}}></View>
             {cancelBtn}
            
             <View>

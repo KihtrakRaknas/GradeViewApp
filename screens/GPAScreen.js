@@ -1,8 +1,11 @@
 import React from 'react';
-import { Text, AsyncStorage, ScrollView } from 'react-native';
+import { AsyncStorage, ScrollView, View } from 'react-native';
+import { Text} from 'react-native-elements';
 import { ListItem } from 'react-native-elements';
 import { navigationHeader } from '../globals/styles'
 import gradeToLetter from '../helperFunctions/gradeToLetter'
+import RespectThemeBackground from '../components/RespectThemeBackground.js'
+
 export default class GPAScreen extends React.Component {
     constructor(props) {
         super(props);
@@ -350,59 +353,61 @@ export default class GPAScreen extends React.Component {
 
     render() {
         return (
-            <ScrollView style={{ flex: 1, flexDirection: 'column', padding: 10 }}>
-                {!this.state.done && <Text style={{textAlign:"center"}}>
-                    Status: {this.state.showingCached && <Text style={{color:"green"}}>Showing Cached Data{"\n"}</Text>}
-                    {!this.state.hasError && <>
-                        {this.state.gettingPast && <Text style={{color:"blue"}}>Getting new data for past years...</Text>}
-                        {this.state.gettingCurr && <Text style={{color:"blue"}}>Getting new data for this year...</Text>}
-                    </>}
-                    {this.state.hasError && <Text style={{color:"red"}}>Error! Most likely a network issue.</Text>}
-                </Text>}
-                <ListItem
-                    title={<Text style={{ fontSize: 40, textAlign: 'center' }}>Past GPA</Text>}
-                    subtitle={"GPA without factoring in the current year"}
-                    subtitleProps={{ style: { fontSize: 17 } }}
-                />
-                <ListItem
-                    rightElement={<Text style={{ fontSize: 20 }}>{this.state.unweightedOldGPA}</Text>}
-                    leftElement={<Text style={{ fontSize: 20 }}>Unweighted:</Text>}
-                />
-                <ListItem
-                    rightElement={<Text style={{ fontSize: 20 }}>{this.state.weightedOldGPA}</Text>}
-                    leftElement={<Text style={{ fontSize: 20 }}>Weighted:</Text>}
-                    bottomDivider={true}
-                />
-                <ListItem
-                    topDivider={true}
-                    title={<Text style={{ fontSize: 40, textAlign: 'center' }}>This Year</Text>}
-                    subtitle={"GPA only for this year (estimate)"}
-                    subtitleProps={{ style: { fontSize: 17 } }}
-                />
-                <ListItem
-                    rightElement={<Text style={{ fontSize: 20 }}>{this.state.unweightedCurrGPA}</Text>}
-                    leftElement={<Text style={{ fontSize: 20 }}>Unweighted:</Text>}
-                />
-                <ListItem
-                    rightElement={<Text style={{ fontSize: 20 }}>{this.state.weightedCurrGPA}</Text>}
-                    leftElement={<Text style={{ fontSize: 20 }}>Weighted:</Text>}
-                    bottomDivider={true}
-                />
-                <ListItem
-                    title={<Text style={{ fontSize: 40, textAlign: 'center' }}>Total GPA estimate</Text>}
-                    subtitle={"GPA so far (estimate)"}
-                    topDivider={true}
-                    subtitleProps={{ style: { fontSize: 17 } }}
-                />
-                <ListItem
-                    rightElement={<Text style={{ fontSize: 20 }}>{this.state.unweightedNewGPA}</Text>}
-                    leftElement={<Text style={{ fontSize: 20 }}>Unweighted:</Text>}
-                />
-                <ListItem
-                    rightElement={<Text style={{ fontSize: 20 }}>{this.state.weightedNewGPA}</Text>}
-                    leftElement={<Text style={{ fontSize: 20 }}>Weighted:</Text>}
-                />
-            </ScrollView>
+            <RespectThemeBackground >
+                <ScrollView style={{ flex: 1, flexDirection: 'column', padding: 10 }}>
+                    {!this.state.done && <Text style={{textAlign:"center"}}>
+                        Status: {this.state.showingCached && <Text style={{color:"green"}}>Showing Cached Data{"\n"}</Text>}
+                        {!this.state.hasError && <>
+                            {this.state.gettingPast && <Text style={{color:"blue"}}>Getting new data for past years...</Text>}
+                            {this.state.gettingCurr && <Text style={{color:"blue"}}>Getting new data for this year...</Text>}
+                        </>}
+                        {this.state.hasError && <Text style={{color:"red"}}>Error! Most likely a network issue.</Text>}
+                    </Text>}
+
+                    <Text style={{ fontSize: 40, textAlign: 'center', paddingTop:10}}>Past GPA</Text>
+                    <Text style={{ fontSize: 17,paddingBottom:15}}>GPA without factoring in the current year</Text>
+                    <View style={{flex:1, flexDirection:'row', justifyContent: "space-between", padding:10}}>
+                        <Text style={{ fontSize: 20 }}>Unweighted:</Text>
+                        <Text style={{ fontSize: 20 }}>{this.state.unweightedOldGPA}</Text>
+                    </View>
+                    <View style={{flex:1, flexDirection:'row', justifyContent: "space-between", padding:10}}>
+                        <Text style={{ fontSize: 20 }}>Weighted:</Text>
+                        <Text style={{ fontSize: 20 }}>{this.state.weightedOldGPA}</Text>      
+                    </View>
+                    <ListItem
+                        bottomDivider={true}
+                    />
+                    <ListItem
+                        topDivider={true}
+                    />
+                    <Text style={{ fontSize: 40, textAlign: 'center' }}>This Year</Text>
+                    <Text style={{ fontSize: 17,paddingBottom:15}}>GPA only for this year (estimate)</Text>
+                    <View style={{flex:1, flexDirection:'row', justifyContent: "space-between", padding:10}}>
+                        <Text style={{ fontSize: 20 }}>Unweighted:</Text>
+                        <Text style={{ fontSize: 20 }}>{this.state.unweightedCurrGPA}</Text>
+                    </View>
+                    <View style={{flex:1, flexDirection:'row', justifyContent: "space-between", padding:10}}>
+                        <Text style={{ fontSize: 20 }}>Weighted:</Text>
+                        <Text style={{ fontSize: 20 }}>{this.state.weightedCurrGPA}</Text>      
+                    </View>
+                    <ListItem
+                        bottomDivider={true}
+                    />
+                    <ListItem
+                        topDivider={true}
+                    />
+                    <Text style={{ fontSize: 40, textAlign: 'center' }}>Total GPA estimate</Text>
+                    <Text style={{ fontSize: 17,paddingBottom:15}}>GPA so far (estimate)</Text>
+                    <View style={{flex:1, flexDirection:'row', justifyContent: "space-between", padding:10}}>
+                        <Text style={{ fontSize: 20 }}>Unweighted:</Text>
+                        <Text style={{ fontSize: 20 }}>{this.state.unweightedNewGPA}</Text>
+                    </View>
+                    <View style={{flex:1, flexDirection:'row', justifyContent: "space-between", padding:10}}>
+                        <Text style={{ fontSize: 20 }}>Weighted:</Text>
+                        <Text style={{ fontSize: 20 }}>{this.state.weightedNewGPA}</Text>      
+                    </View>
+                </ScrollView>
+            </RespectThemeBackground>
         )
     }
 

@@ -3,6 +3,7 @@ import { Text, View } from 'react-native';
 import ListOfAssignmentsView from '../components/ListOfAssignmentsView'
 import { navigationHeader, container } from '../globals/styles'
 import { prepareAssignmentsObjectForSectionList, getAssignmentsFromClassAndMP } from '../helperFunctions/convertingGradesObjectForSectionList'
+import RespectThemeBackground from '../components/RespectThemeBackground.js'
 export default class ClassScreen extends React.Component {
 
     constructor(props) {
@@ -30,7 +31,7 @@ export default class ClassScreen extends React.Component {
         var listOfAssignments = this.parseJSON(global.grades, this.props.navigation.getParam('className'), this.props.navigation.getParam('markingPeriod'))
         if (listOfAssignments.length == 0) {
             this.props.navigation.goBack()
-            return (<View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}><Text style={{ fontSize: 20 }}>No grades yet</Text></View>)
+            return (<RespectThemeBackground><View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}><Text style={{ fontSize: 20 }}>No grades yet</Text></View></RespectThemeBackground>)
         }
 
         return (

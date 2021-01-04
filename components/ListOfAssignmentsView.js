@@ -3,6 +3,8 @@ import { SectionList, Text, View, TouchableOpacity, AsyncStorage, StyleSheet } f
 import { LinearGradient } from 'expo-linear-gradient';
 import {  pickTextColorBasedOnBgColorAdvanced } from '../globals/assignmentColorGlobals.js'
 import { defaultColors } from '../globals/constants'
+import RespectThemeBackground from '../components/RespectThemeBackground.js'
+import { withTheme } from 'react-native-elements';
 
 const styles = StyleSheet.create({
     sectionHeaderContainer: {
@@ -19,7 +21,7 @@ const styles = StyleSheet.create({
     },
 })
 
-export default class ListOfAssignmentsView extends React.Component {
+class ListOfAssignmentsView extends React.Component {
     constructor(props) {
         super(props);
         this.state = {}
@@ -40,6 +42,7 @@ export default class ListOfAssignmentsView extends React.Component {
     }
 
     LightenDarkenColor = (col, amt) => {
+        amt*=this.props.theme.colors.white==='#ffffff'?1:-1;
         var usePound = false;
         if (col[0] == "#") {
             col = col.slice(1);
@@ -66,43 +69,52 @@ export default class ListOfAssignmentsView extends React.Component {
 
     render() {
         return (
-            <SectionList
-                ItemSeparatorComponent={({ item }) => <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}><View style={{ height: 0.5, width: '96%', backgroundColor: '#C8C8C8', }} /></View>}
-                sections={this.props.listOfAssignments}
-                renderItem={({ item }) => <TouchableOpacity onPress={() => this.props.navigation.navigate('Assignment', { assignmentData: item })} style={{ flexDirection: 'row', justifyContent: 'space-between', /*backgroundColor:this.getBackgroundColor(item["Category"])*/ }}>
-                    <LinearGradient
-                        style={{ flexDirection: 'row', justifyContent: 'space-between', width: '100%' }}
-                        colors={[this.getBackgroundColor(item["Category"]), this.LightenDarkenColor(this.getBackgroundColor(item["Category"]), 100)]}
-                        start={[0, 0]}
-                        end={[.7, 1]}
-                    >
-                        <Text style={{
-                            flex: 1,
-                            padding: 10,
-                            fontSize: 18,
-                            flexWrap: 'wrap',
-                            color: pickTextColorBasedOnBgColorAdvanced(this.getBackgroundColor(item["Category"]))
-                        }} flex left>{item["Comment"] || item["Subtitle"]? <Text style={{ textDecorationLine: 'underline' }}>{item["Name"]}</Text> : item["Name"]}</Text>
-                        <Text style={{
-                            padding: 10,
-                            fontSize: 18,
-                            height: 44,
-                            fontStyle: "italic",
-                            color: pickTextColorBasedOnBgColorAdvanced(this.getBackgroundColor(item["Category"]))
-                        }} flex>
-                            <Text style={{ color: this.getBackgroundColor(item["Category"]) != '#ff1100' ? "red" : "white", fontSize: 15 }}>{item["Weighting"] ? item["Weighting"] == "RecentlyUpdated" ? "Recent " : item["Weighting"] : ""}</Text>
-                            {item["Weighting"] && item["Weighting"].includes("x") ? " - " : ""}
-                            <Text style={{ fontWeight: 'bold' }}>{item["Grade"]}</Text>
-                        </Text>
-                    </LinearGradient>
-                </TouchableOpacity>}
-                renderSectionHeader={({ section }) =>
-                    <View style={styles.sectionHeaderContainer}>
-                        <Text style={styles.sectionHeaderText}>{section.title}</Text>
-                    </View>
-                }
-                keyExtractor={(item, index) => item + index}
-            />
+            <RespectThemeBackground>
+                <SectionList
+                    ItemSeparatorComponent={({ item }) => <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}><View style={{ height: 0.5, width: '96%', backgroundColor: '#C8C8C8', }} /></View>}
+                    sections={this.props.listOfAssignments}
+                    renderItem={({ item }) => {
+                        let leftColor = this.getBackgroundColor(item["Category"])
+                        let rightColor = this.LightenDarkenColor(this.getBackgroundColor(item["Category"]), 100)
+                        return(<TouchableOpacity onPress={() => this.props.navigation.navigate('Assignment', { assignmentData: item })} style={{ flexDirection: 'row', justifyContent: 'space-between', /*backgroundColor:this.getBackgroundColor(item["Category"])*/ }}>
+                            <LinearGradient
+                                style={{ flexDirection: 'row', justifyContent: 'space-between', width: '100%' }}
+                                colors={[leftColor, rightColor]}
+                                start={[0, 0]}
+                                end={[.7, 1]}
+                            >
+                                <Text style={{
+                                    flex: 1,
+                                    padding: 10,
+                                    fontSize: 18,
+                                    flexWrap: 'wrap',
+                                    color: pickTextColorBasedOnBgColorAdvanced(leftColor)
+                                }} flex left>{item["Comment"] || item["Subtitle"]? <Text style={{ textDecorationLine: 'underline' }}>{item["Name"]}</Text> : item["Name"]}</Text>
+                                <Text style={{
+                                    padding: 10,
+                                    fontSize: 18,
+                                    height: 44,
+                                    fontStyle: "italic",
+                                    color: pickTextColorBasedOnBgColorAdvanced(rightColor)
+                                }} flex>
+                                    <Text style={{ color: leftColor != '#ff1100' ? "red" : "white", fontSize: 15 }}>{item["Weighting"] ? item["Weighting"] == "RecentlyUpdated" ? "Recent " : item["Weighting"] : ""}</Text>
+                                    {item["Weighting"] && item["Weighting"].includes("x") ? " - " : ""}
+                                    <Text style={{ fontWeight: 'bold' }}>{item["Grade"]}</Text>
+                                </Text>
+                            </LinearGradient>
+                        </TouchableOpacity>
+                        )}
+                    }
+                    renderSectionHeader={({ section }) =>
+                        <View style={styles.sectionHeaderContainer}>
+                            <Text style={styles.sectionHeaderText}>{section.title}</Text>
+                        </View>
+                    }
+                    keyExtractor={(item, index) => item + index}
+                />
+            </RespectThemeBackground>
         )
     }
 }
+
+export default withTheme(ListOfAssignmentsView)
