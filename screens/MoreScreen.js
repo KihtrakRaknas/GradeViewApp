@@ -1,6 +1,6 @@
 import React from 'react';
 import { View, Image, ScrollView, AsyncStorage, Button, ActivityIndicator, Alert } from 'react-native'
-import { Text } from 'react-native-elements';
+import { Text, Icon } from 'react-native-elements';
 import { ListItem } from 'react-native-elements';
 import { navigationHeader } from '../globals/styles'
 import * as FacebookAds from 'expo-ads-facebook';
@@ -177,14 +177,17 @@ export default class MoreScreen extends React.Component {
                         list.map((l, i) => (
                             <ListItem
                                 key={i}
-                                leftIcon={{ name: l.iconName, type: l.iconType }}
-                                title={l.name}
-                                subtitle={l.subtitle}
                                 onPress={l.action}
                                 style={{ marginBottom: l.bottomMargin }}
                                 bottomDivider={i != list.length - 1}
-                                chevron
-                            />
+                            >
+                                <Icon name={l.iconName} type={l.iconType} />
+                                <ListItem.Content>
+                                    <ListItem.Title>{l.name}</ListItem.Title>
+                                    <ListItem.Subtitle>{l.subtitle}</ListItem.Subtitle>
+                                </ListItem.Content>
+                                <ListItem.Chevron/>
+                            </ListItem>
                         ))
                     }
                     <View style={{
@@ -202,11 +205,13 @@ export default class MoreScreen extends React.Component {
                                 : <Button title="Show Lunch Balance" onPress={this.getLunchMoney} />
                             ):null}
                         </View>
-                        {this.state.idBar && <Image
-                            resizeMode={'contain'}
-                            style={{ width: '80%', height: 100, marginTop: 10, backgroundColor:"white", borderRadius:3 }}
-                            source={{ uri: this.state.idBar }}
-                        />}
+                        {this.state.idBar && <View style={{ width: '100%', height: 100, marginTop: 10, backgroundColor:"white", borderRadius:3, marginHorizontal:20, alignContent:"center", justifyContent:"center", flexDirection:"row"}}>
+                            <Image
+                                resizeMode={'contain'}
+                                style={{ width: '80%', height: 100}}
+                                source={{ uri: this.state.idBar }}
+                            />
+                        </View>}
                     </View>
                 </ScrollView>
             </RespectThemeBackground>

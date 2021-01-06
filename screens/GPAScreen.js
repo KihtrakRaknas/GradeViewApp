@@ -1,5 +1,5 @@
 import React from 'react';
-import { AsyncStorage, ScrollView, View } from 'react-native';
+import { AsyncStorage, ScrollView, View, ActivityIndicator } from 'react-native';
 import { Text} from 'react-native-elements';
 import { ListItem } from 'react-native-elements';
 import { navigationHeader } from '../globals/styles'
@@ -9,7 +9,7 @@ import RespectThemeBackground from '../components/RespectThemeBackground.js'
 export default class GPAScreen extends React.Component {
     constructor(props) {
         super(props);
-        this.state = { unweightedOldGPA: "Not Available", weightedOldGPA: "Not Available", unweightedNewGPA: "Not Available", weightedNewGPA: "Not Available", unweightedCurrGPA: "Not Available", weightedCurrGPA: "Not Available", showingCached:false, gettingPast:true, gettingCurr:false, done:false, hasError:false }
+        this.state = { unweightedOldGPA: "Loading...", weightedOldGPA: "Loading...", unweightedNewGPA: "Loading...", weightedNewGPA: "Loading...", unweightedCurrGPA: "Loading...", weightedCurrGPA: "Loading...", showingCached:false, gettingPast:true, gettingCurr:false, done:false, hasError:false }
         AsyncStorage.getItem('weightedOldGPA').then((gpa) => {
             if (gpa)
                 this.setState({ weightedOldGPA: gpa, showingCached:true })
@@ -126,7 +126,7 @@ export default class GPAScreen extends React.Component {
                 return responseJson
             }).catch((e)=>{
                 console.log(e)
-                this.setState({hasError:true})
+                this.setState({hasError:true, error:e.toString()})
             });
     }
 
@@ -156,7 +156,7 @@ export default class GPAScreen extends React.Component {
                 if (global.grades && responseJson) {
                     responseJson.map((classObj) => {
                         if (global.grades[classObj['Name']]) {
-                            for (mpsName in global.grades[classObj['Name']]) {
+                            for (let mpsName in global.grades[classObj['Name']]) {
                                 if (mpsName.includes("MP") && global.grades[classObj['Name']][mpsName]['avg']) {
                                     var percent = global.grades[classObj['Name']][mpsName]['avg']
                                     percent = percent.substring(0, percent.length - 1)
@@ -173,7 +173,7 @@ export default class GPAScreen extends React.Component {
                 return responseJson
             }).catch((e)=>{
                 console.log(e)
-                this.setState({hasError:true})
+                this.setState({hasError:true, error:e.toString()})
             })
     }
 
@@ -196,6 +196,8 @@ export default class GPAScreen extends React.Component {
             if (GPA) {
                 this.setState({ unweightedOldGPA: GPA.toFixed(2) })
                 AsyncStorage.setItem('unweightedOldGPA', GPA.toFixed(2))
+            }else{
+                this.setState({ unweightedOldGPA: "Not Available" })
             }
 
 
@@ -221,6 +223,8 @@ export default class GPAScreen extends React.Component {
             if (weightedGPA && !failed) {
                 this.setState({ weightedOldGPA: weightedGPA.toFixed(2) })
                 AsyncStorage.setItem('weightedOldGPA', weightedGPA.toFixed(2));
+            }else{
+                this.setState({ weightedOldGPA: "Not Available" })
             }
 
 
@@ -272,11 +276,15 @@ export default class GPAScreen extends React.Component {
                 if (yrGPA) {
                     this.setState({ unweightedCurrGPA: yrGPA.toFixed(2) })
                     AsyncStorage.setItem('unweightedCurrGPA', yrGPA.toFixed(2))
+                }else{
+                    this.setState({ unweightedCurrGPA: "Not Available" })
                 }
 
                 if (newGPA) {
                     this.setState({ unweightedNewGPA: newGPA.toFixed(2) })
                     AsyncStorage.setItem('unweightedNewGPA', newGPA.toFixed(2))
+                }else{
+                    this.setState({ unweightedNewGPA: "Not Available" })
                 }
 
 
@@ -339,11 +347,15 @@ export default class GPAScreen extends React.Component {
                 if (yrGPA && !failed) {
                     this.setState({ weightedCurrGPA: yrGPA.toFixed(2) })
                     AsyncStorage.setItem('weightedCurrGPA', yrGPA.toFixed(2))
+                }else{
+                    this.setState({ weightedCurrGPA: "Not Available" })
                 }
 
                 if (newWeightedGPA && !failed) {
                     this.setState({ weightedNewGPA: newWeightedGPA.toFixed(2), done:true })
                     AsyncStorage.setItem('weightedNewGPA', newWeightedGPA.toFixed(2))
+                }else{
+                    this.setState({ weightedNewGPA: "Not Available" })
                 }
 
             });
@@ -361,18 +373,18 @@ export default class GPAScreen extends React.Component {
                             {this.state.gettingPast && <Text style={{color:"blue"}}>Getting new data for past years...</Text>}
                             {this.state.gettingCurr && <Text style={{color:"blue"}}>Getting new data for this year...</Text>}
                         </>}
-                        {this.state.hasError && <Text style={{color:"red"}}>Error! Most likely a network issue.</Text>}
+                        {this.state.hasError && <Text style={{color:"red"}}>Error! Most likely a network issue. {this.state.error}</Text>}
                     </Text>}
 
                     <Text style={{ fontSize: 40, textAlign: 'center', paddingTop:10}}>Past GPA</Text>
                     <Text style={{ fontSize: 17,paddingBottom:15}}>GPA without factoring in the current year</Text>
                     <View style={{flex:1, flexDirection:'row', justifyContent: "space-between", padding:10}}>
                         <Text style={{ fontSize: 20 }}>Unweighted:</Text>
-                        <Text style={{ fontSize: 20 }}>{this.state.unweightedOldGPA}</Text>
+                        <Text style={{ fontSize: 20 }}>{this.state.unweightedOldGPA==="Loading..."&&!this.state.hasError?<ActivityIndicator/>:this.state.unweightedOldGPA}</Text>
                     </View>
                     <View style={{flex:1, flexDirection:'row', justifyContent: "space-between", padding:10}}>
                         <Text style={{ fontSize: 20 }}>Weighted:</Text>
-                        <Text style={{ fontSize: 20 }}>{this.state.weightedOldGPA}</Text>      
+                        <Text style={{ fontSize: 20 }}>{this.state.weightedOldGPA==="Loading..."&&!this.state.hasError?<ActivityIndicator/>:this.state.weightedOldGPA}</Text>      
                     </View>
                     <ListItem
                         bottomDivider={true}
@@ -384,11 +396,11 @@ export default class GPAScreen extends React.Component {
                     <Text style={{ fontSize: 17,paddingBottom:15}}>GPA only for this year (estimate)</Text>
                     <View style={{flex:1, flexDirection:'row', justifyContent: "space-between", padding:10}}>
                         <Text style={{ fontSize: 20 }}>Unweighted:</Text>
-                        <Text style={{ fontSize: 20 }}>{this.state.unweightedCurrGPA}</Text>
+                        <Text style={{ fontSize: 20 }}>{this.state.unweightedCurrGPA==="Loading..."&&!this.state.hasError?<ActivityIndicator/>:this.state.unweightedCurrGPA}</Text>
                     </View>
                     <View style={{flex:1, flexDirection:'row', justifyContent: "space-between", padding:10}}>
                         <Text style={{ fontSize: 20 }}>Weighted:</Text>
-                        <Text style={{ fontSize: 20 }}>{this.state.weightedCurrGPA}</Text>      
+                        <Text style={{ fontSize: 20 }}>{this.state.weightedCurrGPA==="Loading..."&&!this.state.hasError?<ActivityIndicator/>:this.state.weightedCurrGPA}</Text>      
                     </View>
                     <ListItem
                         bottomDivider={true}
@@ -400,11 +412,11 @@ export default class GPAScreen extends React.Component {
                     <Text style={{ fontSize: 17,paddingBottom:15}}>GPA so far (estimate)</Text>
                     <View style={{flex:1, flexDirection:'row', justifyContent: "space-between", padding:10}}>
                         <Text style={{ fontSize: 20 }}>Unweighted:</Text>
-                        <Text style={{ fontSize: 20 }}>{this.state.unweightedNewGPA}</Text>
+                        <Text style={{ fontSize: 20 }}>{this.state.unweightedNewGPA==="Loading..."&&!this.state.hasError?<ActivityIndicator/>:this.state.unweightedNewGPA}</Text>
                     </View>
                     <View style={{flex:1, flexDirection:'row', justifyContent: "space-between", padding:10}}>
                         <Text style={{ fontSize: 20 }}>Weighted:</Text>
-                        <Text style={{ fontSize: 20 }}>{this.state.weightedNewGPA}</Text>      
+                        <Text style={{ fontSize: 20 }}>{this.state.weightedNewGPA==="Loading..."&&!this.state.hasError?<ActivityIndicator/>:this.state.weightedNewGPA}</Text>      
                     </View>
                 </ScrollView>
             </RespectThemeBackground>

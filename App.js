@@ -31,10 +31,10 @@ import SignInScreen from './screens/SignInScreen'
 
 import './globals/signInGlobals'
 
-import { SafeAreaView } from 'react-navigation';
-if (Platform.OS === 'android') {
-  SafeAreaView.setStatusBarHeight(0);
-}
+// import { SafeAreaView } from 'react-navigation';
+// if (Platform.OS === 'android') {
+//   SafeAreaView.setStatusBarHeight(0);
+// }
 
 
 const HomeStack = createStackNavigator({
@@ -375,7 +375,7 @@ export default class App extends React.Component {
     if (this.state.user) {
       console.log("tab nav");
       console.log(`color: ${Appearance.getColorScheme()}`)
-      return <ThemeProvider useDark={Appearance.getColorScheme() === 'dark'}><View style={{ flex: 1 }}><StatusBar hidden={false} barStyle="dark-content" backgroundColor="#6fc2d0"/><Toast ref={(toast) => this.toast = toast} /><AppContainer /></View></ThemeProvider>;
+      return <ThemeProvider useDark={Appearance.getColorScheme() === 'dark'}><View style={{ flex: 1 }}><StatusBar translucent hidden={false} barStyle="dark-content" backgroundColor="#6fc2d0"/><Toast ref={(toast) => this.toast = toast} /><AppContainer /></View></ThemeProvider>;
     }
     return <SignInScreen />;
   }

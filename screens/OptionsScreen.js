@@ -11,7 +11,7 @@ import RespectThemeBackground from '../components/RespectThemeBackground.js'
 export default class OptionsScreen extends React.Component {
     constructor(props) {
         super(props);
-        this.state = { selectedIndex: 0, token: "null", showCodeInput: false, showA: true }
+        this.state = { selectedIndex: 0, token: /*"Why are you reading this. Download the app!"*/"null", showCodeInput: false, showA: true }
         try{
             Notifications.getExpoPushTokenAsync().then((token) => {
                 token=token.data
