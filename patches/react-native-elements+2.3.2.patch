@@ -1,7 +1,16 @@
 diff --git a/node_modules/react-native-elements/src/list/ListItem.js b/node_modules/react-native-elements/src/list/ListItem.js
-index ce94447..7acb9fa 100644
+index ce94447..a794353 100644
 --- a/node_modules/react-native-elements/src/list/ListItem.js
 +++ b/node_modules/react-native-elements/src/list/ListItem.js
+@@ -38,7 +38,7 @@ const renderAvatar = (content) =>
+ 
+ const renderIcon = (content, theme) =>
+   renderNode(Icon, content, {
+-    color: Platform.select(theme.colors.platform).grey,
++    //color: Platform.select(theme.colors.platform).grey,
+     size: 24,
+   });
+ 
 @@ -89,126 +89,126 @@ const ListItem = (props) => {
      ...attributes
    } = props;
