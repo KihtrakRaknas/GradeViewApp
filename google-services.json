@@ -1,0 +1,40 @@
+{
+  "project_info": {
+    "project_number": "993726748778",
+    "firebase_url": "https://gradeviewapp.firebaseio.com",
+    "project_id": "gradeviewapp",
+    "storage_bucket": "gradeviewapp.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:993726748778:android:2e62d62d584cedc81d5213",
+        "android_client_info": {
+          "package_name": "com.kihtrak.REGEN"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "993726748778-q14k1j1j74asnp6c7rqfvoi222d79vv7.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyA6nCw1tY3qZ67MJtCNDrT_yKJc3fgt45w"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "993726748778-q14k1j1j74asnp6c7rqfvoi222d79vv7.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

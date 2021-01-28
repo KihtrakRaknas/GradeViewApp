@@ -26,6 +26,13 @@ export default class SignInScreen extends React.Component {
         acronym: "MCVTS",
         numericUsername: false,
         applyEnding:false,
+      },
+      {
+        name:"Montgomery Township School District",
+        ending:"mtsdstudent.us",
+        acronym: "MTSD",
+        numericUsername: false,
+        applyEnding:true,
       }
     ]
 
@@ -63,11 +70,17 @@ export default class SignInScreen extends React.Component {
         Alert.alert("Enter an ID number and password");
         return 0;
       }
-      email = email + (this.state.school.applyEnding?"@"+schoolEnding:"");
-      /*if(email.includes("@") && !email.includes(schoolEnding))
-        Alert.alert("You used an unsupported email ending. \nPlease make sure you are using either your school email or school username.\n(Do not use parent portal login)");
-      else*/
-        this.verifyWithParams(email, pass, schoolEnding)
+
+      email = email.trim()
+      if(this.state.school.applyEnding){
+        if(email.includes("@")){
+          if(!email.includes(schoolEnding))
+             return Alert.alert("You used an unsupported email ending. \nPlease make sure you are using either your school email or school username.\n(Do not use parent portal login)");
+        }else{
+          email = email + (this.state.school.applyEnding?"@"+schoolEnding:"");
+        }
+      }
+      this.verifyWithParams(email, pass, schoolEnding)
     }
   
     verifyUsingOldCredentials = () => {

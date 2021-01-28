@@ -1,6 +1,8 @@
 import React from 'react';
-import { Text, View, ScrollView, Platform } from 'react-native';
+import { Text as NormalText, View, ScrollView, Platform } from 'react-native';
+import { Text } from 'react-native-elements';
 import { navigationHeader } from '../globals/styles'
+import RespectThemeBackground from '../components/RespectThemeBackground.js'
 export default class AssignmentScreen extends React.Component {
     constructor(props){
       super(props);
@@ -39,13 +41,13 @@ export default class AssignmentScreen extends React.Component {
         }
       console.log(assignment["Name"])
       return (
-        <View style={{flex:1}}>
+        <RespectThemeBackground>
           <View style={{  
             borderBottomWidth: 2,
             borderColor: '#373a6d',
             padding:15,
             paddingBottom:15,
-            backgroundColor:'#f2feff'
+            //backgroundColor:'#f2feff'
           }}>
             <Text adjustsFontSizeToFit numberOfLines={2} style={{fontWeight:"bold", textShadowColor:"lightblue", textShadowOffset: { width: 1, height: 1 }, textShadowRadius: 10, fontSize:50, paddingBottom:10,}}>{assignment["Name"]?assignment["Name"]:null}</Text>
             <Text style={{fontSize:25}}>{date?date:null}</Text>
@@ -57,11 +59,11 @@ export default class AssignmentScreen extends React.Component {
             <Text style={{paddingTop:10, fontSize:30, textAlign:"right"}}>{assignment["Grade"].split("/").length==2?(Number(assignment["Grade"].split("/")[0])/Number(assignment["Grade"].split("/")[1])*100).toFixed(1)+"%":null}</Text>
             <Text style={{paddingTop:20, fontSize:20, textAlign:"right"}}>{assignment["Category"]?""+assignment["Category"]:null}</Text>
             <View style={{marginTop:50,borderRadius:10,backgroundColor:"#f7f7f7", minHeight:100,padding:5,marginBottom:30}}>
-              {subtitle?<Text style={{ fontSize:20, marginBottom:20}}>{subtitle}</Text>:null}
-              <Text style={{ fontSize:20}}>{comment?comment:"No Teacher Comment"}</Text>
+              {subtitle?<NormalText style={{ fontSize:20, marginBottom:20}}>{subtitle}</NormalText>:null}
+              <NormalText style={{ fontSize:20}}>{comment?comment:"No Teacher Comment"}</NormalText>
             </View>
           </ScrollView>
-        </View>
+        </RespectThemeBackground>
       )
     }
   }

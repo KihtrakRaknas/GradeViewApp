@@ -2,6 +2,8 @@ import React from 'react';
 import { Text, View, AsyncStorage, Button, StyleSheet } from 'react-native';
 import { BarCodeScanner } from 'expo-barcode-scanner';
 import * as Permissions from 'expo-permissions'
+import RespectThemeBackground from '../components/RespectThemeBackground.js'
+import { navigationHeader } from '../globals/styles'
 
 export default class CameraScreen extends React.Component {
     state = {
@@ -23,6 +25,13 @@ export default class CameraScreen extends React.Component {
         this.setState({ hasCameraPermission: status === 'granted' });
     };
 
+    static navigationOptions = ({ navigation }) => {
+        return {
+            title: 'ID Scanner',
+            headerStyle: navigationHeader,
+        }
+    };
+
     render() {
         const { hasCameraPermission, scanned } = this.state;
 
@@ -33,21 +42,23 @@ export default class CameraScreen extends React.Component {
             return <Text>No access to camera</Text>;
         }
         return (
-            <View
-                style={{
-                    flex: 1,
-                    flexDirection: 'column',
-                    justifyContent: 'flex-end',
-                }}>
-                <BarCodeScanner
-                    onBarCodeScanned={scanned ? undefined : this.handleBarCodeScanned}
-                    style={StyleSheet.absoluteFillObject}
-                />
+            <RespectThemeBackground>
+                <View
+                    style={{
+                        flex: 1,
+                        flexDirection: 'column',
+                        justifyContent: 'flex-end',
+                    }}>
+                    <BarCodeScanner
+                        onBarCodeScanned={scanned ? undefined : this.handleBarCodeScanned}
+                        style={StyleSheet.absoluteFillObject}
+                    />
 
-                {scanned && (
-                    <Button title={'Tap to Scan Again'} onPress={() => this.setState({ scanned: false })} />
-                )}
-            </View>
+                    {scanned && (
+                        <Button title={'Tap to Scan Again'} onPress={() => this.setState({ scanned: false })} />
+                    )}
+                </View>
+            </RespectThemeBackground>
         );
     }
 
