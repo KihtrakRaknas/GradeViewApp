@@ -29,7 +29,7 @@ import ColorPickScreen from './screens/ColorPickScreen'
 import SignInScreen from './screens/SignInScreen'
 
 
-import './globals/signInGlobals'
+import {signOutGlobal, signInGlobal} from './globals/signInGlobals'
 
 // import { SafeAreaView } from 'react-navigation';
 // if (Platform.OS === 'android') {
@@ -123,8 +123,8 @@ export default class App extends React.Component {
     } catch (e) {
       console.warn(e);
     }
-    global.signOutGlobal = global.signOutGlobal.bind(this);
-    global.signInGlobal = global.signInGlobal.bind(this);
+    global.signOutGlobal = signOutGlobal.bind(this);
+    global.signInGlobal = signInGlobal.bind(this);
     this.state = { user: 8, debug: false, pass: [], txt: "Unfortunately, the district's IT division has decided that this app must be shutdown. I have not been informed of any rules or policies that were violated, but nonetheless, I was instructed to pour 2 long months' worth of work down the drain..." };
     this.returningUser();
     if (Platform.OS === 'android') {
@@ -370,6 +370,7 @@ export default class App extends React.Component {
     else
     */
     SplashScreen.hideAsync()
+    console.log(this.state.user)
     if (this.state.user == 8)
       return <ThemeProvider useDark={Appearance.getColorScheme() === 'dark'}><RespectThemeBackground ><View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}><Text>Please Authenticate</Text><Button title="Authenticate Again" onPress={this.returningUser}></Button></View></RespectThemeBackground></ThemeProvider>;
     if (this.state.user) {

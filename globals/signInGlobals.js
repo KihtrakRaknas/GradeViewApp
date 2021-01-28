@@ -1,13 +1,15 @@
 import { AsyncStorage } from 'react-native';
 
-
-global.signOutGlobal = function () {
+export function signOutGlobal () {
     this.setState({ user: null });
 }
 
-global.signInGlobal = function () {
+global.signOutGlobal = signOutGlobal
+
+export function signInGlobal() {
     AsyncStorage.getItem('username').then((user) => {
         console.log(user);
         this.setState({ user: user })
     });
 }
+global.signInGlobal = signInGlobal

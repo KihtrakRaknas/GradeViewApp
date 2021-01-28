@@ -65,7 +65,9 @@ export default class OptionsScreen extends React.Component {
                     AsyncStorage.getItem('backgroundColors').then((backgroundColors) => {
                         AsyncStorage.getItem('numberOfAppLaunches').then((numberOfAppLaunches) => {
                             AsyncStorage.clear().then(() => {
+                                console.log("cleared")
                                 AsyncStorage.setItem('numberOfAppLaunches', numberOfAppLaunches).then(() => {
+                                    console.log(`user: ${user} pass: ${pass} school: ${school}`)
                                     if (user && pass && school) {
                                         AsyncStorage.setItem('oldUsername', user).then(() => {
                                             AsyncStorage.setItem('oldPassword', pass).then(() => {
@@ -78,8 +80,10 @@ export default class OptionsScreen extends React.Component {
                                             });
                                         });
                                     } else {
+                                        console.log("Sign in info not all present")
                                         backgroundColors = backgroundColors ? backgroundColors : JSON.stringify({})
                                         AsyncStorage.setItem('oldBackgroundColors', backgroundColors).then(() => {
+                                            console.log("saved backgroundColors")
                                             global.signOutGlobal();
                                         });
                                     }

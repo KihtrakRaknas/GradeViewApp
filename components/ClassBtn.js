@@ -71,6 +71,7 @@ export default class ClassBtn extends React.Component {
       colorz = ['#373a6d', '#6fc2d0']//['#F44336', '#FF9800']//
       titleColor = pickTextColorBasedOnBgColorAdvanced(colorz[0])
       avgColor = titleColor//pickTextColorBasedOnBgColorAdvanced(colorz[1])
+      console.log(this.props.title)
       return (
         /*<TouchableOpacity style={{flex: 1, flexDirection: 'row',justifyContent: 'space-between', padding:10,paddingVertical:10}}>
           <View style={{flex: 7, }}>
@@ -97,9 +98,9 @@ export default class ClassBtn extends React.Component {
           title={this.props.title}
           titleStyle={{ color: titleColor, fontWeight: 'bold' }}
           subtitleStyle={{ color: titleColor }}
-          subtitle={this.props.teach}
+          subtitle={this.props.teach?this.props.teach:null}
           chevron={{ color: avgColor }}
-          rightElement = {<Text style={{fontSize:30,textAlign:'right',color:avgColor, fontWeight: fontWeightAvg}}>{avg}</Text>}
+          rightElement = {<Text style={{fontSize:30,textAlign:'right',color:avgColor, fontWeight: fontWeightAvg}}>{avg?avg:null}</Text>}
           containerStyle = {{ marginLeft: 5,
             marginRight: 5, 
             marginTop: 10, 
