@@ -19,6 +19,10 @@ export default class CameraScreen extends React.Component {
             // Call any action
         });
     }
+    componentWillUnmount() {
+        // Remove the event listener
+        this.focusListener.remove();
+    }
 
     getPermissionsAsync = async () => {
         const { status } = await Permissions.askAsync(Permissions.CAMERA);
@@ -75,8 +79,4 @@ export default class CameraScreen extends React.Component {
             });
         });
     };
-    componentWillUnmount() {
-        // Remove the event listener
-        this.focusListener.remove();
-    }
 }

@@ -77,17 +77,21 @@ export default class MoreScreen extends React.Component {
         this.focusListener = navigation.addListener("didFocus", () => { //Prepares app to display a pop up ad
           AsyncStorage.getItem('noAds').then((noAd)=>{
             if(noAd !== "true"){
-                AsyncStorage.getItem('numberOfAppLaunches').then((num)=>{
-                    if(Number(num)>20){
-                        //'ca-app-pub-3940256099942544/1033173712'
-                        AdMobInterstitial.setAdUnitID(__DEV__?"ca-app-pub-3940256099942544/4411468910":Platform.OS === 'ios'?"ca-app-pub-8985838748167691/4846725042":"ca-app-pub-8985838748167691/5663669617"); 
-                        console.log('checking ready')
-                        AdMobInterstitial.getIsReadyAsync().then((ready)=>{
-                            console.log('ready: ' + ready)
-                            if(!ready)
-                            AdMobInterstitial.requestAdAsync({ servePersonalizedAds: true})
+                AsyncStorage.getItem("AdFree").then(val=>{
+                    if(!Number(val) || Number(val)<new Date().getTime()){
+                        AsyncStorage.getItem('numberOfAppLaunches').then((num)=>{
+                            if(Number(num)>20){
+                                //'ca-app-pub-3940256099942544/1033173712'
+                                AdMobInterstitial.setAdUnitID(__DEV__?"ca-app-pub-3940256099942544/4411468910":Platform.OS === 'ios'?"ca-app-pub-8985838748167691/4846725042":"ca-app-pub-8985838748167691/5663669617"); 
+                                console.log('checking ready')
+                                AdMobInterstitial.getIsReadyAsync().then((ready)=>{
+                                    console.log('ready: ' + ready)
+                                    if(!ready)
+                                    AdMobInterstitial.requestAdAsync({ servePersonalizedAds: true})
+                                })
+                                this.showingPopUpAd = true
+                            }
                         })
-                        this.showingPopUpAd = true
                     }
                 })
             }
@@ -149,6 +153,14 @@ export default class MoreScreen extends React.Component {
                         this.props.navigation.navigate('GPA')
                     }
                 },
+                bottomMargin: 5,
+            },
+            {
+                name: 'Remove Ads with Referral Link',
+                iconName: 'person-add',
+                iconType: 'Ionicons',
+                subtitle: 'Get rid of ads (Free)',
+                action: () => this.props.navigation.navigate('Referral'),
                 bottomMargin: 5,
             },
             {

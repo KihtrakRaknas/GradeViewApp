@@ -27,7 +27,7 @@ import ScannedListScreen from './screens/ScannedListScreen'
 import CameraScreen from './screens/CameraScreen'
 import ColorPickScreen from './screens/ColorPickScreen'
 import SignInScreen from './screens/SignInScreen'
-
+import ReferralScreen from './screens/ReferralScreen'
 
 import {signOutGlobal, signInGlobal} from './globals/signInGlobals'
 
@@ -55,7 +55,8 @@ const SettingsStack = createStackNavigator({
   GPA: { screen: GPAScreen },
   ColorPick: { screen: ColorPickScreen },
   ScannedList: { screen: ScannedListScreen },
-  Camera: { screen: CameraScreen }
+  Camera: { screen: CameraScreen },
+  Referral: {screen: ReferralScreen}
 });
 
 const TabNav = createBottomTabNavigator(

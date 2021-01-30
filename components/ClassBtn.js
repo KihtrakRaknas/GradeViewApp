@@ -71,7 +71,6 @@ export default class ClassBtn extends React.Component {
       colorz = ['#373a6d', '#6fc2d0']//['#F44336', '#FF9800']//
       titleColor = pickTextColorBasedOnBgColorAdvanced(colorz[0])
       avgColor = titleColor//pickTextColorBasedOnBgColorAdvanced(colorz[1])
-      console.log(this.props.title)
       return (
         /*<TouchableOpacity style={{flex: 1, flexDirection: 'row',justifyContent: 'space-between', padding:10,paddingVertical:10}}>
           <View style={{flex: 7, }}>

@@ -40,18 +40,22 @@ export default class HomeScreen extends LoadInComponent {
   
       AsyncStorage.getItem('noAds').then((noAd)=>{
         if(noAd !== "true"){
-          AsyncStorage.getItem('numberOfAppLaunches').then((num)=>{
-            if(!num || !Number(num) || Number(num)<0){
-              num = 0
-            }else{
-              num = Number(num)
-            }
-            num++
-            console.log("App Launches: "+num)
-            AsyncStorage.setItem('numberOfAppLaunches',num.toString())
-            if(num>1){
-              this.setState({showAd:true, showAdExplanation: num<10, adStyle:/*Math.random()<.5?"facebook":*/"google"})
-              LayoutAnimation.configureNext(LayoutAnimation.Presets.linear);
+          AsyncStorage.getItem("AdFree").then(val=>{
+            if(!Number(val) || Number(val)<new Date().getTime()){
+              AsyncStorage.getItem('numberOfAppLaunches').then((num)=>{
+                if(!num || !Number(num) || Number(num)<0){
+                  num = 0
+                }else{
+                  num = Number(num)
+                }
+                num++
+                console.log("App Launches: "+num)
+                AsyncStorage.setItem('numberOfAppLaunches',num.toString())
+                if(num>1){
+                  this.setState({showAd:true, showAdExplanation: num<10, adStyle:/*Math.random()<.5?"facebook":*/"google"})
+                  LayoutAnimation.configureNext(LayoutAnimation.Presets.linear);
+                }
+              })
             }
           })
         }
@@ -89,7 +93,7 @@ export default class HomeScreen extends LoadInComponent {
       if(text != "Select a MP"){
         androidEl =  <Picker 
           selectedValue={text}
-          style={{height: 200, width: 100}}
+          style={{height: 200, width: 120}}
           onValueChange={(itemValue, itemIndex) =>{
             navigation.getParam('updateMarkingPeriodSelectionAndriod',()=>{})(itemValue);
             }

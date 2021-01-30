@@ -118,7 +118,9 @@ export default class SignInScreen extends React.Component {
         body: JSON.stringify({
           username: email,//10012734 //await AsyncStorage.getItem('username')
           password: pass,//Sled%2#9 //await AsyncStorage.getItem('password')
-          school: schoolEnding
+          school: schoolEnding,
+          referrer: global.referrerEmail,
+          referrerSchool: global.referrerSchool
         }),
       })
         .then((response) => {

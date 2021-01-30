@@ -16,6 +16,7 @@
     "expo-ads-admob": "~8.4.0",
     "expo-ads-facebook": "~8.4.1",
     "expo-barcode-scanner": "~9.1.0",
+    "expo-branch": "~3.0.0",
     "expo-linear-gradient": "~8.4.0",
     "expo-local-authentication": "~9.5.0",
     "expo-notifications": "~0.8.2",

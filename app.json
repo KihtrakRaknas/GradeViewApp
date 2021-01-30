@@ -7,7 +7,7 @@
       "ios",
       "android"
     ],
-    "version": "4.3.1",
+    "version": "5.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "facebookAppId": "618501142264378",
@@ -31,16 +31,22 @@
       },
       "bundleIdentifier": "com.kihtrak.REGEN",
       "config": {
-        "googleMobileAdsAppId": "ca-app-pub-8985838748167691~8580642842"
+        "googleMobileAdsAppId": "ca-app-pub-8985838748167691~8580642842",
+        "branch":{
+          "apiKey": "key_live_el1auixgues3oW7h0LxnalkaBFiTFwGn"
+        }
       }
     },
     "android": {
       "package": "com.kihtrak.REGEN",
-      "versionCode": 24,
+      "versionCode": 25,
       "googleServicesFile": "./google-services.json",
       "useNextNotificationsApi": true,
       "config": {
-        "googleMobileAdsAppId": "ca-app-pub-8985838748167691~8887764609"
+        "googleMobileAdsAppId": "ca-app-pub-8985838748167691~8887764609",
+        "branch":{
+          "apiKey": "key_live_el1auixgues3oW7h0LxnalkaBFiTFwGn"
+        }
       }
     },
     "userInterfaceStyle": "automatic",
