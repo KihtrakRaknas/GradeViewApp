@@ -387,7 +387,7 @@ export default class GPAScreen extends React.Component {
                         <Text style={{ fontSize: 20 }}>Unweighted:</Text>
                         <Text style={{ fontSize: 20 }}>{this.state.unweightedNewGPA==="Loading..."&&!this.state.hasError?<ActivityIndicator/>:this.state.unweightedNewGPA}</Text>
                     </View>
-                    <View style={{flex:1, flexDirection:'row', justifyContent: "space-between", padding:10}}>
+                    <View style={{flex:1, flexDirection:'row', justifyContent: "space-between", padding:10, marginBottom:10}}>
                         <Text style={{ fontSize: 20 }}>Weighted:</Text>
                         <Text style={{ fontSize: 20 }}>{this.state.weightedNewGPA==="Loading..."&&!this.state.hasError?<ActivityIndicator/>:this.state.weightedNewGPA}</Text>      
                     </View>
