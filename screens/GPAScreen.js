@@ -1,5 +1,5 @@
 import React from 'react';
-import { AsyncStorage, ScrollView, View, ActivityIndicator } from 'react-native';
+import { AsyncStorage, ScrollView, View, ActivityIndicator, Alert} from 'react-native';
 import { Text} from 'react-native-elements';
 import { ListItem } from 'react-native-elements';
 import { navigationHeader } from '../globals/styles'
@@ -61,25 +61,25 @@ export default class GPAScreen extends React.Component {
                 return 4.0
                 break;
             case "A-":
-                return 3.7
+                return 3 + 2/3//3.7
                 break;
             case "B+":
-                return 3.3
+                return 3 + 1/3//3.3
                 break;
             case "B":
                 return 3.0
                 break;
             case "B-":
-                return 2.7
+                return 2 + 2/3//2.7
                 break;
             case "C+":
-                return 2.3
+                return 2 + 1/3//2.3
                 break;
             case "C":
                 return 2.0
                 break;
             case "C-":
-                return 1.7
+                return 1.67//1.7
                 break;
             case "D+":
                 return 1.3
@@ -91,6 +91,11 @@ export default class GPAScreen extends React.Component {
                 return 0.7
                 break;
             case "F":
+            case "P":
+            case "AW":
+            case "W":
+            case "WP":
+            case "WF":
                 return 0.0
                 break;
             default:
@@ -169,7 +174,7 @@ export default class GPAScreen extends React.Component {
                     })
                 }
                 console.log("TEST - new FG ending")
-                console.log(responseJson)
+                //console.log(responseJson)
                 return responseJson
             }).catch((e)=>{
                 console.log(e)
@@ -179,87 +184,73 @@ export default class GPAScreen extends React.Component {
 
     componentDidMount = () => {
         this.getOldFGs().then((FGs) => {
+            console.log(JSON.stringify(FGs))
             this.setState({gettingPast:false, gettingCurr:true})
-            var GPA = null;
+            let pastUnscaledGPA = 0;
+            let pastTotalCredits = 0
             for (var year of FGs) {
-                var yrGPA = 0;
-                var totalCredits = 0;
                 for (var classs of year) {
                     if (this.letterGradeToGPA(classs["FG"]) == "error")
                         continue;
-                    totalCredits += classs["Credits"];
-                    yrGPA += this.letterGradeToGPA(classs["FG"]) * classs["Credits"];
+                    pastTotalCredits += classs["Credits"];
+                    pastUnscaledGPA += this.letterGradeToGPA(classs["FG"]) * classs["Credits"];
                 }
-                yrGPA = yrGPA / totalCredits;
-                GPA += yrGPA / FGs.length
             }
-            if (GPA) {
-                this.setState({ unweightedOldGPA: GPA.toFixed(2) })
-                AsyncStorage.setItem('unweightedOldGPA', GPA.toFixed(2))
+            const pastUnweightedGPA = pastUnscaledGPA / pastTotalCredits
+            if (pastUnweightedGPA) {
+                this.setState({ unweightedOldGPA: pastUnweightedGPA.toFixed(4) })
+                AsyncStorage.setItem('unweightedOldGPA', pastUnweightedGPA.toFixed(4))
             }else{
                 this.setState({ unweightedOldGPA: "Not Available" })
             }
 
-
-            var weightedGPA = null;
-            var failed = false;
+            let pastUnscaledWeightedGPA = 0;
+            let failed = false;
             for (var year of FGs) {
-                var yrGPA = 0;
-                var totalCredits = 0;
                 for (var classs of year) {
                     if (this.letterGradeToGPA(classs["FG"]) == "error")
                         continue;
-                    totalCredits += classs["Credits"];
+                    //totalCredits += classs["Credits"];
                     if (classs["Weight"]) {
-                        yrGPA += (this.letterGradeToGPA(classs["FG"]) + this.weightToGPABoost(classs["Weight"])) * classs["Credits"];
+                        pastUnscaledWeightedGPA += (this.letterGradeToGPA(classs["FG"]) + this.weightToGPABoost(classs["Weight"])) * classs["Credits"];
                     } else {
                         failed = true;
                         Alert.alert('One or more of your classes does not have a known weighting. Please report this using the "Provide Feedback button"')
                     }
                 }
-                yrGPA = yrGPA / totalCredits;
-                weightedGPA += yrGPA / FGs.length
             }
-            if (weightedGPA && !failed) {
-                this.setState({ weightedOldGPA: weightedGPA.toFixed(2) })
-                AsyncStorage.setItem('weightedOldGPA', weightedGPA.toFixed(2));
+            console.log(`past frac: ${pastUnscaledWeightedGPA} / ${pastTotalCredits}`)
+            const pastWeightedGPA = pastUnscaledWeightedGPA / pastTotalCredits
+            if (pastWeightedGPA && !failed) {
+                this.setState({ weightedOldGPA: pastWeightedGPA.toFixed(4) })
+                AsyncStorage.setItem('weightedOldGPA', pastWeightedGPA.toFixed(4));
             }else{
                 this.setState({ weightedOldGPA: "Not Available" })
             }
 
 
             this.getNewFGs().then((newFGs) => {
+                console.log(JSON.stringify(newFGs))
                 this.setState({gettingCurr:false})
-                var newGPA = null;
-                for (var year of FGs) {
-                    var yrGPA = 0;
-                    var totalCredits = 0;
-                    for (var classs of year) {
-                        if (this.letterGradeToGPA(classs["FG"]) == "error")
-                            continue;
-                        totalCredits += classs["Credits"];
-                        yrGPA += this.letterGradeToGPA(classs["FG"]) * classs["Credits"];
-                    }
-                    yrGPA = yrGPA / totalCredits;
-                    newGPA += yrGPA / (FGs.length + 1)
-                }
+                let yrUnscaledGPA = 0
+                let yrTotalCredits = 0//-2.5//0
 
-                var yrGPA = 0;
-                var totalCredits = 0;
                 for (var classs of newFGs) {
+                    if(classs["FG"] && this.letterGradeToGPA(classs["FG"]) != "error")
+                        continue
                     let total = 0;
-                    let totalGPA = 0;
-                    for (gradePerMP in classs) {
+                    let totalmpGPA = 0;
+                    for (let gradePerMP in classs) {
                         if (gradePerMP.includes("MP")) {
                             if (this.letterGradeToGPA(classs[gradePerMP]) == "error")
                                 continue;
                             total++;
-                            totalGPA += this.letterGradeToGPA(classs[gradePerMP])
+                            totalmpGPA += this.letterGradeToGPA(classs[gradePerMP])
                         }
                     }
                     if (total) {
-                        totalCredits += classs["Credits"];
-                        let classGPA = totalGPA / total
+                        yrTotalCredits += classs["Credits"];
+                        let classGPA = totalmpGPA / total
                         if (classs["ME"] && classs["FE"] && this.letterGradeToGPA(classs["ME"]) != "error" && this.letterGradeToGPA(classs["FE"]) != "error")
                             classGPA = classGPA * .8 + this.letterGradeToGPA(classs["ME"]) * .1 + this.letterGradeToGPA(classs["FE"]) * .1
                         else if (classs["ME"] && this.letterGradeToGPA(classs["ME"]) != "error")
@@ -267,65 +258,44 @@ export default class GPAScreen extends React.Component {
                         else if (classs["FE"] && this.letterGradeToGPA(classs["FE"]) != "error")
                             classGPA = classGPA * .9 + this.letterGradeToGPA(classs["FE"]) * .1
                         console.log(classs["Name"] + ": " + classGPA)
-                        yrGPA += classGPA * classs["Credits"];
+                        yrUnscaledGPA += classGPA * classs["Credits"];
                     }
                 }
-                yrGPA = yrGPA / totalCredits;
-                newGPA += yrGPA / (FGs.length + 1)
-
+                console.log(`this year unweighted: ${yrUnscaledGPA} / ${yrTotalCredits}`)
+                const yrGPA = yrUnscaledGPA / yrTotalCredits;
                 if (yrGPA) {
-                    this.setState({ unweightedCurrGPA: yrGPA.toFixed(2) })
-                    AsyncStorage.setItem('unweightedCurrGPA', yrGPA.toFixed(2))
+                    this.setState({ unweightedCurrGPA: yrGPA.toFixed(4) })
+                    AsyncStorage.setItem('unweightedCurrGPA', yrGPA.toFixed(4))
                 }else{
                     this.setState({ unweightedCurrGPA: "Not Available" })
                 }
 
+                const newUnscaledGPA = pastUnscaledGPA + yrUnscaledGPA
+                const newTotalCredits = pastTotalCredits + yrTotalCredits
+                const newGPA = newUnscaledGPA / newTotalCredits;
                 if (newGPA) {
-                    this.setState({ unweightedNewGPA: newGPA.toFixed(2) })
-                    AsyncStorage.setItem('unweightedNewGPA', newGPA.toFixed(2))
+                    this.setState({ unweightedNewGPA: newGPA.toFixed(4) })
+                    AsyncStorage.setItem('unweightedNewGPA', newGPA.toFixed(4))
                 }else{
                     this.setState({ unweightedNewGPA: "Not Available" })
                 }
 
-
-
-
-                var newWeightedGPA = null;
-                var failed = false;
-                for (var year of FGs) {
-                    var yrGPA = 0;
-                    var totalCredits = 0;
-                    for (var classs of year) {
-                        if (this.letterGradeToGPA(classs["FG"]) == "error")
-                            continue;
-                        totalCredits += classs["Credits"];
-                        if (classs["Weight"]) {
-                            yrGPA += (this.letterGradeToGPA(classs["FG"]) + this.weightToGPABoost(classs["Weight"])) * classs["Credits"];
-                        } else {
-                            failed = true;
-                            Alert.alert('One or more of your classes does not have a known weighting. Please report this using the "Provide Feedback button"')
-                        }
-                    }
-                    yrGPA = yrGPA / totalCredits;
-                    newWeightedGPA += yrGPA / (FGs.length + 1)
-                }
-
-                var yrGPA = 0;
-                var totalCredits = 0;
+                let yrUnscaledWeightedGPA = 0
                 for (var classs of newFGs) {
+                    if(classs["FG"] && this.letterGradeToGPA(classs["FG"]) != "error")
+                        continue
                     let total = 0;
-                    let totalGPA = 0;
-                    for (gradePerMP in classs) {
+                    let totalmpGPA = 0;
+                    for (let gradePerMP in classs) {
                         if (gradePerMP.includes("MP")) {
                             if (this.letterGradeToGPA(classs[gradePerMP]) == "error")
                                 continue;
                             total++;
-                            totalGPA += this.letterGradeToGPA(classs[gradePerMP])
+                            totalmpGPA += this.letterGradeToGPA(classs[gradePerMP])
                         }
                     }
                     if (total) {
-                        totalCredits += classs["Credits"];
-                        let classGPA = totalGPA / total
+                        let classGPA = totalmpGPA / total
                         if (classs["ME"] && classs["FE"] && this.letterGradeToGPA(classs["ME"]) != "error" && this.letterGradeToGPA(classs["FE"]) != "error")
                             classGPA = classGPA * .8 + this.letterGradeToGPA(classs["ME"]) * .1 + this.letterGradeToGPA(classs["FE"]) * .1
                         else if (classs["ME"] && this.letterGradeToGPA(classs["ME"]) != "error")
@@ -334,26 +304,29 @@ export default class GPAScreen extends React.Component {
                             classGPA = classGPA * .9 + this.letterGradeToGPA(classs["FE"]) * .1
 
                         if (classs["Weight"]) {
-                            yrGPA += (classGPA + this.weightToGPABoost(classs["Weight"])) * classs["Credits"];
+                            console.log(`${classs["Name"]} This year weighted: ${(classGPA + this.weightToGPABoost(classs["Weight"])) * classs["Credits"]} (${classGPA})`)
+                            yrUnscaledWeightedGPA += (classGPA + this.weightToGPABoost(classs["Weight"])) * classs["Credits"];
                         } else {
                             failed = true;
                             Alert.alert('One or more of your classes does not have a known weighting. Please report this using the "Provide Feedback" button')
                         }
                     }
                 }
-                yrGPA = yrGPA / totalCredits;
-                newWeightedGPA += yrGPA / (FGs.length + 1)
-
-                if (yrGPA && !failed) {
-                    this.setState({ weightedCurrGPA: yrGPA.toFixed(2) })
-                    AsyncStorage.setItem('weightedCurrGPA', yrGPA.toFixed(2))
+                console.log(`this year weighted: ${yrUnscaledWeightedGPA} / ${yrTotalCredits}`)
+                const yrWeightedGPA = yrUnscaledWeightedGPA / yrTotalCredits
+                
+                if (yrWeightedGPA && !failed) {
+                    this.setState({ weightedCurrGPA: yrWeightedGPA.toFixed(4) })
+                    AsyncStorage.setItem('weightedCurrGPA', yrGPA.toFixed(4))
                 }else{
                     this.setState({ weightedCurrGPA: "Not Available" })
                 }
 
+                const newUnscaledWeightedGPA = pastUnscaledWeightedGPA + yrUnscaledWeightedGPA
+                const newWeightedGPA = newUnscaledWeightedGPA / newTotalCredits;
                 if (newWeightedGPA && !failed) {
-                    this.setState({ weightedNewGPA: newWeightedGPA.toFixed(2), done:true })
-                    AsyncStorage.setItem('weightedNewGPA', newWeightedGPA.toFixed(2))
+                    this.setState({ weightedNewGPA: newWeightedGPA.toFixed(4), done:true })
+                    AsyncStorage.setItem('weightedNewGPA', newWeightedGPA.toFixed(4))
                 }else{
                     this.setState({ weightedNewGPA: "Not Available" })
                 }
@@ -377,7 +350,7 @@ export default class GPAScreen extends React.Component {
                     </Text>}
 
                     <Text style={{ fontSize: 40, textAlign: 'center', paddingTop:10}}>Past GPA</Text>
-                    <Text style={{ fontSize: 17,paddingBottom:15}}>GPA without factoring in the current year</Text>
+                    <Text style={{ fontSize: 17,paddingBottom:15}}>GPA without factoring in any current classes</Text>
                     <View style={{flex:1, flexDirection:'row', justifyContent: "space-between", padding:10}}>
                         <Text style={{ fontSize: 20 }}>Unweighted:</Text>
                         <Text style={{ fontSize: 20 }}>{this.state.unweightedOldGPA==="Loading..."&&!this.state.hasError?<ActivityIndicator/>:this.state.unweightedOldGPA}</Text>
@@ -393,7 +366,7 @@ export default class GPAScreen extends React.Component {
                         topDivider={true}
                     />
                     <Text style={{ fontSize: 40, textAlign: 'center' }}>This Year</Text>
-                    <Text style={{ fontSize: 17,paddingBottom:15}}>GPA only for this year (estimate)</Text>
+                    <Text style={{ fontSize: 17,paddingBottom:15}}>GPA only for current classes {"\n"}(prediction using every grade from this year)</Text>
                     <View style={{flex:1, flexDirection:'row', justifyContent: "space-between", padding:10}}>
                         <Text style={{ fontSize: 20 }}>Unweighted:</Text>
                         <Text style={{ fontSize: 20 }}>{this.state.unweightedCurrGPA==="Loading..."&&!this.state.hasError?<ActivityIndicator/>:this.state.unweightedCurrGPA}</Text>
@@ -409,7 +382,7 @@ export default class GPAScreen extends React.Component {
                         topDivider={true}
                     />
                     <Text style={{ fontSize: 40, textAlign: 'center' }}>Total GPA estimate</Text>
-                    <Text style={{ fontSize: 17,paddingBottom:15}}>GPA so far (estimate)</Text>
+                    <Text style={{ fontSize: 17,paddingBottom:15}}>GPA so far {"\n"}(estimate of the total GPA you will end with)</Text>
                     <View style={{flex:1, flexDirection:'row', justifyContent: "space-between", padding:10}}>
                         <Text style={{ fontSize: 20 }}>Unweighted:</Text>
                         <Text style={{ fontSize: 20 }}>{this.state.unweightedNewGPA==="Loading..."&&!this.state.hasError?<ActivityIndicator/>:this.state.unweightedNewGPA}</Text>

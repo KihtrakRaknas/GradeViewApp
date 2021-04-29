@@ -38,6 +38,24 @@ export default class HomeScreen extends LoadInComponent {
           this.setState({showA:true})
       })
   
+      this.checkAd()
+  
+      this.props.navigation.setParams({ click: this.click, genMpsArray: this.genMpsArray, genMpSelector: this.genMpSelector, updateMarkingPeriodSelectionAndriod: this.updateMarkingPeriodSelectionAndriod});
+      
+  
+        AsyncStorage.getItem('MPS').then((oldMps)=>{
+          console.log("oldMps - constructor")
+          oldMps = JSON.parse(oldMps);
+          oldMps = oldMps?oldMps:[];
+          console.log("old: "+JSON.stringify(oldMps))
+            this.setState({oldMps})
+          //console.log("mps str"+JSON.stringify(mps))
+        })
+        this.adsManager = new FacebookAds.NativeAdsManager(Platform.OS === 'ios'?"618501142264378_618513918929767":"618501142264378_618581928922966", 1);
+        this.adsManager.setMediaCachePolicy('all');
+    }
+
+    checkAd = () =>{
       AsyncStorage.getItem('noAds').then((noAd)=>{
         if(noAd !== "true"){
           AsyncStorage.getItem("AdFree").then(val=>{
@@ -60,24 +78,18 @@ export default class HomeScreen extends LoadInComponent {
           })
         }
       })
-  
-      this.props.navigation.setParams({ click: this.click, genMpsArray: this.genMpsArray, genMpSelector: this.genMpSelector, updateMarkingPeriodSelectionAndriod: this.updateMarkingPeriodSelectionAndriod});
-      
-  
-        AsyncStorage.getItem('MPS').then((oldMps)=>{
-          console.log("oldMps - constructor")
-          oldMps = JSON.parse(oldMps);
-          oldMps = oldMps?oldMps:[];
-          console.log("old: "+JSON.stringify(oldMps))
-            this.setState({oldMps})
-          //console.log("mps str"+JSON.stringify(mps))
-        })
-        this.adsManager = new FacebookAds.NativeAdsManager(Platform.OS === 'ios'?"618501142264378_618513918929767":"618501142264378_618581928922966", 1);
-        this.adsManager.setMediaCachePolicy('all');
     }
   
     componentDidMount = () => {
       //SplashScreen.hide()
+      this.focusListener = this.props.navigation.addListener('didFocus', () => {
+        this.checkAd()
+      });
+    }
+
+    componentWillUnmount() {
+        // Remove the event listener
+        this.focusListener.remove();
     }
   
     static navigationOptions = ({ navigation }) => {

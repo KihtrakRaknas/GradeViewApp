@@ -113,6 +113,8 @@ export default class LoadInComponent extends React.Component {
                             }
                             AsyncStorage.setItem("AdFree", newVal)
                         })
+                    }else{
+                        AsyncStorage.setItem("AdFree", "")
                     }
                     global.grades = responseJson;
                     console.log("GRADES UPDATED")

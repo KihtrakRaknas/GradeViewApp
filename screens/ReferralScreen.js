@@ -92,7 +92,7 @@ export default class ReferralScreen extends React.Component {
     shareLink = async () => {
         await this._branchUniversalObject.showShareSheet({
             messageHeader: "GradeView Download Link",
-            messageBody: `Here is a download link for GradeView`,
+            messageBody: `Here is a download link for GradeView: `,
         });
     }
 
@@ -111,12 +111,14 @@ export default class ReferralScreen extends React.Component {
                     <Text style={{ fontSize: 40, textAlign: 'center', paddingTop: 10, marginBottom: 20 }}>Referral FAQ</Text>
                     <Text style={{ fontSize: 20, marginBottom: 15, textDecorationLine: 'underline' }}>How does it work?</Text>
                     <Text style={{ fontSize: 17, marginBottom: 25 }}>You have a custom download link to GradeView. If your friend downloads the app with your custom link, you will automatically get 1 month of ad-free mode.</Text>
-                    <Text style={{ fontSize: 20, marginBottom: 15, textDecorationLine: 'underline' }}>What if I already have a month of ad-free mode?</Text>
+                    <Text style={{ fontSize: 20, marginBottom: 15, textDecorationLine: 'underline' }}>What if I already have no ads?</Text>
                     <Text style={{ fontSize: 17, marginBottom: 25 }}>Every new user that signs up with your link will add an extra month to your ad-free period.</Text>
                     <Text style={{ fontSize: 20, marginBottom: 15, textDecorationLine: 'underline' }}>How will I know it worked?</Text>
                     <Text style={{ fontSize: 17, marginBottom: 25 }}>You will get a notification when your friend signs up.</Text>
-                    <Text style={{ fontSize: 20, marginBottom: 15, textDecorationLine: 'underline' }}>Can I pay to get the ad-free mode?</Text>
-                    <Text style={{ fontSize: 17, marginBottom: 25 }}>No, the referral link is the only way to get ad-free mode</Text>
+                    <Text style={{ fontSize: 20, marginBottom: 15, textDecorationLine: 'underline' }}>Can I pay to remove ads?</Text>
+                    <Text style={{ fontSize: 17, marginBottom: 25 }}>No, the referral link is the only way to remove ads.</Text>
+                    <Text style={{ fontSize: 20, marginBottom: 15, textDecorationLine: 'underline' }}>When does the link work?</Text>
+                    <Text style={{ fontSize: 17, marginBottom: 25 }}>The link will only work if the person doesn't already have GradeView downloaded and they've never used GradeView before.</Text>
                     <ShareButton />
                 </ScrollView>
             </RespectThemeBackground>

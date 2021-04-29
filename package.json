@@ -2,10 +2,12 @@
   "main": "node_modules/expo/AppEntry.js",
   "scripts": {
     "start": "expo start",
-    "android": "expo start --android",
-    "ios": "expo start --ios",
+    "android": "expo build:android --release-channel v2",
+    "ios": "expo build:ios --release-channel v2",
     "eject": "expo eject",
-    "postinstall": "npx patch-package"
+    "postinstall": "npx patch-package",
+    "deploy":"expo build:ios --release-channel v2 && expo build:android --release-channel v2",
+    "pub":"expo publish --release-channel v2"
   },
   "dependencies": {
     "@expo/vector-icons": "^12.0.0",
