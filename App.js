@@ -1,6 +1,11 @@
 import React from 'react';
 import { View, Button, StatusBar, UIManager, Appearance } from 'react-native';
-import { createBottomTabNavigator, createAppContainer, TabBarBottom, createStackNavigator } from 'react-navigation';
+//import { createBottomTabNavigator, createAppContainer, TabBarBottom, createStackNavigator } from 'react-navigation';
+
+import { createAppContainer } from 'react-navigation';
+import { createStackNavigator } from 'react-navigation-stack';
+import { createBottomTabNavigator, TabBarBottom } from 'react-navigation-tabs';
+
 import { Icon, ThemeProvider } from 'react-native-elements'
 import { AsyncStorage } from 'react-native';
 require('create-react-class');
