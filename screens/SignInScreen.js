@@ -46,7 +46,7 @@ export default class SignInScreen extends React.Component {
       //SplashScreen.hide()
     }
   
-    componentWillMount = () => {
+    UNSAFE_componentWillMount = () => {
       AsyncStorage.getItem('oldSchool').then((ending) => {
         if (ending) {
           const school = this.schools.find(school=>school.ending == ending)

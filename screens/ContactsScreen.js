@@ -17,7 +17,7 @@ export default class ContactsScreen extends React.Component {
         })
     }
 
-    componentWillMount = () => {
+    UNSAFE_componentWillMount = () => {
         this.getContacts()
     }
 

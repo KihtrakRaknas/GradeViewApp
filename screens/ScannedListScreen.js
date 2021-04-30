@@ -10,7 +10,7 @@ export default class ScannedListScreen extends React.Component {
         super(props);
         this.state = { contacts: [], baseContacts: [], search: '', result: null }
     }
-    componentWillMount = () => {
+    UNSAFE_componentWillMount = () => {
         this.getContacts()
         this.focusListener = this.props.navigation.addListener('didFocus', () => {
             AsyncStorage.getItem('scannedContacts').then((contacts) => {
