@@ -25,11 +25,23 @@ class ListOfAssignmentsView extends React.Component {
     constructor(props) {
         super(props);
         this.state = {}
-        global.updateBackgroundColorsGlobal = global.updateBackgroundColorsGlobal.bind(this);
+        
+        //global.updateBackgroundColorsGlobal = global.updateBackgroundColorsGlobal.bind(this);
         AsyncStorage.getItem('backgroundColors').then((backgroundColors) => {
             if (JSON.parse(backgroundColors))
                 this.setState({ backgroundColors: JSON.parse(backgroundColors) })
         })
+    }
+
+    componentDidMount = ()=>{
+        global.instancesOfListOfAssignmentView.push(this)
+    }
+
+    componentWillUnmount = ()=>{
+        const index = global.instancesOfListOfAssignmentView.indexOf(this);
+        if (index > -1) {
+            global.instancesOfListOfAssignmentView.splice(index, 1);
+        }
     }
 
     getBackgroundColor = (cat) => {

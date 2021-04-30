@@ -1,6 +1,9 @@
+global.instancesOfListOfAssignmentView = []
+
 global.updateBackgroundColorsGlobal = function (backgroundColors) {
     console.log(`updateBackgroundColorsCalled: ${backgroundColors}`)
-    this.setState({ backgroundColors })
+    for(thisRef of global.instancesOfListOfAssignmentView)
+        thisRef.setState({ backgroundColors })
 }
 
 export function pickTextColorBasedOnBgColorAdvanced(bgColor) {
