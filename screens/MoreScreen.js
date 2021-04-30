@@ -3,7 +3,7 @@ import { View, Image, ScrollView, AsyncStorage, Button, ActivityIndicator, Alert
 import { Text, Icon } from 'react-native-elements';
 import { ListItem } from 'react-native-elements';
 import { navigationHeader } from '../globals/styles'
-import * as FacebookAds from 'expo-ads-facebook';
+//import * as FacebookAds from 'expo-ads-facebook';
 import { AdMobInterstitial } from 'expo-ads-admob';
 import RespectThemeBackground from '../components/RespectThemeBackground.js'
 export default class MoreScreen extends React.Component {
@@ -15,7 +15,7 @@ export default class MoreScreen extends React.Component {
                 if (user) {
                     this.setState({ id: user })
                     const idNumber = user.substring(0, user.indexOf("@"))
-                    if(Number(idNumber)){
+                    if (Number(idNumber)) {
                         if (IDbarcode) {
                             this.setState({ idBar: IDbarcode })
                         } else {
@@ -75,27 +75,27 @@ export default class MoreScreen extends React.Component {
     componentDidMount() {
         const { navigation } = this.props;
         this.focusListener = navigation.addListener("didFocus", () => { //Prepares app to display a pop up ad
-          AsyncStorage.getItem('noAds').then((noAd)=>{
-            if(noAd !== "true"){
-                AsyncStorage.getItem("AdFree").then(val=>{
-                    if(!Number(val) || Number(val)<new Date().getTime()){
-                        AsyncStorage.getItem('numberOfAppLaunches').then((num)=>{
-                            if(Number(num)>20){
-                                //'ca-app-pub-3940256099942544/1033173712'
-                                AdMobInterstitial.setAdUnitID(__DEV__?"ca-app-pub-3940256099942544/4411468910":Platform.OS === 'ios'?"ca-app-pub-8985838748167691/4846725042":"ca-app-pub-8985838748167691/5663669617"); 
-                                console.log('checking ready')
-                                AdMobInterstitial.getIsReadyAsync().then((ready)=>{
-                                    console.log('ready: ' + ready)
-                                    if(!ready)
-                                    AdMobInterstitial.requestAdAsync({ servePersonalizedAds: true})
-                                })
-                                this.showingPopUpAd = true
-                            }
-                        })
-                    }
-                })
-            }
-          })
+            AsyncStorage.getItem('noAds').then((noAd) => {
+                if (noAd !== "true") {
+                    AsyncStorage.getItem("AdFree").then(val => {
+                        if (!Number(val) || Number(val) < new Date().getTime()) {
+                            AsyncStorage.getItem('numberOfAppLaunches').then((num) => {
+                                if (Number(num) > 20) {
+                                    //'ca-app-pub-3940256099942544/1033173712'
+                                    AdMobInterstitial.setAdUnitID(__DEV__ ? "ca-app-pub-3940256099942544/4411468910" : Platform.OS === 'ios' ? "ca-app-pub-8985838748167691/4846725042" : "ca-app-pub-8985838748167691/5663669617");
+                                    console.log('checking ready')
+                                    /*AdMobInterstitial.getIsReadyAsync().then((ready) => {
+                                        console.log('ready: ' + ready)
+                                        if (!ready)
+                                            AdMobInterstitial.requestAdAsync({ servePersonalizedAds: true })
+                                    })*/
+                                    this.showingPopUpAd = true
+                                }
+                            })
+                        }
+                    })
+                }
+            })
         });
     }
 
@@ -113,8 +113,8 @@ export default class MoreScreen extends React.Component {
                 subtitle: 'View your Grade Point Average',
                 action: () => {
                     if (this.showingPopUpAd == true) {
-                        console.log("SHOW FACEBOOK AD")
-                        /*FacebookAds.InterstitialAdManager.showAd(Platform.OS === 'ios'?"618501142264378_618574792257013":"618501142264378_623008151813677").then(didClick => {
+                        /*console.log("SHOW FACEBOOK AD")
+                        FacebookAds.InterstitialAdManager.showAd(Platform.OS === 'ios'?"618501142264378_618574792257013":"618501142264378_623008151813677").then(didClick => {
                             console.log("SHOWN")
                             //this.props.navigation.navigate('GPA')
                         })
@@ -123,32 +123,29 @@ export default class MoreScreen extends React.Component {
                             //this.props.navigation.navigate('GPA')
                         });*/
                         this.props.navigation.navigate('GPA')
-                        AdMobInterstitial.getIsReadyAsync().then((ready)=>{
+                        AdMobInterstitial.getIsReadyAsync().then(async (ready) => {
                             console.log('ready: ' + ready)
-                            if(ready)
-                                AdMobInterstitial.showAdAsync();
-                            else{
-                            /*console.log("SHOW FACEBOOK AD")
-                            FacebookAds.InterstitialAdManager.showAd(Platform.OS === 'ios'?"618501142264378_618574792257013":"618501142264378_623008151813677")
-                            .then(didClick => {
-                                this.props.navigation.navigate('GPA')
-                            })
-                            .catch(error => {
-                                this.props.navigation.navigate('GPA')
-                            });*/
-                            AdMobInterstitial.requestAdAsync({ servePersonalizedAds: true}).catch((e)=>{console.log(e)})
-                            }
-                            let intervalCount
-                            let interval = setInterval(()=>{
-                                intervalCount++
-                                if(intervalCount>20){
-                                    clearInterval(interval)
-                                }
-                                AdMobInterstitial.showAdAsync().then(()=>{
-                                    clearInterval(interval)
+                            if (!ready){
+                                /*console.log("SHOW FACEBOOK AD")
+                                FacebookAds.InterstitialAdManager.showAd(Platform.OS === 'ios'?"618501142264378_618574792257013":"618501142264378_623008151813677")
+                                .then(didClick => {
+                                    this.props.navigation.navigate('GPA')
                                 })
-                            },1000)
-                        }) 
+                                .catch(error => {
+                                    this.props.navigation.navigate('GPA')
+                                });*/
+                                await AdMobInterstitial.requestAdAsync({ servePersonalizedAds: true }).catch((e) => { 
+                                    console.log("requestAdAsync: "+e) 
+                                    setTimeout(()=>this.props.navigation.navigate('GPA'),1000)
+                                })
+                            }
+                            AdMobInterstitial.showAdAsync().then(()=>{
+                                this.props.navigation.navigate('GPA')
+                            }).catch((e) => { 
+                                console.log("showAdAsync: "+e) 
+                                setTimeout(()=>this.props.navigation.navigate('GPA'),1000)
+                            });
+                        })
                     } else {
                         this.props.navigation.navigate('GPA')
                     }
@@ -172,9 +169,9 @@ export default class MoreScreen extends React.Component {
                 bottomMargin: 150,
             },
         ]
-        const isSB = this.state.id.substring(this.state.id.indexOf("@"))=="@sbstudents.org";
-        if(isSB)
-            list.splice(1, 0,{
+        const isSB = this.state.id.substring(this.state.id.indexOf("@")) == "@sbstudents.org";
+        if (isSB)
+            list.splice(1, 0, {
                 name: 'Global Name Lookup',
                 iconName: 'account-search',
                 iconType: 'material-community',
@@ -198,7 +195,7 @@ export default class MoreScreen extends React.Component {
                                     <ListItem.Title>{l.name}</ListItem.Title>
                                     <ListItem.Subtitle>{l.subtitle}</ListItem.Subtitle>
                                 </ListItem.Content>
-                                <ListItem.Chevron/>
+                                <ListItem.Chevron />
                             </ListItem>
                         ))
                     }
@@ -207,7 +204,7 @@ export default class MoreScreen extends React.Component {
                         alignItems: 'center',
                     }}>
                         <View>
-                            {isSB?(this.state.lunchBalance || this.state.lunchBalanceButtonPressed ?
+                            {isSB ? (this.state.lunchBalance || this.state.lunchBalanceButtonPressed ?
                                 <View style={{
                                     flexDirection: 'row',
                                 }}>
@@ -215,12 +212,12 @@ export default class MoreScreen extends React.Component {
                                     {this.state.lunchBalance ? <Text style={{ fontSize: 20 }}>{this.state.lunchBalance}</Text> : <ActivityIndicator />}
                                 </View>
                                 : <Button title="Show Lunch Balance" onPress={this.getLunchMoney} />
-                            ):null}
+                            ) : null}
                         </View>
-                        {this.state.idBar && <View style={{ width: '100%', height: 100, marginTop: 10, backgroundColor:"white", borderRadius:3, marginHorizontal:20, alignContent:"center", justifyContent:"center", flexDirection:"row"}}>
+                        {this.state.idBar && <View style={{ width: '100%', height: 100, marginTop: 10, backgroundColor: "white", borderRadius: 3, marginHorizontal: 20, alignContent: "center", justifyContent: "center", flexDirection: "row" }}>
                             <Image
                                 resizeMode={'contain'}
-                                style={{ width: '80%', height: 100}}
+                                style={{ width: '80%', height: 100 }}
                                 source={{ uri: this.state.idBar }}
                             />
                         </View>}

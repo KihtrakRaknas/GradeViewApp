@@ -4,13 +4,13 @@ import LoadInComponent from '../components/LoadInComponent'
 import Modal from 'react-native-modal';
 import ClassBtn from '../components/ClassBtn'
 import { navigationHeader } from '../globals/styles'
-import AdComponent from '../components/AdComponent'
+//import AdComponent from '../components/AdComponent' /* uses facebook ads */
 import '../globals/homeScreenGlobals.js'
 import {preferredBackgroundColor} from '../helperFunctions/darkModeUtil.js'
 import {
     AdMobBanner,
 } from 'expo-ads-admob';
-import * as FacebookAds from 'expo-ads-facebook';
+//import * as FacebookAds from 'expo-ads-facebook';
 import RespectThemeBackground from '../components/RespectThemeBackground.js'
 import { Text } from 'react-native-elements';
 
@@ -51,8 +51,10 @@ export default class HomeScreen extends LoadInComponent {
             this.setState({oldMps})
           //console.log("mps str"+JSON.stringify(mps))
         })
+        /*
         this.adsManager = new FacebookAds.NativeAdsManager(Platform.OS === 'ios'?"618501142264378_618513918929767":"618501142264378_618581928922966", 1);
         this.adsManager.setMediaCachePolicy('all');
+        */
     }
 
     checkAd = () =>{
@@ -280,7 +282,7 @@ export default class HomeScreen extends LoadInComponent {
                   this.setState({currentMarking: mp});
                 }
             });
-        let CustomAd = FacebookAds.withNativeAd(AdComponent)
+        //let CustomAd = FacebookAds.withNativeAd(AdComponent)
         return(
           <RespectThemeBackground>
             <ScrollView style={{flex: 1, flexDirection: 'column'/*, backgroundColor: preferredBackgroundColor()*/}} refreshControl={
@@ -330,13 +332,13 @@ export default class HomeScreen extends LoadInComponent {
               bannerSize="smartBannerPortrait"
               adUnitID={__DEV__?"ca-app-pub-3940256099942544/2934735716":Platform.OS === 'ios'?"ca-app-pub-8985838748167691/6884417794":"ca-app-pub-8985838748167691/7707857953"} // Test ID, Replace with your-admob-unit-id
               //testDeviceID="7BE32C8C-101D-45EE-AFFD-81B6BF27CEC2"
-              servePersonalizedAds // true or false
+              servePersonalizedAds={true} // true or false
               onDidFailToReceiveAdWithError={(err)=>{
                 console.log(err)
                 LayoutAnimation.configureNext(LayoutAnimation.Presets.linear);
                 //this.setState({adStyle:"facebook"})
               }} />:
-              <CustomAd adsManager={this.adsManager}/>:null}
+              /*<CustomAd adsManager={this.adsManager}/>*/null:null}
             </ScrollView>
           </RespectThemeBackground>
   

@@ -16,7 +16,6 @@
     "create-react-context": "^0.3.0",
     "expo": "^41.0.0",
     "expo-ads-admob": "~10.0.4",
-    "expo-ads-facebook": "~10.0.4",
     "expo-barcode-scanner": "~10.1.2",
     "expo-branch": "~4.1.0",
     "expo-linear-gradient": "~9.1.0",

@@ -9,7 +9,7 @@ export default class LoadInComponent extends React.Component {
         super(props);
         this.state = { isLoading: global.grades == null }
     }
-    componentWillMount() {
+    UNSAFE_componentWillMount() {
         console.log("LOADIN COMPONENT RUNNIN")
         console.log("LOADIN COMPONENT DONE!!!")
         console.log(AppState.currentState)
