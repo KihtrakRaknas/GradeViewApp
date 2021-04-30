@@ -30,7 +30,7 @@ export default class ClassScreen extends React.Component {
     render() {
         var listOfAssignments = this.parseJSON(global.grades, this.props.navigation.getParam('className'), this.props.navigation.getParam('markingPeriod'))
         if (listOfAssignments.length == 0) {
-            this.props.navigation.goBack()
+            setTimeout(()=>this.props.navigation.goBack(),1000)
             return (<RespectThemeBackground><View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}><Text style={{ fontSize: 20 }}>No grades yet</Text></View></RespectThemeBackground>)
         }
 
