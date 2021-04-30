@@ -46,7 +46,7 @@ export default class ReferralScreen extends React.Component {
         return {
             title: 'Referral',
             headerStyle: navigationHeader,
-            headerRight: (
+            headerRight: ()=>(
                 <View paddingRight={10}>
                     {<Icon onPress={navigation.getParam("shareLink")} name={Platform.OS === 'android' ? "share-google" : "share-apple"} size={30} type={"evilicon"} />}
                 </View>

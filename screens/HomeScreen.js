@@ -127,7 +127,7 @@ export default class HomeScreen extends LoadInComponent {
         return {
           title: 'Home',
           headerStyle: navigationHeader,
-          headerRight: (
+          headerRight: ()=>(
             headerEl
           ),
         }

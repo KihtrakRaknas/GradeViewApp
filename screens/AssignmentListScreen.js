@@ -35,7 +35,7 @@ export default class AssignmentListScreen extends LoadInComponent {
         return {
             title: 'Your Assignments',
             headerStyle: navigationHeader,
-            headerRight: (
+            headerRight: ()=>(
                 <View paddingRight={10}>
                     {icon}
                 </View>

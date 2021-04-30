@@ -48,7 +48,7 @@ export default class ScannedListScreen extends React.Component {
         return {
             title: 'Scanned IDs',
             headerStyle: navigationHeader,
-            headerRight: (
+            headerRight: ()=>(
                 <View paddingRight={10}>
                     {<Icon onPress={() => navigation.navigate('Camera')} name={"camera-alt"} size={25} type={"MaterialIcons"} />}
                 </View>
@@ -79,7 +79,7 @@ export default class ScannedListScreen extends React.Component {
     render() {
         let list = <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}><Text style={{ fontSize: 20 }}>Contacts are not current available, connect to the internet and try again</Text></View>
         if (Object.keys(this.state.contacts).length > 0) {
-            arr = this.state.contacts;
+            let arr = this.state.contacts;
             if (this.state.result)//Object.keys(this.state.result).length>0
                 arr = this.state.result;
 
