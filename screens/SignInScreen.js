@@ -33,6 +33,13 @@ export default class SignInScreen extends React.Component {
         acronym: "MTSD",
         numericUsername: false,
         applyEnding:true,
+      },
+      {
+        name:"Morris County Vocational School District",
+        ending:"mcvts.org",
+        acronym: "MCVSD",
+        numericUsername: false,
+        applyEnding:true,
       }
     ]
 

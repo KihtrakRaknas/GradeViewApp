@@ -9,6 +9,7 @@ import '../globals/homeScreenGlobals.js'
 import {preferredBackgroundColor} from '../helperFunctions/darkModeUtil.js'
 import {
     AdMobBanner,
+    getPermissionsAsync
 } from 'expo-ads-admob';
 //import * as FacebookAds from 'expo-ads-facebook';
 import RespectThemeBackground from '../components/RespectThemeBackground.js'
@@ -18,7 +19,7 @@ export default class HomeScreen extends LoadInComponent {
     constructor(props){
       super(props);
       console.log("GERNERATING")  
-      this.state ={ isLoading: false, email:"", password:"", num: 0, currentMarking: "Select MP", style:"Percent", firstMPSRender:true, showAd:false, showA:true}
+      this.state ={ isLoading: false, email:"", password:"", num: 0, currentMarking: "Select MP", style:"Percent", firstMPSRender:true, showAd:false, showA:true, personalizeAds:false}
   
       this.firstMPSRender = false;
       console.log("GERNERATING DONE")
@@ -58,6 +59,7 @@ export default class HomeScreen extends LoadInComponent {
     }
 
     checkAd = () =>{
+      getPermissionsAsync().then(res=>res.status=='granted'?this.setState({personalizeAds:true}):null)
       AsyncStorage.getItem('noAds').then((noAd)=>{
         if(noAd !== "true"){
           AsyncStorage.getItem("AdFree").then(val=>{
@@ -266,6 +268,7 @@ export default class HomeScreen extends LoadInComponent {
             console.log("mp")
             //console.log(mp)
             console.log("new"+mps)
+            console.log(mps)
             if(!mp||(mps.length>0&&!mps.includes(mp))){
                   console.log("ENFORCED NEW2")
                   if(mps.length>0){
@@ -309,6 +312,7 @@ export default class HomeScreen extends LoadInComponent {
                         AsyncStorage.setItem('MP', itemValue).then(()=>{})
                         this.props.navigation.setParams({ currentMarking: itemValue});
                         this.setState({currentMarking: itemValue})
+                        console.log("MP value changed")
                       }
                       }>
                       {this.genMpSelector()}
@@ -332,7 +336,7 @@ export default class HomeScreen extends LoadInComponent {
               bannerSize="smartBannerPortrait"
               adUnitID={__DEV__?"ca-app-pub-3940256099942544/2934735716":Platform.OS === 'ios'?"ca-app-pub-8985838748167691/6884417794":"ca-app-pub-8985838748167691/7707857953"} // Test ID, Replace with your-admob-unit-id
               //testDeviceID="7BE32C8C-101D-45EE-AFFD-81B6BF27CEC2"
-              servePersonalizedAds={true} // true or false
+              servePersonalizedAds={this.state.personalizeAds} // true or false
               onDidFailToReceiveAdWithError={(err)=>{
                 console.log(err)
                 LayoutAnimation.configureNext(LayoutAnimation.Presets.linear);

@@ -7,7 +7,7 @@
       "ios",
       "android"
     ],
-    "version": "5.1.2",
+    "version": "5.2.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "facebookAppId": "618501142264378",
@@ -28,6 +28,7 @@
       "infoPlist": {
         "NSNotificationDescription": "This app uses notifications to notify you of changes in your grades",
         "NSFaceIDUsageDescription": "Face ID is used when you enable biometric security",
+        "NSUserTrackingUsageDescription": "This app uses Google Ads. Google wants to track you to serve targeted ads. (GradeView doesn't allow any third parties to access any of your data)",
         "SKAdNetworkItems": [
           {
             "SKAdNetworkIdentifier": "cstr6suwn9.skadnetwork"
@@ -140,7 +141,7 @@
     },
     "android": {
       "package": "com.kihtrak.REGEN",
-      "versionCode": 27,
+      "versionCode": 29,
       "googleServicesFile": "./google-services.json",
       "useNextNotificationsApi": true,
       "config": {

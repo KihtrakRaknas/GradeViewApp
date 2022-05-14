@@ -118,7 +118,7 @@ export default class OptionsScreen extends React.Component {
                 Alert.alert("There was an error in communicating with the server")
             })
         }).catch((e) => {
-            Alert.alert("There was an error in getting your push token")
+            Alert.alert("There was an error in getting your push token: " + e.toString())
         })
     }
 

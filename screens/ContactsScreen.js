@@ -73,7 +73,7 @@ export default class ContactsScreen extends React.Component {
     };
 
     getContacts = () => {
-        return fetch('https://raw.githubusercontent.com/KihtrakRaknas/DirectoryScraper/master/output.json', {
+        return fetch('https://gradeview.herokuapp.com/dir', {
             method: 'GET',
             headers: {
                 Accept: 'application/json',

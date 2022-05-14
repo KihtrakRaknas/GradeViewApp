@@ -4,7 +4,7 @@ import { Text, Icon } from 'react-native-elements';
 import { ListItem } from 'react-native-elements';
 import { navigationHeader } from '../globals/styles'
 //import * as FacebookAds from 'expo-ads-facebook';
-import { AdMobInterstitial } from 'expo-ads-admob';
+import { AdMobInterstitial, getPermissionsAsync } from 'expo-ads-admob';
 import RespectThemeBackground from '../components/RespectThemeBackground.js'
 export default class MoreScreen extends React.Component {
     constructor(props) {
@@ -90,6 +90,10 @@ export default class MoreScreen extends React.Component {
                                             AdMobInterstitial.requestAdAsync({ servePersonalizedAds: true })
                                     })*/
                                     this.showingPopUpAd = true
+                                    getPermissionsAsync().then(res=>{
+                                        if(res.status=='granted')
+                                            this.showingPersonalizedAds = true
+                                    })
                                 }
                             })
                         }
@@ -134,7 +138,7 @@ export default class MoreScreen extends React.Component {
                                 .catch(error => {
                                     this.props.navigation.navigate('GPA')
                                 });*/
-                                await AdMobInterstitial.requestAdAsync({ servePersonalizedAds: true }).catch((e) => { 
+                                await AdMobInterstitial.requestAdAsync({ servePersonalizedAds: !!this.showingPersonalizedAds }).catch((e) => { 
                                     console.log("requestAdAsync: "+e) 
                                     setTimeout(()=>this.props.navigation.navigate('GPA'),1000)
                                 })
