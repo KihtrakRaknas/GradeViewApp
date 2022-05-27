@@ -1,11 +1,11 @@
 import React from 'react';
 import { Text, View, FlatList, AsyncStorage } from 'react-native';
-import { Icon, SearchBar } from 'react-native-elements'
+import { Icon, SearchBar, withTheme } from 'react-native-elements'
 import NameIDItem from '../components/NameIDItem'
 import { navigationHeader } from '../globals/styles'
 import RespectThemeBackground from '../components/RespectThemeBackground.js'
 
-export default class ContactsScreen extends React.Component {
+class ContactsScreen extends React.Component {
     constructor(props) {
         super(props);
         this.state = { contacts: [], search: '', result: null }
@@ -92,7 +92,7 @@ export default class ContactsScreen extends React.Component {
     }
 
     render() {
-        let list = <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}><Text style={{ fontSize: 20 }}>Contacts are not current available, connect to the internet and try again</Text></View>
+        let list = <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}><Text style={{ fontSize: 20, color: this.props.theme.colors.black }}>Contacts are not current available, connect to the internet and try again</Text></View>
         if (Object.keys(this.state.contacts).length > 0) {
             let arr = this.state.contacts;
             if (this.state.result)//Object.keys(this.state.result).length>0
@@ -100,7 +100,7 @@ export default class ContactsScreen extends React.Component {
 
             list = <FlatList
                 data={arr}
-                ListEmptyComponent={<View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}><Text style={{ fontSize: 20 }}>No results</Text></View>}
+                ListEmptyComponent={<View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}><Text style={{ fontSize: 20, color: this.props.theme.colors.black, marginTop: 20 }}>No results</Text></View>}
                 keyExtractor={item => item.email}
                 //ListHeaderComponent={          }
                 ItemSeparatorComponent={({ item }) => <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}><View style={{ height: 0.5, width: '96%', backgroundColor: '#C8C8C8', }} /></View>}
@@ -116,7 +116,7 @@ export default class ContactsScreen extends React.Component {
                     onSubmitEditing={this.updateSearch}
                     onChangeText={this.updateSearchVal}
                     value={this.state.search}
-                    lightTheme
+                    lightTheme={this.props.theme.isLight}
                     showLoading={this.state.searchLoading}
                     onClear={() => {
                         this.setState({ search: null, result: null });
@@ -129,3 +129,5 @@ export default class ContactsScreen extends React.Component {
     }
 
 }
+
+export default withTheme(ContactsScreen)

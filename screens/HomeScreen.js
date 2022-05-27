@@ -194,15 +194,15 @@ export default class HomeScreen extends LoadInComponent {
         }
         // console.log("avg")
         // console.log(avg)
-        console.log(classN)
-        console.log(avg)
+        // console.log(classN)
+        // console.log(avg)
         if(classN!="Status"&&avg){
           table.push(<ClassBtn key={classN+count} title={classN} showAPlus={this.state.showA} teach = {teach} avg={avg} onPress={this.classClicked} style={this.state.style}></ClassBtn>)
           count++;
         }
-        console.log(table.length)
+        // console.log(table.length)
       }
-      console.log("DONE");
+      // console.log("DONE");
       return table
     }
   
@@ -338,6 +338,7 @@ export default class HomeScreen extends LoadInComponent {
               //testDeviceID="7BE32C8C-101D-45EE-AFFD-81B6BF27CEC2"
               servePersonalizedAds={this.state.personalizeAds} // true or false
               onDidFailToReceiveAdWithError={(err)=>{
+                console.log("GOOGLE AD FAILED")
                 console.log(err)
                 LayoutAnimation.configureNext(LayoutAnimation.Presets.linear);
                 //this.setState({adStyle:"facebook"})

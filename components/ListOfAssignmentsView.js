@@ -1,22 +1,26 @@
 import React from 'react';
-import { SectionList, Text, View, TouchableOpacity, AsyncStorage, StyleSheet } from 'react-native';
+import { SectionList, View, TouchableOpacity, AsyncStorage, StyleSheet, Text as NormalText } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import {  pickTextColorBasedOnBgColorAdvanced } from '../globals/assignmentColorGlobals.js'
 import { defaultColors } from '../globals/constants'
 import RespectThemeBackground from '../components/RespectThemeBackground.js'
-import { withTheme } from 'react-native-elements';
+import { withTheme, Text } from 'react-native-elements';
 
 const styles = StyleSheet.create({
     sectionHeaderContainer: {
-        backgroundColor: '#beeef7',
-        paddingVertical: 8,
+        // backgroundColor: '#beeef7',
+        paddingTop: 14,
+        marginTop: 0,
+        paddingBottom: 6,
+        marginBottom: 8,
         paddingHorizontal: 25,
-        borderWidth: StyleSheet.hairlineWidth,
-        borderColor: '#ededed',
+        // borderWidth: StyleSheet.hairlineWidth,
+        // borderColor: '#ededed',
     },
     sectionHeaderText: {
-        fontSize: 14,
-        fontWeight: 'bold',
+        fontSize: 28,
+        fontFamily: 'Futura',
+        // fontWeight: 'bold',
         //textAlign:'center'
     },
 })
@@ -54,7 +58,7 @@ class ListOfAssignmentsView extends React.Component {
     }
 
     LightenDarkenColor = (col, amt) => {
-        amt*=this.props.theme.colors.white==='#ffffff'?1:-1;
+        amt*=this.props.theme.isLight?1:-1;
         var usePound = false;
         if (col[0] == "#") {
             col = col.slice(1);
@@ -80,48 +84,50 @@ class ListOfAssignmentsView extends React.Component {
     }
 
     render() {
+        console.log(this.props.theme)
         return (
             <RespectThemeBackground>
                 <SectionList
-                    ItemSeparatorComponent={({ item }) => <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}><View style={{ height: 0.5, width: '96%', backgroundColor: '#C8C8C8', }} /></View>}
+                    // ItemSeparatorComponent={({ item }) => <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}><View style={{ height: 0.5, width: '96%', backgroundColor: '#C8C8C8', }} /></View>}
                     sections={this.props.listOfAssignments}
                     renderItem={({ item }) => {
                         let leftColor = this.getBackgroundColor(item["Category"])
                         let rightColor = this.LightenDarkenColor(this.getBackgroundColor(item["Category"]), 100)
-                        return(<TouchableOpacity onPress={() => this.props.navigation.navigate('Assignment', { assignmentData: item })} style={{ flexDirection: 'row', justifyContent: 'space-between', /*backgroundColor:this.getBackgroundColor(item["Category"])*/ }}>
-                            <LinearGradient
-                                style={{ flexDirection: 'row', justifyContent: 'space-between', width: '100%' }}
-                                colors={[leftColor, rightColor]}
-                                start={[0, 0]}
-                                end={[.7, 1]}
-                            >
-                                <Text style={{
-                                    flex: 1,
-                                    padding: 10,
-                                    fontSize: 18,
-                                    flexWrap: 'wrap',
-                                    color: pickTextColorBasedOnBgColorAdvanced(leftColor)
-                                }} flex left>{item["Comment"] || item["Subtitle"]? <Text style={{ textDecorationLine: 'underline' }}>{item["Name"]}</Text> : item["Name"]}</Text>
-                                <Text style={{
-                                    padding: 10,
-                                    fontSize: 18,
-                                    height: 44,
-                                    fontStyle: "italic",
-                                    color: pickTextColorBasedOnBgColorAdvanced(rightColor)
-                                }} flex>
-                                    <Text style={{ color: leftColor != '#ff1100' ? "red" : "white", fontSize: 15 }}>{item["Weighting"] ? item["Weighting"] == "RecentlyUpdated" ? "Recent " : item["Weighting"] : ""}</Text>
-                                    {item["Weighting"] && item["Weighting"].includes("x") ? " - " : ""}
-                                    <Text style={{ fontWeight: 'bold' }}>{item["Grade"]}</Text>
-                                </Text>
-                            </LinearGradient>
+                        return(<TouchableOpacity onPress={() => this.props.navigation.navigate('Assignment', { assignmentData: item })} style={{ flexDirection: 'row', justifyContent: 'space-between', borderRadius:10, shadowRadius:10, justifyContent: 'space-between', backgroundColor:this.props.theme.colors.white, padding:10, marginHorizontal:5, marginVertical:5 }}>
+                                {/* <View style={{  , flexDirection: 'row', justifyContent: 'space-between', width: '100%', backgroundColor:"white", padding:10 }}> */}
+                                    <LinearGradient style={{width:5, borderRadius:2.5, backgroundColor:"purple"}} colors={[leftColor, rightColor]}></LinearGradient>
+                                    <Text style={{
+                                        flex: 1,
+                                        padding: 10,
+                                        fontSize: 18,
+                                        flexWrap: 'wrap',
+                                        // color: pickTextColorBasedOnBgColorAdvanced(leftColor)
+                                        color: this.props.theme.colors.grey6
+                                    }} flex left>{item["Comment"] || item["Subtitle"]? <NormalText style={{ textDecorationLine: 'underline' }}>{item["Name"]}</NormalText> : item["Name"]}</Text>
+                                    <NormalText style={{
+                                        padding: 10,
+                                        fontSize: 18,
+                                        height: 44,
+                                        fontStyle: "italic",
+                                        // color: pickTextColorBasedOnBgColorAdvanced(rightColor)
+                                        color: this.props.theme.colors.grey6
+                                    }} flex>
+                                        <NormalText style={{ color: leftColor != '#ff1100' ? "red" : "white", fontSize: 15 }}>{item["Weighting"] ? item["Weighting"] == "RecentlyUpdated" ? "Recent " : item["Weighting"] : ""}</NormalText>
+                                        {item["Weighting"] && item["Weighting"].includes("x") ? " - " : ""}
+                                        <NormalText style={{ fontWeight: 'bold' }}>{item["Grade"]}</NormalText>
+                                    </NormalText>
+                                {/* </View> */}
                         </TouchableOpacity>
                         )}
                     }
-                    renderSectionHeader={({ section }) =>
-                        <View style={styles.sectionHeaderContainer}>
-                            <Text style={styles.sectionHeaderText}>{section.title}</Text>
-                        </View>
-                    }
+                    renderSectionHeader={({ section }) => {
+                        const backgroundTheme = {backgroundColor: this.props.theme.colors.offWhite + "F0"};
+                        return (
+                            <View style={[styles.sectionHeaderContainer, backgroundTheme]}>
+                                <Text style={styles.sectionHeaderText}>{section.title}</Text>
+                            </View>
+                        )
+                    }}
                     keyExtractor={(item, index) => item + index}
                 />
             </RespectThemeBackground>

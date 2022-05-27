@@ -168,7 +168,7 @@ export default class MoreScreen extends React.Component {
                 name: 'Options',
                 iconName: 'settings',
                 iconType: 'Octicons',
-                subtitle: 'View configuration options',
+                subtitle: 'Customize the app to your liking',
                 action: () => this.props.navigation.navigate('Options'),
                 bottomMargin: 150,
             },
