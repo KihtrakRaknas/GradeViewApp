@@ -1,12 +1,13 @@
 import React from 'react';
-import { AsyncStorage, ScrollView, View, ActivityIndicator, Alert} from 'react-native';
+import { AsyncStorage, ScrollView, View, ActivityIndicator, Alert, StyleSheet} from 'react-native';
 import { Text} from 'react-native-elements';
 import { ListItem } from 'react-native-elements';
 import { navigationHeader } from '../globals/styles'
 import gradeToLetter from '../helperFunctions/gradeToLetter'
 import RespectThemeBackground from '../components/RespectThemeBackground.js'
+import { withTheme } from 'react-native-elements';
 
-export default class GPAScreen extends React.Component {
+class GPAScreen extends React.Component {
     constructor(props) {
         super(props);
         this.state = { unweightedOldGPA: "Loading...", weightedOldGPA: "Loading...", unweightedNewGPA: "Loading...", weightedNewGPA: "Loading...", unweightedCurrGPA: "Loading...", weightedCurrGPA: "Loading...", showingCached:false, gettingPast:true, gettingCurr:false, done:false, hasError:false }
@@ -335,6 +336,35 @@ export default class GPAScreen extends React.Component {
         })
     }
 
+    styles = StyleSheet.create({
+        gpaDiv: {
+            borderRadius:10, 
+            backgroundColor:this.props.theme.colors.grey1, 
+            // marginTop:10, 
+            marginVertical:15,
+            padding: 10,
+            shadowOffset: {width: 5, height: 5}, 
+            shadowColor: this.props.theme.colors.grey6, 
+            shadowOpacity:.2, 
+            shadowRadius: 2,
+        },
+        horizontalRule: {borderBottomColor: 'black',borderBottomWidth: 1},
+        subtitle: { fontSize: 13,paddingBottom:15, paddingLeft:7},
+        title: { fontSize: 40, textAlign: 'center' },
+        numericalContainer: {
+            flex:1, 
+            flexDirection:'row', 
+            justifyContent: "space-between", 
+            padding:10, 
+            backgroundColor:this.props.theme.colors.grey2, 
+            borderRadius:10, 
+            marginVertical:3,
+            shadowOffset: {width: 1, height: 1}, 
+            shadowColor: this.props.theme.colors.grey5, 
+            shadowOpacity:.2, 
+            shadowRadius: 2,
+        },
+    })
 
     render() {
         return (
@@ -348,48 +378,44 @@ export default class GPAScreen extends React.Component {
                         </>}
                         {this.state.hasError && <Text style={{color:"red"}}>Error! Most likely a network issue. {this.state.error}</Text>}
                     </Text>}
-
-                    <Text style={{ fontSize: 40, textAlign: 'center', paddingTop:10}}>Past GPA</Text>
-                    <Text style={{ fontSize: 17,paddingBottom:15}}>GPA without factoring in any current classes</Text>
-                    <View style={{flex:1, flexDirection:'row', justifyContent: "space-between", padding:10}}>
-                        <Text style={{ fontSize: 20 }}>Unweighted:</Text>
-                        <Text style={{ fontSize: 20 }}>{this.state.unweightedOldGPA==="Loading..."&&!this.state.hasError?<ActivityIndicator/>:this.state.unweightedOldGPA}</Text>
+                    
+                    <View style={[this.styles.gpaDiv, {marginTop:10}]}>
+                        <Text style={this.styles.title}>Past GPA</Text>
+                        <Text style={this.styles.subtitle}>GPA from completed school years</Text>
+                        <View style={this.styles.numericalContainer}>
+                            <Text style={{ fontSize: 20, color:this.props.theme.colors.cardText }}>Unweighted:</Text>
+                            <Text style={{ fontSize: 20 }}>{this.state.unweightedOldGPA==="Loading..."&&!this.state.hasError?<ActivityIndicator/>:this.state.unweightedOldGPA}</Text>
+                        </View>
+                        <View style={this.styles.numericalContainer}>
+                            <Text style={{ fontSize: 20, color:this.props.theme.colors.cardText }}>Weighted:</Text>
+                            <Text style={{ fontSize: 20 }}>{this.state.weightedOldGPA==="Loading..."&&!this.state.hasError?<ActivityIndicator/>:this.state.weightedOldGPA}</Text>      
+                        </View>
                     </View>
-                    <View style={{flex:1, flexDirection:'row', justifyContent: "space-between", padding:10}}>
-                        <Text style={{ fontSize: 20 }}>Weighted:</Text>
-                        <Text style={{ fontSize: 20 }}>{this.state.weightedOldGPA==="Loading..."&&!this.state.hasError?<ActivityIndicator/>:this.state.weightedOldGPA}</Text>      
+                    {/* <View style={this.styles.horizontalRule}/> */}
+                    <View style={this.styles.gpaDiv}>
+                        <Text style={this.styles.title}>This Year</Text>
+                        <Text style={this.styles.subtitle}>A prediction using every grade from this year)</Text>
+                        <View style={this.styles.numericalContainer}>
+                            <Text style={{ fontSize: 20, color:this.props.theme.colors.cardText }}>Unweighted:</Text>
+                            <Text style={{ fontSize: 20 }}>{this.state.unweightedCurrGPA==="Loading..."&&!this.state.hasError?<ActivityIndicator/>:this.state.unweightedCurrGPA}</Text>
+                        </View>
+                        <View style={this.styles.numericalContainer}>
+                            <Text style={{ fontSize: 20, color:this.props.theme.colors.cardText }}>Weighted:</Text>
+                            <Text style={{ fontSize: 20 }}>{this.state.weightedCurrGPA==="Loading..."&&!this.state.hasError?<ActivityIndicator/>:this.state.weightedCurrGPA}</Text>      
+                        </View>
                     </View>
-                    <ListItem
-                        bottomDivider={true}
-                    />
-                    <ListItem
-                        topDivider={true}
-                    />
-                    <Text style={{ fontSize: 40, textAlign: 'center' }}>This Year</Text>
-                    <Text style={{ fontSize: 17,paddingBottom:15}}>GPA only for current classes {"\n"}(prediction using every grade from this year)</Text>
-                    <View style={{flex:1, flexDirection:'row', justifyContent: "space-between", padding:10}}>
-                        <Text style={{ fontSize: 20 }}>Unweighted:</Text>
-                        <Text style={{ fontSize: 20 }}>{this.state.unweightedCurrGPA==="Loading..."&&!this.state.hasError?<ActivityIndicator/>:this.state.unweightedCurrGPA}</Text>
-                    </View>
-                    <View style={{flex:1, flexDirection:'row', justifyContent: "space-between", padding:10}}>
-                        <Text style={{ fontSize: 20 }}>Weighted:</Text>
-                        <Text style={{ fontSize: 20 }}>{this.state.weightedCurrGPA==="Loading..."&&!this.state.hasError?<ActivityIndicator/>:this.state.weightedCurrGPA}</Text>      
-                    </View>
-                    <ListItem
-                        bottomDivider={true}
-                    />
-                    <ListItem
-                        topDivider={true}
-                    />
-                    <Text style={{ fontSize: 40, textAlign: 'center' }}>Total GPA estimate</Text>
-                    <Text style={{ fontSize: 17,paddingBottom:15}}>GPA so far {"\n"}(estimate of the total GPA you will end with)</Text>
-                    <View style={{flex:1, flexDirection:'row', justifyContent: "space-between", padding:10}}>
-                        <Text style={{ fontSize: 20 }}>Unweighted:</Text>
-                        <Text style={{ fontSize: 20 }}>{this.state.unweightedNewGPA==="Loading..."&&!this.state.hasError?<ActivityIndicator/>:this.state.unweightedNewGPA}</Text>
-                    </View>
-                    <View style={{flex:1, flexDirection:'row', justifyContent: "space-between", padding:10, marginBottom:10}}>
-                        <Text style={{ fontSize: 20 }}>Weighted:</Text>
-                        <Text style={{ fontSize: 20 }}>{this.state.weightedNewGPA==="Loading..."&&!this.state.hasError?<ActivityIndicator/>:this.state.weightedNewGPA}</Text>      
+                    {/* <View style={this.styles.horizontalRule}/> */}
+                    <View style={[this.styles.gpaDiv,{marginBottom:40}]}>
+                        <Text style={this.styles.title}>Total GPA</Text>
+                        <Text style={this.styles.subtitle}>An estimate of the total GPA you will end the year with</Text>
+                        <View style={this.styles.numericalContainer}>
+                            <Text style={{ fontSize: 20, color:this.props.theme.colors.cardText }}>Unweighted:</Text>
+                            <Text style={{ fontSize: 20 }}>{this.state.unweightedNewGPA==="Loading..."&&!this.state.hasError?<ActivityIndicator/>:this.state.unweightedNewGPA}</Text>
+                        </View>
+                        <View style={this.styles.numericalContainer}>
+                            <Text style={{ fontSize: 20, color:this.props.theme.colors.cardText }}>Weighted:</Text>
+                            <Text style={{ fontSize: 20 }}>{this.state.weightedNewGPA==="Loading..."&&!this.state.hasError?<ActivityIndicator/>:this.state.weightedNewGPA}</Text>      
+                        </View>
                     </View>
                 </ScrollView>
             </RespectThemeBackground>
@@ -397,3 +423,5 @@ export default class GPAScreen extends React.Component {
     }
 
 }
+
+export default withTheme(GPAScreen)

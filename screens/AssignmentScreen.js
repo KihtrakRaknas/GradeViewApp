@@ -49,7 +49,7 @@ export default class AssignmentScreen extends React.Component {
             paddingBottom:15,
             //backgroundColor:'#f2feff'
           }}>
-            <Text adjustsFontSizeToFit numberOfLines={2} style={{fontWeight:"bold", textShadowColor:"lightblue", textShadowOffset: { width: 1, height: 1 }, textShadowRadius: 4, fontSize:50, paddingBottom:10, fontFamily:"Farah"}}>{assignment["Name"]?assignment["Name"]:null}</Text>
+            <Text adjustsFontSizeToFit numberOfLines={2} style={{fontWeight:"bold", textShadowColor:"lightblue", textShadowOffset: { width: 1, height: 1 }, textShadowRadius: 4, fontSize:50, paddingBottom:10, fontFamily:"Avenir"}}>{assignment["Name"]?assignment["Name"]:null}</Text>
             <Text style={{fontSize:25, fontStyle:"italic"}}>{date?date:null}</Text>
           </View>
           <ScrollView style={{flex:1,padding:15, paddingTop:25}}>
@@ -61,7 +61,7 @@ export default class AssignmentScreen extends React.Component {
               <Text style={{color:"red", width:"50%"}}>{assignment["Weighting"]&&assignment["Weighting"].includes("x")?assignment["Weighting"]:null}</Text>
             </Text>
 
-            <View style={{ flexDirection: "row-reverse"}}><Text style={{ marginTop:10, padding: 3, fontSize:30, borderWidth:2, borderColor:"green", borderRadius: 10 }}>{assignment["Grade"].split("/").length==2?(Number(assignment["Grade"].split("/")[0])/Number(assignment["Grade"].split("/")[1])*100).toFixed(1)+"%":null}</Text></View>
+            {assignment["Grade"] != "" && <View style={{ flexDirection: "row-reverse"}}><Text style={{ marginTop:10, padding: 3, fontSize:30, borderWidth:2, borderColor:"green", borderRadius: 10 }}>{assignment["Grade"].split("/").length==2?(Number(assignment["Grade"].split("/")[0])/Number(assignment["Grade"].split("/")[1])*100).toFixed(1)+"%":null}</Text></View>}
 
             <Text style={{paddingTop:20, fontSize:20, textAlign:"right", fontFamily: "American Typewriter"}}>{assignment["Category"]?""+assignment["Category"]:null}</Text>
 

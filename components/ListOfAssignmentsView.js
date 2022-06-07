@@ -9,7 +9,7 @@ import { withTheme, Text } from 'react-native-elements';
 const styles = StyleSheet.create({
     sectionHeaderContainer: {
         // backgroundColor: '#beeef7',
-        paddingTop: 14,
+        paddingTop: 10,
         marginTop: 0,
         paddingBottom: 6,
         marginBottom: 8,
@@ -93,7 +93,7 @@ class ListOfAssignmentsView extends React.Component {
                     renderItem={({ item }) => {
                         let leftColor = this.getBackgroundColor(item["Category"])
                         let rightColor = this.LightenDarkenColor(this.getBackgroundColor(item["Category"]), 100)
-                        return(<TouchableOpacity onPress={() => this.props.navigation.navigate('Assignment', { assignmentData: item })} style={{ flexDirection: 'row', justifyContent: 'space-between', borderRadius:10, shadowRadius:10, justifyContent: 'space-between', backgroundColor:this.props.theme.colors.white, padding:10, marginHorizontal:5, marginVertical:5 }}>
+                        return(<TouchableOpacity onPress={() => this.props.navigation.navigate('Assignment', { assignmentData: item })} style={{ flexDirection: 'row', justifyContent: 'space-between', borderRadius:10, shadowRadius:10, justifyContent: 'space-between', backgroundColor:this.props.theme.colors.grey1, padding:10, marginHorizontal:8, marginVertical:8, shadowOffset: {width: 3, height: 3}, shadowColor: this.props.theme.colors.grey6, shadowOpacity:.2, shadowRadius: 2 }}>
                                 {/* <View style={{  , flexDirection: 'row', justifyContent: 'space-between', width: '100%', backgroundColor:"white", padding:10 }}> */}
                                     <LinearGradient style={{width:5, borderRadius:2.5, backgroundColor:"purple"}} colors={[leftColor, rightColor]}></LinearGradient>
                                     <Text style={{
@@ -124,7 +124,7 @@ class ListOfAssignmentsView extends React.Component {
                         const backgroundTheme = {backgroundColor: this.props.theme.colors.offWhite + "F0"};
                         return (
                             <View style={[styles.sectionHeaderContainer, backgroundTheme]}>
-                                <Text style={styles.sectionHeaderText}>{section.title}</Text>
+                                <Text style={[styles.sectionHeaderText,{color:this.props.theme.colors.cardText}]}>{section.title}</Text>
                             </View>
                         )
                     }}

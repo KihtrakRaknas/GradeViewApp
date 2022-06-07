@@ -5,8 +5,9 @@ import { pickTextColorBasedOnBgColorAdvanced } from '../globals/assignmentColorG
 import TouchableScale from 'react-native-touchable-scale';
 import gradeToLetter from '../helperFunctions/gradeToLetter'
 import { LinearGradient } from 'expo-linear-gradient';
+import { withTheme } from 'react-native-elements';
 
-export default class ClassBtn extends React.Component {
+class ClassBtn extends React.Component {
     constructor(props) {
       super(props);
       //title
@@ -104,8 +105,12 @@ export default class ClassBtn extends React.Component {
             marginRight: 5, 
             marginTop: 10, 
             borderRadius: 10, // adds the rounded corners
-            backgroundColor: '#fff' }}
+            backgroundColor: '#fff',
+          }}
+          style={{shadowOffset: {width: 3, height: 3}, shadowColor: this.props.theme.colors.grey6, shadowOpacity:.2, shadowRadius: 2}}
         />
       );
     }
   }
+
+export default withTheme(ClassBtn)
