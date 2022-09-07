@@ -49,9 +49,9 @@ export default class SignInScreen extends React.Component {
         applyEnding:true,
       },
       {
-        name:"East Brunswick School District",
+        name:"East Brunswick Public Schools",
         ending:"ebnet.org",
-        acronym: "EBSD",
+        acronym: "EBPS",
         numericUsername: false,
         applyEnding:true,
       },
