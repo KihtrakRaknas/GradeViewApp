@@ -9,16 +9,16 @@ import { withTheme, Text } from 'react-native-elements';
 const styles = StyleSheet.create({
     sectionHeaderContainer: {
         // backgroundColor: '#beeef7',
-        paddingTop: 10,
+        paddingTop: 5,
         marginTop: 0,
-        paddingBottom: 6,
-        marginBottom: 8,
-        paddingHorizontal: 25,
+        paddingBottom: 5,
+        marginBottom: 1,
+        paddingHorizontal: 34,
         // borderWidth: StyleSheet.hairlineWidth,
         // borderColor: '#ededed',
     },
     sectionHeaderText: {
-        fontSize: 28,
+        fontSize: 20,
         fontFamily: 'Futura',
         // fontWeight: 'bold',
         //textAlign:'center'
