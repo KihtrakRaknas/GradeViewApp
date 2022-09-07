@@ -40,13 +40,19 @@ export default class SignInScreen extends React.Component {
         acronym: "MCVSD",
         numericUsername: false,
         applyEnding:true,
-      }
+      },
+      {
+        name:"West Windsor-Plainsboro Regional School District",
+        ending:"wwprsd.org",
+        acronym: "WWP",
+        numericUsername: false,
+        applyEnding:true,
+      },
     ]
 
     constructor(props) {
       super(props);
       this.state = { isLoading: false, email: "", password: "", school: null}
-  
     }
   
     componentDidMount = () => {
@@ -206,7 +212,7 @@ export default class SignInScreen extends React.Component {
         }}
       />)
       return(<SafeAreaView style={{ flex: 1, backgroundColor: "#373a6d"}}>
-        <ScrollView style={{flex: 1, flexDirection: 'column'}} contentContainerStyle={{ flexGrow: 1, justifyContent: 'center' }}>
+        <ScrollView style={{flex: 1, flexDirection: 'column'}} contentContainerStyle={{ flexGrow: 1, justifyContent: 'center', paddingVertical:50 }}>
           <Text style={{fontSize:40, textAlign:"center", color:"white", marginBottom:20, fontWeight:"bold", textDecorationLine: 'underline'}}>Select a school</Text>
           {buttons}
         </ScrollView>
