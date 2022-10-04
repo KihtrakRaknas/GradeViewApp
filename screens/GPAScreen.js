@@ -394,7 +394,7 @@ class GPAScreen extends React.Component {
                     {/* <View style={this.styles.horizontalRule}/> */}
                     <View style={this.styles.gpaDiv}>
                         <Text style={this.styles.title}>This Year</Text>
-                        <Text style={this.styles.subtitle}>A prediction using every grade from this year)</Text>
+                        <Text style={this.styles.subtitle}>A prediction using every grade from this year</Text>
                         <View style={this.styles.numericalContainer}>
                             <Text style={{ fontSize: 20, color:this.props.theme.colors.cardText }}>Unweighted:</Text>
                             <Text style={{ fontSize: 20 }}>{this.state.unweightedCurrGPA==="Loading..."&&!this.state.hasError?<ActivityIndicator/>:this.state.unweightedCurrGPA}</Text>

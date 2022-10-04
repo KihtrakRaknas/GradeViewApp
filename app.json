@@ -141,7 +141,7 @@
     },
     "android": {
       "package": "com.kihtrak.REGEN",
-      "versionCode": 31,
+      "versionCode": 32,
       "googleServicesFile": "./google-services.json",
       "useNextNotificationsApi": true,
       "config": {
