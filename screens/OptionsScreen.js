@@ -99,7 +99,7 @@ export default class OptionsScreen extends React.Component {
     sendTestNotification = () => {
         Notifications.getExpoPushTokenAsync().then((token) => {
             token=token.data
-            fetch('https://gradeview.herokuapp.com/testNotification?token=' + token, {
+            fetch('https://gradeviewapi.kihtrak.com/testNotification?token=' + token, {
                 method: 'GET',
                 headers: {
                     Accept: 'text/html',
@@ -138,7 +138,7 @@ export default class OptionsScreen extends React.Component {
                 })
             }
             else {
-                fetch('https://gradeview.herokuapp.com/checkCode?code=' + this.state.code, {
+                fetch('https://gradeviewapi.kihtrak.com/checkCode?code=' + this.state.code, {
                     method: 'GET',
                     headers: {
                         Accept: 'text/html',

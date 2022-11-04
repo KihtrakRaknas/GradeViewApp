@@ -53,7 +53,7 @@ export default class LoadInComponent extends React.Component {
         console.log(token)
         AsyncStorage.getItem('password').then((pass) => {
             AsyncStorage.getItem('school').then((school) => {
-                return fetch("https://gradeview.herokuapp.com/addToken", {
+                return fetch("https://gradeviewapi.kihtrak.com/addToken", {
                     method: 'POST',
                     headers: {
                         Accept: 'application/json',
@@ -84,7 +84,7 @@ export default class LoadInComponent extends React.Component {
     getGradeWithoutErrorCatching = async () => {
         this.props.navigation.setParams({ loading: true });
         console.log("TEST")
-        return fetch('https://gradeview.herokuapp.com/', {
+        return fetch('https://gradeviewapi.kihtrak.com/', {
             method: 'POST',
             headers: {
                 Accept: 'application/json',

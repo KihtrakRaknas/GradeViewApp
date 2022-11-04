@@ -291,7 +291,7 @@ export default class App extends React.Component {
     this.setState({ emailIsLoading: true })
     this.state.emailForUpdate
     if (this.state.emailForUpdate && this.validateEmail(this.state.emailForUpdate)) {
-      fetch('https://gradeview.herokuapp.com/emailList', {
+      fetch('https://gradeviewapi.kihtrak.com/emailList', {
         method: 'POST',
         headers: {
           Accept: 'application/json',

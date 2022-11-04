@@ -73,7 +73,7 @@ class ContactsScreen extends React.Component {
     };
 
     getContacts = () => {
-        return fetch('https://gradeview.herokuapp.com/dir', {
+        return fetch('https://gradeviewapi.kihtrak.com/dir', {
             method: 'GET',
             headers: {
                 Accept: 'application/json',

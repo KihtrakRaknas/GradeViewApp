@@ -108,7 +108,7 @@ class GPAScreen extends React.Component {
     getOldFGs = async () => {
         this.props.navigation.setParams({ loading: true });
         console.log("TEST")
-        return fetch('https://gradeview.herokuapp.com/oldGrades', {
+        return fetch('https://gradeviewapi.kihtrak.com/oldGrades', {
             method: 'POST',
             headers: {
                 Accept: 'application/json',
@@ -139,7 +139,7 @@ class GPAScreen extends React.Component {
     getNewFGs = async () => {
         this.props.navigation.setParams({ loading: true });
         console.log("TEST - new FG starting")
-        return fetch('https://gradeview.herokuapp.com/newGrades', {
+        return fetch('https://gradeviewapi.kihtrak.com/newGrades', {
             method: 'POST',
             headers: {
                 Accept: 'application/json',

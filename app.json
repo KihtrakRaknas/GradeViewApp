@@ -7,7 +7,7 @@
       "ios",
       "android"
     ],
-    "version": "5.3.2",
+    "version": "5.3.3",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "facebookAppId": "618501142264378",
@@ -141,7 +141,7 @@
     },
     "android": {
       "package": "com.kihtrak.REGEN",
-      "versionCode": 32,
+      "versionCode": 33,
       "googleServicesFile": "./google-services.json",
       "useNextNotificationsApi": true,
       "config": {

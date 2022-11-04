@@ -19,7 +19,7 @@ export default class MoreScreen extends React.Component {
                         if (IDbarcode) {
                             this.setState({ idBar: IDbarcode })
                         } else {
-                            fetch('https://gradeview.herokuapp.com/id?id=' + idNumber, {
+                            fetch('https://gradeviewapi.kihtrak.com/id?id=' + idNumber, {
                                 method: 'GET',
                                 headers: {
                                     Accept: 'text/html',
@@ -48,7 +48,7 @@ export default class MoreScreen extends React.Component {
 
     getLunchMoney = async () => {
         this.setState({ lunchBalanceButtonPressed: true })
-        return fetch('https://gradeview.herokuapp.com/money', {
+        return fetch('https://gradeviewapi.kihtrak.com/money', {
             method: 'POST',
             headers: {
                 Accept: 'application/json',

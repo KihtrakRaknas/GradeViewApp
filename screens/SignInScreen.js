@@ -131,7 +131,7 @@ export default class SignInScreen extends React.Component {
         isLoading: true,
       });
       //Alert.alert(this.state.email+":"+this.state.password);
-      return fetch('https://gradeview.herokuapp.com/check', {
+      return fetch('https://gradeviewapi.kihtrak.com/check', {
         method: 'POST',
         headers: {
           Accept: 'application/json',
