@@ -303,7 +303,7 @@ export default class SignInScreen extends React.Component {
               {btnText}
             </TouchableOpacity>
 
-            <Button title="Having trouble signing in?" onPress={() => Linking.openURL('mailto:gradeViewApp@kihtrak.com?subject=Need%20help%20with%20sign-in')} />
+            <Button title="Having trouble signing in?" onPress={() => Linking.openURL('https://gradeview.kihtrak.com/sign-in-help/')} />
             
             <View style={{height:10}}></View>
             {cancelBtn}
