@@ -57,6 +57,13 @@ export default class SignInScreen extends React.Component {
         numericUsername: false,
         applyEnding:true,
       },
+      {
+        name:"Bernards Township School District",
+        ending:"bernardsboe.com",
+        acronym: "BTSD",
+        numericUsername: false,
+        applyEnding:true,
+      }
     ]
 
     constructor(props) {
