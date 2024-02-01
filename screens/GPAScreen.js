@@ -129,6 +129,8 @@ class GPAScreen extends React.Component {
             .then((responseJson) => {
                 console.log("old")
                 //console.log(responseJson)
+                if(responseJson?.Status == "Invalid")
+                    throw new Error("Login credentials are invalid. Please log out and log back in. Contact the developer if this issue persists.")
                 return responseJson
             }).catch((e)=>{
                 console.log(e)
@@ -159,6 +161,8 @@ class GPAScreen extends React.Component {
             })
             .then((responseJson) => {
                 console.log("new")
+                if(responseJson?.Status == "Invalid")
+                    throw new Error("Login credentials are invalid. Please log out and log back in. Contact the developer if this issue persists.")
                 if (global.grades && responseJson) {
                     responseJson.map((classObj) => {
                         if (global.grades[classObj['Name']]) {
