@@ -6,6 +6,7 @@ import { navigationHeader } from '../globals/styles'
 import gradeToLetter from '../helperFunctions/gradeToLetter'
 import RespectThemeBackground from '../components/RespectThemeBackground.js'
 import { withTheme } from 'react-native-elements';
+import pRetry from 'p-retry';
 
 class GPAScreen extends React.Component {
     constructor(props) {
@@ -108,7 +109,7 @@ class GPAScreen extends React.Component {
     getOldFGs = async () => {
         this.props.navigation.setParams({ loading: true });
         console.log("TEST")
-        return fetch('https://gradeviewapi.kihtrak.com/oldGrades', {
+        return pRetry(async ()=>fetch('https://gradeviewapi.kihtrak.com/oldGrades', {
             method: 'POST',
             headers: {
                 Accept: 'application/json',
@@ -132,6 +133,15 @@ class GPAScreen extends React.Component {
                 if(responseJson?.Status == "Invalid")
                     throw new Error("Login credentials are invalid. Please log out and log back in. Contact the developer if this issue persists.")
                 return responseJson
+            }),
+            {
+                retries: 3,
+                minTimeout: 15 * 1000,
+                maxTimeout: 5 * 60 * 1000,
+                onFailedAttempt: error => {
+                    console.log(`Attempt ${error.attemptNumber} failed.`);
+                    console.error(error)
+                },
             }).catch((e)=>{
                 console.log(e)
                 this.setState({hasError:true, error:e.toString()})
@@ -141,7 +151,7 @@ class GPAScreen extends React.Component {
     getNewFGs = async () => {
         this.props.navigation.setParams({ loading: true });
         console.log("TEST - new FG starting")
-        return fetch('https://gradeviewapi.kihtrak.com/newGrades', {
+        return pRetry(async ()=>fetch('https://gradeviewapi.kihtrak.com/newGrades', {
             method: 'POST',
             headers: {
                 Accept: 'application/json',
@@ -181,6 +191,15 @@ class GPAScreen extends React.Component {
                 console.log("TEST - new FG ending")
                 //console.log(responseJson)
                 return responseJson
+            }),
+            {
+                retries: 3,
+                minTimeout: 15 * 1000,
+                maxTimeout: 5 * 60 * 1000,
+                onFailedAttempt: error => {
+                    console.log(`Attempt ${error.attemptNumber} failed.`);
+                    console.error(error)
+                },
             }).catch((e)=>{
                 console.log(e)
                 this.setState({hasError:true, error:e.toString()})
